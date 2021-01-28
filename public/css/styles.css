@@ -16,6 +16,195 @@ body {
     color: #333333;
 }
 
-.main-div {
-    max-height: 100vh;
+.image-card {
+    background-color: #2b2b28;
+    border-top-right-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+.image {
+    width: 330px;
+}
+
+.box-shadow {
+    box-shadow: 0px 3px 6px 0px #757575;
+    border-radius: 0px;
+}
+
+input {
+    outline: 0;
+    border-width: 0 0 1px;
+    border-color: #757575;
+    width: 100%;
+}
+
+.form-outer-container {
+    width: 288px;
+}
+
+.form-inner-container {
+    width: 220px;
+}
+
+.welcome-image {
+    width: 258px;
+}
+
+.or-line {
+    width: 15px;
+    color: #bbbbbb;
+    top: -0.2em;
+}
+
+.or {
+    width: 21px;
+    height: 21px;
+    line-height: 21px;
+    border-radius: 50%;
+    font-size: 12px;
+    color: #fff;
+    text-align: center;
+    background-color: #2b2b28;
+    justify-content: center;
+}
+
+.active-rooms-button {
+    font-size: 12px;
+    color: #fff;
+    background-color: #17cbde;
+    border-color: #17cbde;
+    height: 36px;
+    width: 100%;
+}
+
+.active-rooms-button:hover {
+    color: #fff;
+    background-color: #0cbdd6;
+    border-color: #0cbdd6;
+}
+
+.active-rooms-button:focus {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.25);
+}
+
+.dropdown-menu {
+    font-size: 12px;
+    border: 1px solid rgba(12, 189, 214, 0.15);
+    padding: 0.3rem 0;
+}
+
+.dropdown-item {
+    color: #333333;
+    padding: 0.1rem 0.75rem;
+}
+
+.dropdown-item:focus,
+.dropdown-item:hover {
+    color: #fff;
+    text-decoration: none;
+    background-color: #17cbde;
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+    color: #fff;
+    text-decoration: none;
+    background-color: #17cbde;
+    outline: none;
+}
+
+.dropdown-divider {
+    margin: 0.2rem 0;
+}
+
+.active-room {
+    color: #fff;
+    background-color: #17cbde;
+    border-color: #17cbde;
+}
+
+.get-started-button {
+    font-size: 12px;
+    color: #fff;
+    background-color: #df74b8;
+    border-color: #df74b8;
+    height: 36px;
+}
+
+.get-started-button:hover {
+    color: #fff;
+    background-color: #d665bb;
+    border-color: #d665bb;
+}
+
+.get-started-button:focus {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.25);
+}
+
+/** modal window */
+.modal-yes-button {
+    font-size: 12px;
+    color: #fff;
+    background-color: #17cbde;
+    border-color: #17cbde;
+    height: 36px;
+    width: 80px;
+}
+
+.modal-yes-button:hover {
+    color: #fff;
+    background-color: #0cbdd6;
+    border-color: #0cbdd6;
+}
+
+.modal-no-button {
+    font-size: 12px;
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+    height: 36px;
+    width: 80px;
+}
+
+.modal-no-button:hover {
+    color: #fff;
+    background-color: #5c646a;
+    border-color: #5c646a;
+}
+
+/* @media screen and (max-width: 991px) { */
+@media (max-width: 770px) {
+    .image {
+        width: 230px;
+    }
+
+    .form-outer-container {
+        width: 258px;
+    }
+
+    .form-inner-container {
+        width: 190px;
+    }
+
+    .welcome-image {
+        width: 228px;
+    }
+
+    .image-card {
+        background-color: #3e3e40;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0.25rem;
+        border-bottom-left-radius: 0.25rem;
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1366px) {
+    .main-column {
+        max-width: 83%;
+        flex: 0 0 83%;
+    }
 }
