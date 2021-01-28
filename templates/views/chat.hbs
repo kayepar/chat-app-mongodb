@@ -1,0 +1,264 @@
+{{#extend "main"}}
+    {{#content "styles" mode="prepend"}}
+       <link rel="stylesheet" href="../../public/css/chat.css">
+    {{/content}}
+
+    {{#content "content"}}
+        <div class="outmost-div">
+            <div class="container-fluid position-absolute h-100">
+                <div class="row h-100">
+                    <nav id="sidebar-menu" class="d-lg-block d-md-block h-100">
+                        <div class="sidebar-outer-div position-relative">
+                            <div class="col logo-div">  
+                                <img src="../../public/img/logo_light.png" alt="myChat" class="img-fluid logo d-block my-auto">
+                                <div class="my-auto ml-auto d-md-none">
+                                    <button type="button" id="sidebar-toggler-1" class="btn nav-button-light">
+                                        <span class="icon">
+                                            <i class="fas fa-bars"></i>
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider mt-1"></div>
+
+                            <div id="sidebar-content" class="pt-1 sidebar-content">
+                                <h6 id="current-chat-room-text"
+                                    class="sidebar-heading d-flex justify-content align-items-center px-3 mt-2 mb-1 text-muted">
+                                    <span class="mr-2 icon">
+                                        <i class="fas fa-door-open"></i>
+                                    </span>
+                                    <span>Current Chat Room</span>
+                                </h6>
+                                <div id="current-room-section"></div>
+
+                                <script id="room-name-template" type="text/html">
+                                    <div class="flex-column px-3 py-1">
+                                        \{{room}}
+                                    </div>
+                                </script>
+                                <h6 id="users-text"
+                                    class="sidebar-heading d-flex justify-content align-items-center px-3 mt-4 mb-1 text-muted">
+                                    <span class="mr-2 icon">
+                                        <i class="fas fa-user-friends"></i>
+                                    </span>
+                                    <span>Users</span>
+                                </h6>
+                                <div id="users-section"></div>
+
+                                <div class="dropdown-divider mt-4"> </div>
+                                <h6
+                                    class="sidebar-heading d-flex justify-content align-items-center px-3 mt-4 mb-1 text-muted">
+                                    <span class="mr-2 icon">
+                                        <i class="fas fa-door-closed"></i>
+                                    </span>
+                                    <span>Other Chat Rooms</span>
+                                </h6>
+                                <div id="rooms-section"></div>
+
+                                <script id="list-template" type="text/html">
+                                    <div id="\{{type}}">
+                                        \{{#items}}
+                                        <div class="flex-column px-3 py-1">
+                                            \{{#ifEquals ...type "rooms"}}
+                                                <a id="\{{../type}}-\{{.}}" href="#">\{{.}}</a>
+                                            \{{else}}
+                                                \{{#ifContains . "(you)"}}
+                                                    <strong>\{{.}}</strong>
+                                                \{{else}}
+                                                    \{{.}}
+                                                \{{/ifContains}}
+                                            \{{/ifEquals}}
+                                        </div>
+                                        \{{/items}}
+                                    </div>
+                                </script>
+
+                                <script id="more-items-template" type="text/html">
+                                    <div id="\{{type}}">
+                                        \{{#set1}}
+                                        <div class="flex-column px-3 py-1">
+                                            \{{#ifEquals ...type "rooms"}}
+                                                <a id="\{{../type}}-\{{.}}" href="#">\{{.}}</a>
+                                            \{{else}}
+                                                \{{#ifContains . "(you)"}}
+                                                    <strong>\{{.}}</strong>
+                                                \{{else}}
+                                                    \{{.}}
+                                                \{{/ifContains}}
+                                            \{{/ifEquals}}
+                                        </div>
+                                        \{{/set1}}
+                                    </div>
+                                    <div>
+                                        <div class="flex-column px-3 pt-1">
+                                            <a class="collapse-link" data-toggle="collapse" href="#\{{type}}-set2-div" role="button">
+                                                <span class="icon-small">
+                                                    <i class="fas fa-angle-down"></i>
+                                                </span>
+                                                <span>Show more</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div id="\{{type}}-set2-div" class="collapse">
+                                        \{{#set2}}
+                                        <div class="flex-column px-3 py-1">
+                                            \{{#ifEquals ...type "rooms"}}
+                                                <a id="\{{../type}}-\{{.}}" href="#">\{{.}}</a>
+                                            \{{else}}
+                                                \{{.}}
+                                            \{{/ifEquals}}
+                                        </div>
+                                        \{{/set2}}
+                                    </div>
+                                </script>
+                            </div>
+                            <div class="footer-div w-100">
+                                <div class="footer-divider"></div>
+                                <div class="col my-auto"> © Copyright 2020 <a href="https://www.linkedin.com/in/catherine-par345/"
+                                        target="_new">Kaye Par</a></div>
+                            </div>
+                        </div>
+                    </nav>
+                    <div class="overlay"></div>
+                    <main role="main" class="col ml-sm-auto h-100">
+                         <div class="container-fluid justify-content">
+                            <div class="w-100 p-0">
+                                <nav class="navbar navbar-dark navbar-expand-xs flex-sm-nowrap px-0 py-0">
+                                    <div class="container-fluid px-0">
+                                        <a class="navbar-brand d-lg-none" href="#">
+                                            <img src="../../public/img/logo_dark.png" alt="myChat" class="logo">
+                                        </a>
+                                        <button type="button" id="sidebar-toggler-2"
+                                            class="btn d-lg-none d-md-none ml-auto nav-button-dark">
+                                            <span class="icon">
+                                                <i class="fas fa-bars"></i>
+                                            </span>
+                                        </button>
+                                        <button type="button" class="btn ml-lg-auto nav-button-dark" id="exit-room-button">
+                                            <span class="icon">
+                                                <i class="far fa-window-close"></i>
+                                            </span>
+                                        </button>
+                                    </div>
+                                </nav>
+                            </div>
+                         </div>
+                        <div class="container-fluid justify-content messages-container">
+                            <div class="rounded border p-3 mt-md-2 w-100 messages-box position-relative" id="messages-div">
+                            </div>
+                            <script id="message-template" type="text/html">
+                                \{{#with message}}
+                                <div class="row \{{type}}" id="\{{id}}">
+                                    <div>
+                                        <strong>\{{username}}</strong>
+                                        <span class="text-muted">\{{createdAt}}
+                                        </span>
+                                    </div>
+                                    <p class="message \{{#isAdmin username}}admin\{{/isAdmin}}">\{{text}}</p>
+                                </div>
+                                \{{/with}}
+                            </script>
+                            <form id="chat-message-form" class="w-100 mt-3">
+                                <div class="form-row">
+                                    <div class="input-group col-auto input-container">
+                                        {{!-- <input type="text" class="form-control" id="message-textbox" placeholder="Message"
+                                            autocomplete="off"> --}}
+
+                                            <textarea class="message-textbox" id="message-textbox"  rows="1" placeholder="Message" autocomplete="false"></textarea>
+                                        <div class="input-group-prepend">
+                                            <button class="btn rounded-right emoji-button" type="button"><i
+                                                    class="far fa-laugh"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="col submit-container">
+                                        <button type="submit" class="rounded w-100">
+                                            <span class="">
+                                                <i class="far fa-paper-plane"></i>
+                                            </span>
+                                        </button>
+                                    </div>
+                                    
+                                </div>  
+                                <div id="spacer-div" class="spacer-div"></div>
+                            </form>
+                        </div>
+
+                        <div class="modal fade" data-backdrop="static" id="duplicate-name-modal" tabindex="-1" role="dialog">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Duplicate Name</h5>
+                                    </div>
+                                    <div class="modal-body">
+                                        <span>Username already in use. Click OK button to return to login screen. </span>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <form action="/">
+                                            {{!-- <button type="button" class="btn modal-no-button" data-dismiss="modal">No</button> --}}
+                                            <button type="submit" class="btn modal-yes-button" id="modal-duplicate-name-yes-button">OK</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="exit-room-modal" tabindex="-1" role="dialog">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Exit Room</h5>
+                                        <button type="button" class="close" data-dismiss="modal">
+                                            <span\>&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <span>Are you sure you want to leave?</span>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <form action="/">
+                                            <button type="button" class="btn modal-no-button" data-dismiss="modal">No</button>
+                                            <button type="submit" class="btn modal-yes-button">Yes</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="join-room-modal" tabindex="-1" role="dialog">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Join Chat Room</h5>
+                                        <button type="button" class="close" data-dismiss="modal">
+                                            <span\>&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <span>You are about join another chat room. Would you like to continue?</span>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div class="mr-auto">
+                                            <input type="checkbox" id="modal-checkbox-no-show">
+                                            <label id="modal-label-no-show">Don't show me again</label>
+                                        </div>
+                                        <form>
+                                            <input type="hidden" name="chosen-room" id="chosen-room">
+                                            <button type="button" class="btn modal-no-button" data-dismiss="modal">No</button>
+                                            <button type="button" class="btn modal-yes-button" id="modal-join-yes-button">Yes</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </div>
+    {{/content}}
+
+    {{#content "scripts" mode="prepend"}}
+        <script src="../../public/js/chat/emoji.js"></script>
+        <script src="../../public/js/chat/chat-event-handlers.js"></script>
+        <script src="../../public/js/chat/chat.js"></script>
+    {{/content}}
+{{/extend}}  
