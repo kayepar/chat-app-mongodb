@@ -12,21 +12,9 @@
         "ecmaVersion": 11
     },
     "rules": {
-        "indent": [
-            "error",
-            4
-        ],
-        "linebreak-style": [
-            "error",
-            "windows"
-        ],
-        "quotes": [
-            0,
-            "single"
-        ],
-        "semi": [
-            "error",
-            "always"
-        ]
+        "indent": ["error", 4],
+        "linebreak-style": ["error", "windows"],
+        "quotes": [0, "single"],
+        "semi": ["error", "always"]
     }
 }
