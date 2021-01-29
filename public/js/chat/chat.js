@@ -2,9 +2,9 @@ const io = require('socket.io-client');
 const qs = require('qs');
 const moment = require('moment');
 
-const { autoscroll, displayAsList, removeTypingIndicatorMsg } = require('./chat-utils');
+const { autoscroll, removeTypingIndicatorMsg } = require('./chat-utils');
 const { getAllOtherActiveRooms } = require('../common/common-fetch');
-const { registerHbsHelper, displayData } = require('../common/common-utils');
+const { registerHbsHelper, displayData, displayAsList } = require('../common/common-utils');
 
 $(document).ready(function () {
     registerHbsHelper();
@@ -16,11 +16,15 @@ $(document).ready(function () {
 
     const message_textbox = document.querySelector('#message-textbox');
 
-    const initialize = () => {
+    const initialize = async () => {
         message_textbox.focus();
 
-        const rooms = getAllOtherActiveRooms(room);
-        displayAsList(rooms, 'rooms');
+        try {
+            const rooms = getAllOtherActiveRooms(room);
+            displayAsList(rooms, 'rooms');
+        } catch (error) {
+            console.log(`Error: ${error.message}`);
+        }
     };
 
     socket.emit(

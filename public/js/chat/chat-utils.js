@@ -48,49 +48,6 @@ const toggleCollapseLinkText = (parentElement) => {
     }
 };
 
-const displayAsList = (list, type) => {
-    let items = [];
-
-    if (type === 'users') {
-        list.forEach((item) => {
-            const name = item.username === username ? `${item.username} (you)` : item.username;
-
-            items.push(name);
-        });
-    } else {
-        items = list;
-    }
-
-    // todo: delete! for testing purposes only
-    // for (let i = 0; i < 7; i++) {
-    //     items.push(`*${type.substring(0, type.length - 1)}-${i}`);
-    // }
-
-    if (items.length > 5) {
-        const set1 = items.slice(0, 5);
-        const set2 = items.slice(5, items.length);
-
-        displayData({
-            template: document.querySelector('#more-items-template'),
-            parent_element: document.querySelector(`#${type}-section`),
-            content: {
-                set1,
-                set2,
-                type,
-            },
-        });
-    } else {
-        displayData({
-            template: document.querySelector('#list-template'),
-            parent_element: document.querySelector(`#${type}-section`),
-            content: {
-                items,
-                type,
-            },
-        });
-    }
-};
-
 const removeTypingIndicatorMsg = (username) => {
     if (document.querySelector(`#${username}-temp-msg-div`)) {
         document.querySelector(`#${username}-temp-msg-div`).remove();
@@ -100,6 +57,5 @@ const removeTypingIndicatorMsg = (username) => {
 module.exports = {
     toggleCollapseLinkText,
     autoscroll,
-    displayAsList,
     removeTypingIndicatorMsg,
 };

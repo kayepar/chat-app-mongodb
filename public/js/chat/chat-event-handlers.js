@@ -1,5 +1,6 @@
 const qs = require('qs');
-const { toggleCollapseLinkText, isMobile } = require('./chat-utils');
+const { toggleCollapseLinkText } = require('./chat-utils');
+const { isMobile } = require('../common/common-utils');
 
 const { username } = qs.parse(location.search, {
     ignoreQueryPrefix: true,
