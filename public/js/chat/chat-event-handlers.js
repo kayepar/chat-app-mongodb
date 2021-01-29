@@ -95,7 +95,7 @@ document.querySelector('#message-textbox').addEventListener('textInput', functio
 const originalDimension = window.innerHeight + window.innerWidth;
 const messagesDiv = document.querySelector('#messages-div');
 
-window.addEventListener('resize', (e) => {
+window.addEventListener('resize', () => {
     if (isMobile()) {
         // message input box
         if (document.activeElement.tagName === 'INPUT') {

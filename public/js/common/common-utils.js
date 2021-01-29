@@ -1,4 +1,9 @@
 const Handlebars = require('handlebars');
+const qs = require('qs');
+
+const { username } = qs.parse(location.search, {
+    ignoreQueryPrefix: true,
+});
 
 const registerHbsHelper = () => {
     Handlebars.registerHelper('isAdmin', function (context, options) {
