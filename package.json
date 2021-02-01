@@ -9,7 +9,7 @@
         "parcel-dev": "concurrently -k \"npm run parcel-watch\" \"npm run dev\"",
         "parcel-build": "parcel build templates/views/*.hbs --no-cache",
         "heroku-postbuild": "npm run parcel-build",
-        "dev": "nodemon src/index.js -e js, hbs",
+        "dev": "env-cmd -f ./config/dev.env nodemon src/index.js -e js, hbs",
         "test": "jest --runInBand --detectOpenHandles --coverage --watchAll --no-cache",
         "test:e2e": "jest --config jest.e2e.config.js --runInBand --detectOpenHandles --watchAll --no-cache",
         "lint": "eslint ./"
@@ -27,15 +27,19 @@
         "express-hbs": "^2.3.4",
         "handlebars": "^4.7.6",
         "moment": "^2.29.1",
+        "mongodb": "^3.6.3",
+        "mongoose": "^5.11.14",
         "morgan": "^1.10.0",
         "parcel-bundler": "^1.12.4",
         "parcel-plugin-handlebars": "^0.4.4",
         "qs": "^6.9.6",
         "socket.io": "^3.1.0",
-        "socket.io-client": "^3.1.0"
+        "socket.io-client": "^3.1.0",
+        "validator": "^13.5.2"
     },
     "devDependencies": {
         "concurrently": "^5.3.0",
+        "env-cmd": "^10.1.0",
         "eslint": "^7.18.0",
         "jest": "^26.6.3",
         "jest-puppeteer": "^4.4.0",
