@@ -3,6 +3,10 @@ const validator = require('validator');
 // const Room = require('./Room');
 
 const userSchema = new mongoose.Schema({
+    sessionId: {
+        type: String,
+        required: true,
+    },
     email: {
         type: String,
         required: true,
