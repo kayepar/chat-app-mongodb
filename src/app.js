@@ -1,8 +1,13 @@
 const path = require('path');
+const http = require('http');
 const express = require('express');
+const socketio = require('socket.io');
 const hbs = require('express-hbs');
+const morgan = require('morgan');
 
 const app = express();
+const server = http.createServer(app);
+const io = socketio(server);
 
 // setup handlebars engine and views location
 app.set('view engine', 'hbs');
@@ -16,9 +21,9 @@ app.engine(
 
 // setup static directory to serve
 app.use(express.static(path.join(__dirname, '../dist')));
+app.use(express.json());
+app.use(morgan('dev'));
 
-app.get('', (req, res) => {
-    res.render('index');
-});
+require('./socket')(io);
 
-module.exports = app;
+module.exports = server;
