@@ -10,7 +10,7 @@ $(document).ready(function () {
     registerHbsHelper();
     const socket = io();
 
-    const { username, room } = qs.parse(location.search, {
+    const { username, room, email } = qs.parse(location.search, {
         ignoreQueryPrefix: true,
     });
 
@@ -30,6 +30,7 @@ $(document).ready(function () {
     socket.emit(
         'join',
         {
+            email,
             username,
             room,
         },
