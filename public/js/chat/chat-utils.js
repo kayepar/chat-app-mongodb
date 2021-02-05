@@ -1,10 +1,4 @@
-const qs = require('qs');
-
-const { username } = qs.parse(location.search, {
-    ignoreQueryPrefix: true,
-});
-
-const { displayData, isMobile } = require('../common/common-utils');
+const { isMobile } = require('../common/common-utils');
 
 const messages = document.querySelector('#messages-div');
 
