@@ -151,11 +151,11 @@
                                 \{{#with message}}
                                 <div class="row \{{type}}" id="\{{id}}">
                                     <div>
-                                        <strong>\{{username}}</strong>
+                                        <strong>\{{sender.username}}</strong>
                                         <span class="text-muted">\{{createdAt}}
                                         </span>
                                     </div>
-                                    <p class="message \{{#isAdmin username}}admin\{{/isAdmin}}">\{{text}}</p>
+                                    <p class="message \{{#isAdmin sender.username}}admin\{{/isAdmin}}">\{{text}}</p>
                                 </div>
                                 \{{/with}}
                             </script>
