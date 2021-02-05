@@ -4,6 +4,9 @@ const express = require('express');
 const socketio = require('socket.io');
 const hbs = require('express-hbs');
 const morgan = require('morgan');
+require('./db/mongoose');
+
+const dbUtils = require('./db/utils');
 
 const app = express();
 const server = http.createServer(app);
@@ -24,6 +27,7 @@ app.use(express.static(path.join(__dirname, '../dist')));
 app.use(express.json());
 app.use(morgan('dev'));
 
+dbUtils.cleanupDb();
 require('./socket')(io);
 
 module.exports = server;
