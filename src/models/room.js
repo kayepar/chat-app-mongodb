@@ -25,6 +25,12 @@ roomSchema.virtual('users', {
     foreignField: 'chatroom',
 });
 
+roomSchema.virtual('messages', {
+    ref: 'Message',
+    localField: '_id',
+    foreignField: 'chatroom',
+});
+
 const Room = mongoose.model('Room', roomSchema);
 
 module.exports = Room;
