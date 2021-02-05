@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const Room = require('../models/room');
+const Message = require('../models/message');
 
 const cleanupDb = async () => {
     console.log('cleanup called');
@@ -12,7 +13,10 @@ const cleanupDb = async () => {
     // otherwise, leave room as is
     try {
         await User.deleteMany({});
+
+        await Message.deleteMany({});
         const rooms = await Room.find({});
+
         // console.log(rooms[0]);
 
         rooms.forEach(async (room) => {
