@@ -29,14 +29,25 @@ const messageSchema = new mongoose.Schema(
 //     foreignField: '_id',
 // });
 
-messageSchema.statics.generateMessage = function ({ sessionId, chatroom }, text) {
+messageSchema.statics.dataCleanup = ({ sender, text, createdAt }) => {
+    return {
+        sender: { email: sender.email, username: sender.username },
+        text,
+        createdAt,
+    };
+};
+
+messageSchema.statics.generateAndSaveMessage = async function ({ _id, chatroom }, text) {
     text = text.trim();
 
     if (!text) {
         return;
     }
 
-    return new this({ sender: sessionId, chatroom, text });
+    const temp_message = new this({ sender: _id, chatroom, text });
+    const message = await temp_message.save();
+
+    return this.dataCleanup(await message.execPopulate('sender', 'username email'));
 };
 
 const Message = mongoose.model('Message', messageSchema);

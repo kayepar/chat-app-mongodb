@@ -42,13 +42,14 @@ $(document).ready(function () {
     );
 
     socket.on('message', (message) => {
-        removeTypingIndicatorMsg(message.username);
+        console.log(message);
+        removeTypingIndicatorMsg(message.sender.username);
         const rawTimestamp = message.createdAt;
-        const type = message.username === username ? 'sent' : 'received';
+        const type = message.sender.username === username ? 'sent' : 'received';
 
         message['type'] = type;
         message['createdAt'] = moment(message.createdAt).format('MM-D h:mm a');
-        message['id'] = `${message.username}-${rawTimestamp}-msg-div`;
+        message['id'] = `${message.sender.username}-${rawTimestamp}-msg-div`;
 
         displayData({
             template: document.querySelector('#message-template'),
