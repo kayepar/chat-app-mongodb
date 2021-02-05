@@ -1,30 +1,32 @@
 const Filter = require('bad-words');
-require('./db/mongoose');
+const short = require('short-uuid');
 // const mongoose = require('mongoose');
 
 const User = require('./models/user');
 const Room = require('./models/room');
+const Message = require('./models/message');
 
 // todo: see if socket middleware is really needed
 // todo: get message model ready
 // todo: get routes back up again
 // todo: change focus on e2e test - should be email
+// todo: fixtures in unit tests
 // todo: invalid email checking
 // todo: clear users and room (without messages?)
 
 const chatSocket = (io) => {
-    const saveRoom = async (room) => {
+    const saveRoom = async (name) => {
         try {
-            const result = await Room.create({ name: room }).then(null, async (error) => {
+            const room = await Room.create({ name }).then(null, async (error) => {
                 if (error.code === 11000) {
                     // if duplicate, return existing
-                    return await Room.findOne({ name: room });
+                    return await Room.findOne({ name });
                 } else {
                     throw new Error(error);
                 }
             });
 
-            return await result.execPopulate('users');
+            return await room.execPopulate('users');
         } catch (error) {
             console.log(error);
         }
@@ -38,12 +40,41 @@ const chatSocket = (io) => {
     //     next();
     // });
 
+    const getAdminUser = async (room) => {
+        // console.log(room.users);
+        let adminUser = room.users.find((user) => user.username === 'Admin');
+        // if (adminUser) return adminUser;
+
+        if (adminUser === undefined) {
+            const admin = new User({
+                sessionId: short.generate(),
+                email: 'admin@mychat.com',
+                username: 'Admin',
+                chatroom: room._id,
+            });
+
+            try {
+                adminUser = await admin.save();
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        return adminUser;
+    };
+
     io.on('connection', (socket) => {
+        // console.log(io.sockets.sockets);
+        // var srvSockets = io.sockets.sockets;
+        // console.log(Object.keys(srvSockets));
         socket.on('join', async ({ email, username, room }, callback) => {
             try {
                 const savedRoom = await saveRoom(room);
-                const roomUsers = savedRoom.users;
-                console.log(roomUsers);
+                const adminUser = await getAdminUser(savedRoom);
+
+                const roomUsers = savedRoom.users; // todo: clean this up!
+                // console.log(roomUsers);
+
                 if (
                     roomUsers.some((user) => user.email === email) ||
                     roomUsers.some((user) => user.username === username)
@@ -57,18 +88,30 @@ const chatSocket = (io) => {
                     chatroom: savedRoom._id,
                 });
 
+                await user.execPopulate('chatroom'); // todo: see if this is really needed
                 // console.log(user);
 
                 await user.save();
                 socket.join(savedRoom.name);
 
-                // socket.emit('message', generateMessage('Admin', `Welcome, ${username}!`));
-                // socket.broadcast.to(user.room).emit('message', generateMessage('Admin', `${user.username} has joined!`));
+                socket.emit('message', await Message.generateAndSaveMessage(adminUser, `Welcome, ${username}!`));
+                socket.broadcast
+                    .to(room)
+                    .emit('message', await Message.generateAndSaveMessage(adminUser, `${user.username} has joined!`));
 
-                // io.to(user.room).emit('roomData', {
-                //     room: user.room,
-                //     users: getUsersInRoom(user.room),
-                // });
+                // move to room schema
+                const activeUsers = await savedRoom
+                    .populate({
+                        path: 'users',
+                        select: 'username',
+                        match: { username: { $ne: 'Admin' } },
+                    })
+                    .execPopulate();
+
+                io.to(room).emit('roomData', {
+                    room,
+                    users: activeUsers.users,
+                });
 
                 // socket.broadcast.emit('activeRoomsUpdate', {
                 //     allActiveRooms: getAllActiveRooms(),
@@ -76,6 +119,7 @@ const chatSocket = (io) => {
 
                 callback();
             } catch (error) {
+                // todo: fix error message - always saying duplicates (modal)
                 console.log(error);
                 return callback(error);
             }
@@ -107,12 +151,13 @@ const chatSocket = (io) => {
             const user = await User.findOneAndDelete({ sessionId: socket.id });
 
             if (user) {
+                console.log(`${user.username} disconnected`);
                 try {
                     const room = await Room.findOne({ _id: user.chatroom }).then(async (room) => {
                         return await room.execPopulate('users');
                     });
 
-                    console.log(room.users);
+                    // console.log(room.users);
 
                     if (room.users.length === 0) {
                         await room.deleteOne();
