@@ -43,9 +43,7 @@ messageSchema.statics.generateAndSaveMessage = async function ({ _id, chatroom }
     if (!text) {
         return;
     }
-
-    const temp_message = new this({ sender: _id, chatroom, text });
-    const message = await temp_message.save();
+    const message = this.create({ sender: _id, chatroom, text });
 
     return this.dataCleanup(await message.execPopulate('sender', 'username email'));
 };

@@ -46,15 +46,13 @@ const chatSocket = (io) => {
         // if (adminUser) return adminUser;
 
         if (adminUser === undefined) {
-            const admin = new User({
-                sessionId: short.generate(),
-                email: 'admin@mychat.com',
-                username: 'Admin',
-                chatroom: room._id,
-            });
-
             try {
-                adminUser = await admin.save();
+                adminUser = await User.create({
+                    sessionId: short.generate(),
+                    email: 'admin@mychat.com',
+                    username: 'Admin',
+                    chatroom: room._id,
+                });
             } catch (error) {
                 console.log(error);
             }
@@ -81,17 +79,15 @@ const chatSocket = (io) => {
                 )
                     throw new Error('Username/Email Address already in use.');
 
-                const user = new User({
+                const user = await User.create({
                     sessionId: socket.id,
                     email,
                     username,
                     chatroom: savedRoom._id,
                 });
-
-                await user.execPopulate('chatroom'); // todo: see if this is really needed
+                // await user.execPopulate('chatroom'); // todo: see if this is really needed
                 // console.log(user);
 
-                await user.save();
                 socket.join(savedRoom.name);
 
                 socket.emit('message', await Message.generateAndSaveMessage(adminUser, `Welcome, ${username}!`));
@@ -123,6 +119,7 @@ const chatSocket = (io) => {
                 console.log(error);
                 return callback(error);
             }
+            d;
         });
 
         socket.on('sendMessage', (message, callback) => {
