@@ -1,4 +1,4 @@
-const Filter = require('bad-words');
+// const Filter = require('bad-words');
 const short = require('short-uuid');
 // const mongoose = require('mongoose');
 
@@ -41,9 +41,7 @@ const chatSocket = (io) => {
     // });
 
     const getAdminUser = async (room) => {
-        // console.log(room.users);
         let adminUser = room.users.find((user) => user.username === 'Admin');
-        // if (adminUser) return adminUser;
 
         if (adminUser === undefined) {
             try {
@@ -62,9 +60,6 @@ const chatSocket = (io) => {
     };
 
     io.on('connection', (socket) => {
-        // console.log(io.sockets.sockets);
-        // var srvSockets = io.sockets.sockets;
-        // console.log(Object.keys(srvSockets));
         socket.on('join', async ({ email, username, room }, callback) => {
             try {
                 const savedRoom = await saveRoom(room);
@@ -77,7 +72,7 @@ const chatSocket = (io) => {
                     roomUsers.some((user) => user.email === email) ||
                     roomUsers.some((user) => user.username === username)
                 )
-                    throw new Error('Username/Email Address already in use.');
+                    return callback('Username/Email Address already in use.');
 
                 const user = await User.create({
                     sessionId: socket.id,
@@ -88,38 +83,33 @@ const chatSocket = (io) => {
                 // await user.execPopulate('chatroom'); // todo: see if this is really needed
                 // console.log(user);
 
-                socket.join(savedRoom.name);
+                socket.join(savedRoom.name); // todo: can this just be plain room?
 
-                socket.emit('message', await Message.generateAndSaveMessage(adminUser, `Welcome, ${username}!`));
+                socket.emit('message', await Message.generateMessage(adminUser, `Welcome, ${username}!`));
                 socket.broadcast
                     .to(room)
-                    .emit('message', await Message.generateAndSaveMessage(adminUser, `${user.username} has joined!`));
-
-                // move to room schema
-                const activeUsers = await savedRoom
-                    .populate({
-                        path: 'users',
-                        select: 'username',
-                        match: { username: { $ne: 'Admin' } },
-                    })
-                    .execPopulate();
+                    .emit('message', await Message.generateMessage(adminUser, `${user.username} has joined!`));
 
                 io.to(room).emit('roomData', {
                     room,
-                    users: activeUsers.users,
+                    users: await Room.getActiveUsers(savedRoom),
                 });
 
-                // socket.broadcast.emit('activeRoomsUpdate', {
-                //     allActiveRooms: getAllActiveRooms(),
-                // });
+                // todo: handle error
+                Room.getActiveRooms((error, rooms) => {
+                    console.log(rooms);
+
+                    socket.broadcast.emit('activeRoomsUpdate', {
+                        allActiveRooms: rooms,
+                    });
+                });
 
                 callback();
             } catch (error) {
                 // todo: fix error message - always saying duplicates (modal)
                 console.log(error);
-                return callback(error);
+                // return callback(error);
             }
-            d;
         });
 
         socket.on('sendMessage', (message, callback) => {
