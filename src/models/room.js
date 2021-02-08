@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Message = require('./message');
 
 const roomSchema = new mongoose.Schema({
     name: {
@@ -12,9 +13,10 @@ const roomSchema = new mongoose.Schema({
 
 roomSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
     console.log('delete one middleware called');
-    // const user = this;
+    const room = this;
+    const hasMemberMessages = room.messages.some((message) => message.sender.username !== 'Admin');
 
-    // await Task.deleteMany({ owner: user._id});
+    hasMemberMessages ? next() : await Message.deleteMany({ chatroom: room._id });
 
     next();
 });
@@ -86,11 +88,13 @@ roomSchema.statics.isRoomActive = async function (room) {
             })
             .execPopulate();
 
-        console.log(myRoom.users);
-        console.log(myRoom.messages);
+        // console.log(myRoom.users);
+        // console.log(myRoom.messages);
 
         let isActive = false;
 
+        // keep room if there is another user other than Admin
+        // or there are messages other than notifications (from Admin)
         if (myRoom.users > 1 || myRoom.messages.some((message) => message.sender.username !== 'Admin')) isActive = true;
 
         console.log(`${room.name} is active: ${isActive}`);
