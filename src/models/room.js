@@ -10,6 +10,15 @@ const roomSchema = new mongoose.Schema({
     },
 });
 
+roomSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
+    console.log('delete one middleware called');
+    // const user = this;
+
+    // await Task.deleteMany({ owner: user._id});
+
+    next();
+});
+
 roomSchema.statics.getActiveUsers = async (room) => {
     try {
         const populatedRoom = await room
@@ -26,11 +35,11 @@ roomSchema.statics.getActiveUsers = async (room) => {
     }
 };
 
-roomSchema.statics.getActiveRooms = async function (callback) {
+roomSchema.statics.getActiveRooms = function (callback) {
     try {
         this.find({})
             .populate('users')
-            .exec(function (error, rooms) {
+            .exec((error, rooms) => {
                 if (error) throw new Error(error);
 
                 const activeRooms = rooms.reduce((filtered, room) => {
@@ -44,6 +53,49 @@ roomSchema.statics.getActiveRooms = async function (callback) {
 
                 callback(null, activeRooms);
             });
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+roomSchema.statics.deleteIfInactive = async function (room) {
+    try {
+        const isActive = await this.isRoomActive(room);
+
+        if (!isActive) await room.deleteOne();
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+roomSchema.statics.isRoomActive = async function (room) {
+    try {
+        const myRoom = await room
+            .populate({
+                path: 'users',
+                select: 'username',
+                match: { username: { $ne: 'Admin' } },
+            })
+            .populate({
+                path: 'messages',
+                select: 'sender',
+                populate: {
+                    path: 'sender',
+                    select: 'username',
+                },
+            })
+            .execPopulate();
+
+        console.log(myRoom.users);
+        console.log(myRoom.messages);
+
+        let isActive = false;
+
+        if (myRoom.users > 1 || myRoom.messages.some((message) => message.sender.username !== 'Admin')) isActive = true;
+
+        console.log(`${room.name} is active: ${isActive}`);
+
+        return isActive;
     } catch (error) {
         console.log(error);
     }

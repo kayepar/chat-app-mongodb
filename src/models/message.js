@@ -37,13 +37,13 @@ messageSchema.statics.dataCleanup = ({ sender, text, createdAt }) => {
     };
 };
 
-messageSchema.statics.generateAndSaveMessage = async function ({ _id, chatroom }, text) {
+messageSchema.statics.generateMessage = async function ({ _id, chatroom }, text) {
     text = text.trim();
 
     if (!text) {
         return;
     }
-    const message = this.create({ sender: _id, chatroom, text });
+    const message = await this.create({ sender: _id, chatroom, text });
 
     return this.dataCleanup(await message.execPopulate('sender', 'username email'));
 };

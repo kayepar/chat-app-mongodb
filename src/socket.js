@@ -1,4 +1,4 @@
-// const Filter = require('bad-words');
+const Filter = require('bad-words');
 const short = require('short-uuid');
 // const mongoose = require('mongoose');
 
@@ -59,6 +59,8 @@ const chatSocket = (io) => {
         return adminUser;
     };
 
+    // todo: try to see if it's better to save room and validate user/save to db in middleware
+    // then save them in socket for re-use in other events
     io.on('connection', (socket) => {
         socket.on('join', async ({ email, username, room }, callback) => {
             try {
@@ -97,8 +99,6 @@ const chatSocket = (io) => {
 
                 // todo: handle error
                 Room.getActiveRooms((error, rooms) => {
-                    console.log(rooms);
-
                     socket.broadcast.emit('activeRoomsUpdate', {
                         allActiveRooms: rooms,
                     });
@@ -112,18 +112,21 @@ const chatSocket = (io) => {
             }
         });
 
-        socket.on('sendMessage', (message, callback) => {
-            // console.log('sendMessage');
-            // console.log(socket.room);
-            // console.log(socket.roomId);
-            // const filter = new Filter();
+        socket.on('sendMessage', async (message, callback) => {
+            const filter = new Filter();
 
-            // if (filter.isProfane(message)) {
-            //     return callback('Profanity is not allowed!');
-            // }
+            console.log(message);
+            if (filter.isProfane(message)) {
+                return callback('Profanity is not allowed!');
+            }
 
-            // const user = getUser(socket.id);
-            // io.to(user.room).emit('message', generateMessage(user.username, message));
+            try {
+                const user = await User.findOne({ sessionId: socket.id });
+                await user.execPopulate('chatroom', 'name');
+                io.to(user.chatroom.name).emit('message', await Message.generateMessage(user, message));
+            } catch (error) {
+                console.log(error);
+            }
             callback();
         });
 
@@ -135,21 +138,19 @@ const chatSocket = (io) => {
         // });
 
         socket.on('disconnect', async () => {
-            const user = await User.findOneAndDelete({ sessionId: socket.id });
+            // const user = await User.findOneAndDelete({ sessionId: socket.id });
+            const user = await User.findOne({ sessionId: socket.id }).exec();
+            await user.execPopulate('chatroom');
 
             if (user) {
                 console.log(`${user.username} disconnected`);
                 try {
-                    const room = await Room.findOne({ _id: user.chatroom }).then(async (room) => {
-                        return await room.execPopulate('users');
-                    });
+                    // todo: need to implement send message first so as to correctly filter out rooms with admin messages only
+                    await Room.deleteIfInactive(user.chatroom);
+                    console.log(`will delete user`);
+                    await user.deleteOne();
 
-                    // console.log(room.users);
-
-                    if (room.users.length === 0) {
-                        await room.deleteOne();
-                    }
-                    // todo: check messages first before actually deleting
+                    // todo: delete messages if all are from admin
                 } catch (error) {
                     console.log(error);
                 }
