@@ -31,6 +31,12 @@ const userSchema = new mongoose.Schema({
     },
 });
 
+userSchema.pre('findOne', { document: false, query: true }, function (next) {
+    this.populate('chatroom', 'name');
+
+    next();
+});
+
 userSchema.virtual('messages', {
     ref: 'Message',
     localField: '_id',

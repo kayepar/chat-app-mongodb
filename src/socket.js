@@ -14,16 +14,6 @@ const Message = require('./models/message');
 // todo: clear users and room (without messages?)
 
 const chatSocket = (io) => {
-    // io.use(function (socket, next) {
-    //     const url = socket.handshake.headers.referer;
-    //     const roomQs = /(?<=room=).+?(?=&)/.exec(url)[0];
-    //     socket.room = roomQs;
-
-    //     next();
-    // });
-
-    // todo: try to see if it's better to save room and validate user/save to db in middleware
-    // then save them in socket for re-use in other events
     io.on('connection', (socket) => {
         socket.on('join', async ({ email, username, room }, callback) => {
             try {
@@ -76,7 +66,6 @@ const chatSocket = (io) => {
 
             try {
                 const user = await User.findOne({ sessionId: socket.id });
-                await user.execPopulate('chatroom', 'name');
                 io.to(user.chatroom.name).emit('message', await Message.generateMessage(user, message));
             } catch (error) {
                 console.log(error);
@@ -84,12 +73,17 @@ const chatSocket = (io) => {
             callback();
         });
 
-        // socket.on('typing', (message, callback) => {
-        //     const user = getUser(socket.id);
+        socket.on('typing', async (message, callback) => {
+            try {
+                const user = await User.findOne({ sessionId: socket.id });
 
-        //     socket.broadcast.to(user.room).emit('typing', generateMessage(user.username, message));
-        //     callback();
-        // });
+                socket.broadcast.to(user.chatroom.name).emit('typing', await Message.generateMessage(user, message));
+            } catch (error) {
+                console.log(error);
+            }
+
+            callback();
+        });
 
         socket.on('disconnect', async () => {
             try {
@@ -97,11 +91,9 @@ const chatSocket = (io) => {
 
                 if (user) {
                     console.log(`${user.username} disconnected`);
-                    await user.execPopulate('chatroom');
                     const room = user.chatroom;
 
                     const deletedRoom = await room.deleteIfInactive('disconnect');
-                    console.log(`deleted room: ${deletedRoom}`);
 
                     if (deletedRoom) {
                         Room.getActiveRooms((error, rooms) => {
