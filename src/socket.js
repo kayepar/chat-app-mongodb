@@ -5,13 +5,11 @@ const User = require('./models/user');
 const Room = require('./models/room');
 const Message = require('./models/message');
 
-// todo: see if socket middleware is really needed
-// todo: get message model ready
 // todo: get routes back up again
 // todo: change focus on e2e test - should be email
 // todo: fixtures in unit tests
 // todo: invalid email checking
-// todo: clear users and room (without messages?)
+// todo: remove try catch in models?
 
 const chatSocket = (io) => {
     io.on('connection', (socket) => {
@@ -76,7 +74,6 @@ const chatSocket = (io) => {
         socket.on('typing', async (message, callback) => {
             try {
                 const user = await User.findOne({ sessionId: socket.id });
-
                 socket.broadcast.to(user.chatroom.name).emit('typing', await Message.generateMessage(user, message));
             } catch (error) {
                 console.log(error);
@@ -92,7 +89,6 @@ const chatSocket = (io) => {
                 if (user) {
                     console.log(`${user.username} disconnected`);
                     const room = user.chatroom;
-
                     const deletedRoom = await room.deleteIfInactive('disconnect');
 
                     if (deletedRoom) {
