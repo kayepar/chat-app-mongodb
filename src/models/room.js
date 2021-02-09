@@ -29,7 +29,6 @@ roomSchema.statics.getActiveUsers = async (room) => {
             .populate({
                 path: 'users',
                 select: 'username',
-                // match: { username: { $ne: 'Admin' } },
             })
             .execPopulate();
 
@@ -47,8 +46,7 @@ roomSchema.statics.getActiveRooms = function (callback) {
                 if (error) throw new Error(error);
 
                 const activeRooms = rooms.reduce((filtered, room) => {
-                    if (room.users.length > 1) {
-                        // room has user other than admin
+                    if (room.users.length > 0) {
                         filtered.push(room.name);
                     }
 
