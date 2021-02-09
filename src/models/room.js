@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Message = require('./message');
+// const Message = require('./message');
 
 const roomSchema = new mongoose.Schema({
     name: {
@@ -11,17 +11,17 @@ const roomSchema = new mongoose.Schema({
     },
 });
 
-roomSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
-    const room = this;
+// roomSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
+//     const room = this;
 
-    // check if messages in room are all from admin or not
-    const hasMemberMessages = room.messages.some((message) => message.sender.username !== 'Admin');
+//     // check if messages in room are all from admin or not
+//     const hasMemberMessages = room.messages.some((message) => message.sender.username !== 'Admin');
 
-    // delete all if messages are just notifications from admin
-    hasMemberMessages ? next() : await Message.deleteMany({ chatroom: room._id });
+//     // delete all if messages are just notifications from admin
+//     hasMemberMessages ? next() : await Message.deleteMany({ chatroom: room._id });
 
-    next();
-});
+//     next();
+// });
 
 roomSchema.statics.getActiveUsers = async (room) => {
     try {
@@ -29,7 +29,7 @@ roomSchema.statics.getActiveUsers = async (room) => {
             .populate({
                 path: 'users',
                 select: 'username',
-                match: { username: { $ne: 'Admin' } },
+                // match: { username: { $ne: 'Admin' } },
             })
             .execPopulate();
 
@@ -78,39 +78,22 @@ roomSchema.statics.isRoomActive = async function (room, activity) {
             .populate({
                 path: 'users',
                 select: 'username',
-                match: { username: { $ne: 'Admin' } },
             })
             .populate({
                 path: 'messages',
                 select: 'sender',
-                populate: {
-                    path: 'sender',
-                    select: 'username',
-                },
             })
             .execPopulate();
 
         console.log(myRoom.users);
         console.log(myRoom.messages);
 
-        let isActive = false;
+        let isActive = myRoom.messages.length > 0;
 
-        console.log(activity);
-        if (activity === 'cleanup') {
-            // keep room only if there are messages from other users
-            if (myRoom.messages.some((message) => message.sender.username !== 'Admin')) isActive = true;
-
-            console.log(`${room.name} is active: ${isActive}`);
-
-            return isActive;
+        if (activity === 'disconnect' && !isActive) {
+            // check if there is another user in room (apart from the one who just disconnected which represents users[0])
+            isActive = myRoom.users.length > 1;
         }
-
-        // disconnect
-        // keep room if there is another user other than Admin
-        // or there are messages other than notifications (from Admin)
-        if (myRoom.users.length > 1 || myRoom.messages.some((message) => message.sender.username !== 'Admin'))
-            isActive = true;
-
         console.log(`${room.name} is active: ${isActive}`);
 
         return isActive;
