@@ -65,7 +65,7 @@ const chatSocket = (io) => {
         socket.on('join', async ({ email, username, room }, callback) => {
             try {
                 const savedRoom = await saveRoom(room);
-                const adminUser = await getAdminUser(savedRoom);
+                // const adminUser = await getAdminUser(savedRoom);
 
                 const roomUsers = savedRoom.users; // todo: clean this up!
                 // console.log(roomUsers);
@@ -82,15 +82,14 @@ const chatSocket = (io) => {
                     username,
                     chatroom: savedRoom._id,
                 });
-                // await user.execPopulate('chatroom'); // todo: see if this is really needed
                 console.log(`${user.username} joined`);
 
                 socket.join(savedRoom.name); // todo: can this just be plain room?
 
-                socket.emit('message', await Message.generateMessage(adminUser, `Welcome, ${username}!`));
+                socket.emit('message', Message.generateAdminNotif(room, `Welcome, ${username}!`));
                 socket.broadcast
                     .to(room)
-                    .emit('message', await Message.generateMessage(adminUser, `${user.username} has joined!`));
+                    .emit('message', Message.generateAdminNotif(room, `${user.username} has joined!`));
 
                 io.to(room).emit('roomData', {
                     room,
@@ -157,10 +156,9 @@ const chatSocket = (io) => {
                             });
                         });
                     } else {
-                        const adminUser = await getAdminUser(user.chatroom); // !Do something about this, it's being repeated all over the place
                         io.to(user.chatroom.name).emit(
                             'message',
-                            await Message.generateMessage(adminUser, `${user.username} has left!`)
+                            Message.generateAdminNotif(user.chatroom.name, `${user.username} has left!`)
                         );
                     }
 

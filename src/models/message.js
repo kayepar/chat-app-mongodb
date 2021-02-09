@@ -48,6 +48,17 @@ messageSchema.statics.generateMessage = async function ({ _id, chatroom }, text)
     return this.dataCleanup(await message.execPopulate('sender', 'username email'));
 };
 
+messageSchema.statics.generateAdminNotif = (chatroom, text) => {
+    const notif = {
+        sender: { username: 'Admin' },
+        chatroom,
+        text,
+        createdAt: new Date().getTime(),
+    };
+
+    return notif;
+};
+
 const Message = mongoose.model('Message', messageSchema);
 
 module.exports = Message;
