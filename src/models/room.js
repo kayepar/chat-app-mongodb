@@ -12,10 +12,12 @@ const roomSchema = new mongoose.Schema({
 });
 
 roomSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
-    console.log('delete one middleware called');
     const room = this;
+
+    // check if messages in room are all from admin or not
     const hasMemberMessages = room.messages.some((message) => message.sender.username !== 'Admin');
 
+    // delete all if messages are just notifications from admin
     hasMemberMessages ? next() : await Message.deleteMany({ chatroom: room._id });
 
     next();
@@ -60,17 +62,17 @@ roomSchema.statics.getActiveRooms = function (callback) {
     }
 };
 
-roomSchema.statics.deleteIfInactive = async function (room) {
+roomSchema.statics.deleteIfInactive = async function (room, activity) {
     try {
-        const isActive = await this.isRoomActive(room);
+        const isActive = await this.isRoomActive(room, activity);
 
-        if (!isActive) await room.deleteOne();
+        if (!isActive) return await room.deleteOne();
     } catch (error) {
         console.log(error);
     }
 };
 
-roomSchema.statics.isRoomActive = async function (room) {
+roomSchema.statics.isRoomActive = async function (room, activity) {
     try {
         const myRoom = await room
             .populate({
@@ -88,14 +90,26 @@ roomSchema.statics.isRoomActive = async function (room) {
             })
             .execPopulate();
 
-        // console.log(myRoom.users);
-        // console.log(myRoom.messages);
+        console.log(myRoom.users);
+        console.log(myRoom.messages);
 
         let isActive = false;
 
+        console.log(activity);
+        if (activity === 'cleanup') {
+            // keep room only if there are messages from other users
+            if (myRoom.messages.some((message) => message.sender.username !== 'Admin')) isActive = true;
+
+            console.log(`${room.name} is active: ${isActive}`);
+
+            return isActive;
+        }
+
+        // disconnect
         // keep room if there is another user other than Admin
         // or there are messages other than notifications (from Admin)
-        if (myRoom.users > 1 || myRoom.messages.some((message) => message.sender.username !== 'Admin')) isActive = true;
+        if (myRoom.users.length > 1 || myRoom.messages.some((message) => message.sender.username !== 'Admin'))
+            isActive = true;
 
         console.log(`${room.name} is active: ${isActive}`);
 
