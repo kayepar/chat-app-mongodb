@@ -1,5 +1,4 @@
 const Filter = require('bad-words');
-const short = require('short-uuid');
 // const mongoose = require('mongoose');
 
 const User = require('./models/user');
@@ -15,23 +14,6 @@ const Message = require('./models/message');
 // todo: clear users and room (without messages?)
 
 const chatSocket = (io) => {
-    const saveRoom = async (name) => {
-        try {
-            const room = await Room.create({ name }).then(null, async (error) => {
-                if (error.code === 11000) {
-                    // if duplicate, return existing
-                    return await Room.findOne({ name });
-                } else {
-                    throw new Error(error);
-                }
-            });
-
-            return await room.execPopulate('users');
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
     // io.use(function (socket, next) {
     //     const url = socket.handshake.headers.referer;
     //     const roomQs = /(?<=room=).+?(?=&)/.exec(url)[0];
@@ -40,51 +22,25 @@ const chatSocket = (io) => {
     //     next();
     // });
 
-    const getAdminUser = async (room) => {
-        let adminUser = room.users.find((user) => user.username === 'Admin');
-
-        if (adminUser === undefined) {
-            try {
-                adminUser = await User.create({
-                    sessionId: short.generate(),
-                    email: 'admin@mychat.com',
-                    username: 'Admin',
-                    chatroom: room._id,
-                });
-            } catch (error) {
-                console.log(error);
-            }
-        }
-
-        return adminUser;
-    };
-
     // todo: try to see if it's better to save room and validate user/save to db in middleware
     // then save them in socket for re-use in other events
     io.on('connection', (socket) => {
         socket.on('join', async ({ email, username, room }, callback) => {
             try {
-                const savedRoom = await saveRoom(room);
-                // const adminUser = await getAdminUser(savedRoom);
+                const chatRoom = await Room.createRoom(room);
+                const userValid = await chatRoom.validateUser(email, username);
 
-                const roomUsers = savedRoom.users; // todo: clean this up!
-                // console.log(roomUsers);
-
-                if (
-                    roomUsers.some((user) => user.email === email) ||
-                    roomUsers.some((user) => user.username === username)
-                )
-                    return callback('Username/Email Address already in use.');
+                if (!userValid) return callback('Username/Email Address already in use.');
 
                 const user = await User.create({
                     sessionId: socket.id,
                     email,
                     username,
-                    chatroom: savedRoom._id,
+                    chatroom: chatRoom._id,
                 });
                 console.log(`${user.username} joined`);
 
-                socket.join(savedRoom.name); // todo: can this just be plain room?
+                socket.join(room);
 
                 socket.emit('message', Message.generateAdminNotif(room, `Welcome, ${username}!`));
                 socket.broadcast
@@ -93,7 +49,7 @@ const chatSocket = (io) => {
 
                 io.to(room).emit('roomData', {
                     room,
-                    users: await Room.getActiveUsers(savedRoom),
+                    users: await Room.getActiveUsers(chatRoom),
                 });
 
                 // todo: handle error
@@ -114,7 +70,6 @@ const chatSocket = (io) => {
         socket.on('sendMessage', async (message, callback) => {
             const filter = new Filter();
 
-            console.log(message);
             if (filter.isProfane(message)) {
                 return callback('Profanity is not allowed!');
             }

@@ -11,17 +11,28 @@ const roomSchema = new mongoose.Schema({
     },
 });
 
-// roomSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
-//     const room = this;
+roomSchema.methods.validateUser = async function (email, username) {
+    return this.users.some((user) => user.email === email) || this.users.some((user) => user.username === username)
+        ? false
+        : true;
+};
 
-//     // check if messages in room are all from admin or not
-//     const hasMemberMessages = room.messages.some((message) => message.sender.username !== 'Admin');
+roomSchema.statics.createRoom = async function (name) {
+    try {
+        const room = await this.create({ name }).then(null, async (error) => {
+            if (error.code === 11000) {
+                // if duplicate, return existing
+                return await Room.findOne({ name });
+            } else {
+                throw new Error(error);
+            }
+        });
 
-//     // delete all if messages are just notifications from admin
-//     hasMemberMessages ? next() : await Message.deleteMany({ chatroom: room._id });
-
-//     next();
-// });
+        return await room.execPopulate('users');
+    } catch (error) {
+        console.log(error);
+    }
+};
 
 roomSchema.statics.getActiveUsers = async (room) => {
     try {
@@ -83,13 +94,14 @@ roomSchema.statics.isRoomActive = async function (room, activity) {
             })
             .execPopulate();
 
-        console.log(myRoom.users);
-        console.log(myRoom.messages);
+        // console.log(myRoom.users);
+        // console.log(myRoom.messages);
 
         let isActive = myRoom.messages.length > 0;
 
         if (activity === 'disconnect' && !isActive) {
-            // check if there is another user in room (apart from the one who just disconnected which represents users[0])
+            // check if there is another user in room
+            // (apart from the one who just disconnected which represents users[0])
             isActive = myRoom.users.length > 1;
         }
         console.log(`${room.name} is active: ${isActive}`);
