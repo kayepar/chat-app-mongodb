@@ -83,7 +83,7 @@ const chatSocket = (io) => {
                     chatroom: savedRoom._id,
                 });
                 // await user.execPopulate('chatroom'); // todo: see if this is really needed
-                // console.log(user);
+                console.log(`${user.username} joined`);
 
                 socket.join(savedRoom.name); // todo: can this just be plain room?
 
@@ -138,39 +138,42 @@ const chatSocket = (io) => {
         // });
 
         socket.on('disconnect', async () => {
-            // const user = await User.findOneAndDelete({ sessionId: socket.id });
-            const user = await User.findOne({ sessionId: socket.id }).exec();
-            await user.execPopulate('chatroom');
+            try {
+                const user = await User.findOne({ sessionId: socket.id });
 
-            if (user) {
-                console.log(`${user.username} disconnected`);
-                try {
-                    // todo: need to implement send message first so as to correctly filter out rooms with admin messages only
-                    await Room.deleteIfInactive(user.chatroom);
-                    console.log(`will delete user`);
+                if (user) {
+                    console.log(`${user.username} disconnected`);
+                    await user.execPopulate('chatroom');
+
+                    const deletedRoom = await Room.deleteIfInactive(user.chatroom, 'disconnect');
+                    console.log(`deleted room: ${deletedRoom}`);
+
+                    if (deletedRoom) {
+                        Room.getActiveRooms((error, rooms) => {
+                            if (error) throw new Error(error);
+
+                            socket.broadcast.emit('activeRoomsUpdate', {
+                                allActiveRooms: rooms,
+                            });
+                        });
+                    } else {
+                        const adminUser = await getAdminUser(user.chatroom); // !Do something about this, it's being repeated all over the place
+                        io.to(user.chatroom.name).emit(
+                            'message',
+                            await Message.generateMessage(adminUser, `${user.username} has left!`)
+                        );
+                    }
+
                     await user.deleteOne();
 
-                    // todo: delete messages if all are from admin
-                } catch (error) {
-                    console.log(error);
+                    io.to(user.chatroom.name).emit('roomData', {
+                        room: user.chatroom.name,
+                        users: await Room.getActiveUsers(user.chatroom),
+                    });
                 }
+            } catch (error) {
+                console.log(error);
             }
-
-            // if (user) {
-            //     io.to(user.room).emit('message', generateMessage('Admin', `${user.username} has left!`));
-            //     io.to(user.room).emit('roomData', {
-            //         room: user.room,
-            //         users: getUsersInRoom(user.room),
-            //     });
-            //     // check if there are are still active users in the room
-            //     const usersInRoom = getUsersInRoom(user.room);
-            //     if (usersInRoom.length === 0) {
-            //         // if no one is online, send a message to everyone to remove room from sidebar
-            //         socket.broadcast.emit('activeRoomsUpdate', {
-            //             allActiveRooms: getAllActiveRooms(),
-            //         });
-            //     }
-            // }
         });
     });
 };
