@@ -8,7 +8,7 @@ const cleanupDb = async () => {
         const rooms = await Room.find({});
         await Promise.all(
             rooms.map(async (room) => {
-                await Room.deleteIfInactive(room, 'cleanup');
+                await room.deleteIfInactive('cleanup');
             })
         );
         await User.deleteMany({});

@@ -49,7 +49,7 @@ const chatSocket = (io) => {
 
                 io.to(room).emit('roomData', {
                     room,
-                    users: await Room.getActiveUsers(chatRoom),
+                    users: await chatRoom.getActiveUsers(),
                 });
 
                 // todo: handle error
@@ -98,8 +98,9 @@ const chatSocket = (io) => {
                 if (user) {
                     console.log(`${user.username} disconnected`);
                     await user.execPopulate('chatroom');
+                    const room = user.chatroom;
 
-                    const deletedRoom = await Room.deleteIfInactive(user.chatroom, 'disconnect');
+                    const deletedRoom = await room.deleteIfInactive('disconnect');
                     console.log(`deleted room: ${deletedRoom}`);
 
                     if (deletedRoom) {
@@ -111,17 +112,17 @@ const chatSocket = (io) => {
                             });
                         });
                     } else {
-                        io.to(user.chatroom.name).emit(
+                        io.to(room.name).emit(
                             'message',
-                            Message.generateAdminNotif(user.chatroom.name, `${user.username} has left!`)
+                            Message.generateAdminNotif(room.name, `${user.username} has left!`)
                         );
                     }
 
                     await user.deleteOne();
 
-                    io.to(user.chatroom.name).emit('roomData', {
-                        room: user.chatroom.name,
-                        users: await Room.getActiveUsers(user.chatroom),
+                    io.to(room.name).emit('roomData', {
+                        room: room.name,
+                        users: await room.getActiveUsers(),
                     });
                 }
             } catch (error) {
