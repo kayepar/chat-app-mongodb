@@ -18,28 +18,21 @@ roomSchema.methods.validateUser = async function (email, username) {
 };
 
 roomSchema.methods.deleteIfInactive = async function (activity) {
-    try {
-        const isActive = await this.model('Room').isRoomActive(this, activity);
+    const isActive = await this.model('Room').isRoomActive(this, activity);
 
-        if (!isActive) return await this.deleteOne();
-    } catch (error) {
-        console.log(error);
-    }
+    if (!isActive) return await this.deleteOne();
 };
 
 roomSchema.methods.getActiveUsers = async function () {
-    try {
-        const populatedRoom = await this.populate({
-            path: 'users',
-            select: 'username',
-        }).execPopulate();
+    const populatedRoom = await this.populate({
+        path: 'users',
+        select: 'username',
+    }).execPopulate();
 
-        return populatedRoom.users;
-    } catch (error) {
-        console.log(error);
-    }
+    return populatedRoom.users;
 };
 
+// todo: handle errors properly
 roomSchema.statics.createRoom = async function (name) {
     try {
         const room = await this.create({ name }).then(null, async (error) => {
@@ -47,12 +40,14 @@ roomSchema.statics.createRoom = async function (name) {
                 // if duplicate, return existing
                 return await Room.findOne({ name });
             } else {
+                console.log('throw');
                 throw new Error(error);
             }
         });
 
         return await room.execPopulate('users');
     } catch (error) {
+        console.log('catch');
         console.log(error);
     }
 };
