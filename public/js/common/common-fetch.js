@@ -8,16 +8,14 @@ const isUserValid = async (email, username, room) => {
     return isValid;
 };
 
-const getAllActiveRooms = async () => {
-    // const response = await fetch('/room/getAllActiveRooms');
+const getActiveRooms = async () => {
+    const response = await fetch('/getActiveRooms');
 
-    // if (!response.ok) throw new Error(`An error has occured: ${response.status}`);
+    if (!response.ok) throw new Error(`An error has occured: ${response.status}`);
 
-    // const { rooms } = await response.json();
+    const { rooms } = await response.json();
 
-    // return rooms;
-
-    return [];
+    return rooms;
 };
 
 const getAllOtherActiveRooms = async (myRoom) => {
@@ -34,6 +32,6 @@ const getAllOtherActiveRooms = async (myRoom) => {
 
 module.exports = {
     isUserValid,
-    getAllActiveRooms,
+    getActiveRooms,
     getAllOtherActiveRooms,
 };

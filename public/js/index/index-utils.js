@@ -1,9 +1,9 @@
-const { getAllActiveRooms } = require('../common/common-fetch');
+const { getActiveRooms } = require('../common/common-fetch');
 const { displayData } = require('../common/common-utils');
 
 const getAvailableRooms = async () => {
     try {
-        const rooms = await getAllActiveRooms();
+        const rooms = await getActiveRooms();
 
         if (rooms.length > 0) {
             displayData({

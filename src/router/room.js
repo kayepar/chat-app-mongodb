@@ -18,4 +18,20 @@ router.get('/validateUser', async (req, res) => {
     }
 });
 
+router.get('/getActiveRooms', async (req, res) => {
+    try {
+        Room.getActiveRooms((error, rooms) => {
+            if (error) throw new Error(error);
+
+            res.status(200).send({
+                rooms,
+            });
+        });
+    } catch (error) {
+        res.status(400).send({
+            error: error.message,
+        });
+    }
+});
+
 module.exports = router;
