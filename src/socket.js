@@ -1,5 +1,4 @@
 const Filter = require('bad-words');
-// const mongoose = require('mongoose');
 
 const User = require('./models/user');
 const Room = require('./models/room');
@@ -75,9 +74,12 @@ const chatSocket = (io) => {
         socket.on('typing', async (message, callback) => {
             try {
                 const user = await User.findOne({ sessionId: socket.id });
-                socket.broadcast
-                    .to(user.chatroom.name)
-                    .emit('typing', Message.generateNotification(user.username, user.chatroom.name, message));
+
+                if (user) {
+                    socket.broadcast
+                        .to(user.chatroom.name)
+                        .emit('typing', Message.generateNotification(user.username, user.chatroom.name, message));
+                }
             } catch (error) {
                 console.log(error);
             }
