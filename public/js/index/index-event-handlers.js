@@ -7,7 +7,7 @@ const {
     isRoomExisting,
 } = require('./index-utils');
 
-const { isUsernameValid } = require('../common/common-fetch');
+const { isUserValid } = require('../common/common-fetch');
 
 const form = document.querySelector('#chat-form');
 
@@ -22,8 +22,9 @@ form.addEventListener('submit', (e) => {
     // if form passed basic constraint checking
     if (form.checkValidity()) {
         const room = document.querySelector('#room-text').value;
-        const room_qs = document.querySelector('#room-qs'); // will contain room value on submit
+        let room_qs = document.querySelector('#room-qs'); // will contain room value on submit
         const username = document.querySelector('#username-text').value;
+        const email = document.querySelector('#email-text').value;
 
         // check if room name already exists
         if (isRoomExisting(room)) {
@@ -42,7 +43,7 @@ form.addEventListener('submit', (e) => {
                 }
             }
 
-            isUsernameValid(username, room_qs.value)
+            isUserValid(email, username, room_qs.value)
                 .then((isValid) => {
                     isValid ? form.submit() : (username_feedback.style.display = 'block');
                 })
