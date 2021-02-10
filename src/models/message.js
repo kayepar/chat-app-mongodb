@@ -48,9 +48,10 @@ messageSchema.statics.generateMessage = async function ({ _id, chatroom }, text)
     return this.dataCleanup(await message.execPopulate('sender', 'username email'));
 };
 
-messageSchema.statics.generateAdminNotif = (chatroom, text) => {
+// Notifications are not saved to DB
+messageSchema.statics.generateNotification = (username, chatroom, text) => {
     const notif = {
-        sender: { username: 'Admin' },
+        sender: { username },
         chatroom,
         text,
         createdAt: new Date().getTime(),
