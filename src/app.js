@@ -6,6 +6,7 @@ const hbs = require('express-hbs');
 const morgan = require('morgan');
 require('./db/mongoose');
 
+const roomRouter = require('./router/room');
 const dbUtils = require('./db/utils');
 
 const app = express();
@@ -26,6 +27,7 @@ app.engine(
 app.use(express.static(path.join(__dirname, '../dist')));
 app.use(express.json());
 app.use(morgan('dev'));
+app.use(roomRouter);
 
 dbUtils.cleanupDb();
 require('./socket')(io);
