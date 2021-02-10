@@ -11,10 +11,28 @@ const roomSchema = new mongoose.Schema({
     },
 });
 
+roomSchema.pre('findOne', { document: false, query: true }, function (next) {
+    this.populate('users');
+
+    next();
+});
+
+// triggered by create()
+roomSchema.pre('save', { document: true, query: false }, function (next) {
+    this.populate('users');
+
+    next();
+});
+
 roomSchema.methods.validateUser = async function (email, username) {
-    return this.users.some((user) => user.email === email) || this.users.some((user) => user.username === username)
-        ? false
-        : true;
+    console.log('validateUser called');
+    try {
+        return this.users.some((user) => user.email === email) || this.users.some((user) => user.username === username)
+            ? false
+            : true;
+    } catch (error) {
+        console.log(error);
+    }
 };
 
 roomSchema.methods.deleteIfInactive = async function (activity) {
@@ -45,7 +63,8 @@ roomSchema.statics.createRoom = async function (name) {
             }
         });
 
-        return await room.execPopulate('users');
+        // return await room.execPopulate('users');
+        return room;
     } catch (error) {
         console.log('catch');
         console.log(error);
