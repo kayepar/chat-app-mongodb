@@ -30,10 +30,10 @@ const chatSocket = (io) => {
 
                 socket.join(room);
 
-                socket.emit('message', Message.generateAdminNotif(room, `Welcome, ${username}!`));
+                socket.emit('message', Message.generateNotification('Admin', room, `Welcome, ${username}!`));
                 socket.broadcast
                     .to(room)
-                    .emit('message', Message.generateAdminNotif(room, `${user.username} has joined!`));
+                    .emit('message', Message.generateNotification('Admin', room, `${user.username} has joined!`));
 
                 io.to(room).emit('roomData', {
                     room,
@@ -50,6 +50,7 @@ const chatSocket = (io) => {
                 callback();
             } catch (error) {
                 // todo: fix error message - always saying duplicates (modal)
+                console.log('try catch');
                 console.log(error);
                 // return callback(error);
             }
@@ -74,7 +75,9 @@ const chatSocket = (io) => {
         socket.on('typing', async (message, callback) => {
             try {
                 const user = await User.findOne({ sessionId: socket.id });
-                socket.broadcast.to(user.chatroom.name).emit('typing', await Message.generateMessage(user, message));
+                socket.broadcast
+                    .to(user.chatroom.name)
+                    .emit('typing', Message.generateNotification(user.username, user.chatroom.name, message));
             } catch (error) {
                 console.log(error);
             }
@@ -102,7 +105,7 @@ const chatSocket = (io) => {
                     } else {
                         io.to(room.name).emit(
                             'message',
-                            Message.generateAdminNotif(room.name, `${user.username} has left!`)
+                            Message.generateNotification('Admin', room.name, `${user.username} has left!`)
                         );
                     }
 
