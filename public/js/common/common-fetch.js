@@ -18,20 +18,7 @@ const getActiveRooms = async () => {
     return rooms;
 };
 
-const getAllOtherActiveRooms = async (myRoom) => {
-    // const response = await fetch(`/room/getAllOtherActiveRooms?room=${myRoom}`);
-
-    // if (!response.ok) throw new Error(`An error has occured: ${response.status}`);
-
-    // const { rooms } = await response.json();
-
-    // return rooms;
-
-    return [];
-};
-
 module.exports = {
     isUserValid,
     getActiveRooms,
-    getAllOtherActiveRooms,
 };
