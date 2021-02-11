@@ -24,7 +24,6 @@ roomSchema.pre('save', { document: true, query: false }, function (next) {
 });
 
 roomSchema.methods.validateUser = async function (email, username) {
-    console.log('validateUser called');
     try {
         return this.users.some((user) => user.email === email) || this.users.some((user) => user.username === username)
             ? false
@@ -116,7 +115,7 @@ roomSchema.statics.isRoomActive = async function (room, activity) {
             // (apart from the one who just disconnected which represents users[0])
             isActive = myRoom.users.length > 1;
         }
-        console.log(`${room.name} is active: ${isActive}`);
+        // console.log(`${room.name} is active: ${isActive}`);
 
         return isActive;
     } catch (error) {

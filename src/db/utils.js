@@ -2,8 +2,6 @@ const User = require('../models/user');
 const Room = require('../models/room');
 
 const cleanupDb = async () => {
-    console.log('cleanup called');
-
     try {
         const rooms = await Room.find({});
         await Promise.all(
