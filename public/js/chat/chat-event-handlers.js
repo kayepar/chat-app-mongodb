@@ -2,7 +2,7 @@ const qs = require('qs');
 const { toggleCollapseLinkText } = require('./chat-utils');
 const { isMobile } = require('../common/common-utils');
 
-const { username } = qs.parse(location.search, {
+const { email, username } = qs.parse(location.search, {
     ignoreQueryPrefix: true,
 });
 
@@ -51,11 +51,12 @@ document.querySelector('#sidebar-content').addEventListener('click', (e) => {
     // join another room
     if (e.target.id.startsWith('rooms-')) {
         if (!localStorage.getItem('join-room-modal-checked')) {
+            // show modal
             // save selected room to a hidden element
             document.querySelector('#chosen-room').value = e.target.text;
             $('#join-room-modal').modal('show');
         } else {
-            window.open(`/chat.html?room=${e.target.text}&username=${username}`, '_blank');
+            window.open(`/chat.html?room=${e.target.text}&email=${email}&username=${username}`, '_blank');
         }
     }
 });
@@ -65,7 +66,7 @@ document.querySelector('#modal-join-yes-button').addEventListener('click', (e) =
     // get selected room from hidden element
     const chosenRoom = document.querySelector('#chosen-room').value;
 
-    window.open(`/chat.html?room=${chosenRoom}&username=${username}`, '_blank');
+    window.open(`/chat.html?room=${chosenRoom}&email=${email}&username=${username}`, '_blank');
     $('#join-room-modal').modal('hide');
 });
 
