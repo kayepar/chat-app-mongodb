@@ -3,7 +3,7 @@ const qs = require('qs');
 const moment = require('moment');
 
 const { autoscroll, removeTypingIndicatorMsg } = require('./chat-utils');
-const { getAllOtherActiveRooms } = require('../common/common-fetch');
+const { getActiveRooms } = require('../common/common-fetch');
 const { registerHbsHelper, displayData, displayAsList } = require('../common/common-utils');
 
 $(document).ready(function () {
@@ -20,8 +20,9 @@ $(document).ready(function () {
         message_textbox.focus();
 
         try {
-            const rooms = getAllOtherActiveRooms(room);
-            displayAsList(rooms, 'rooms');
+            const allRooms = await getActiveRooms();
+            const filteredRooms = allRooms.filter((activeRoom) => activeRoom !== room);
+            displayAsList(filteredRooms, 'rooms');
         } catch (error) {
             console.log(`Error: ${error.message}`);
         }
@@ -42,7 +43,6 @@ $(document).ready(function () {
     );
 
     socket.on('message', (message) => {
-        console.log(message);
         removeTypingIndicatorMsg(message.sender.username);
         const rawTimestamp = message.createdAt;
         const type = message.sender.username === username ? 'sent' : 'received';
