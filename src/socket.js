@@ -93,25 +93,23 @@ const chatSocket = (io) => {
 
                 if (user) {
                     console.log(`${user.username} disconnected`);
-                    const room = user.chatroom;
-                    const deletedRoom = await room.deleteIfInactive('disconnect');
-
-                    if (deletedRoom) {
-                        Room.getActiveRooms((error, rooms) => {
-                            if (error) throw new Error(error);
-
-                            socket.broadcast.emit('activeRoomsUpdate', {
-                                allActiveRooms: rooms,
-                            });
-                        });
-                    } else {
-                        io.to(room.name).emit(
-                            'message',
-                            Message.generateNotification('Admin', room.name, `${user.username} has left!`)
-                        );
-                    }
-
                     await user.deleteOne();
+
+                    const room = user.chatroom;
+                    await room.deleteIfInactive('disconnect');
+
+                    Room.getActiveRooms((error, rooms) => {
+                        if (error) throw new Error(error);
+
+                        socket.broadcast.emit('activeRoomsUpdate', {
+                            allActiveRooms: rooms,
+                        });
+                    });
+
+                    io.to(room.name).emit(
+                        'message',
+                        Message.generateNotification('Admin', room.name, `${user.username} has left!`)
+                    );
 
                     io.to(room.name).emit('roomData', {
                         room: room.name,
