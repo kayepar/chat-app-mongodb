@@ -18,7 +18,7 @@ roomSchema.pre('findOne', { document: false, query: true }, function (next) {
 
 // triggered by create()
 roomSchema.pre('save', { document: true, query: false }, function (next) {
-    this.populate('users');
+    this.execPopulate('users');
 
     next();
 });
@@ -80,6 +80,7 @@ roomSchema.statics.getActiveRooms = function (callback) {
                 const activeRooms = rooms.reduce((filtered, room) => {
                     if (room.users.length > 0) {
                         filtered.push(room.name);
+                        // filtered.push(room);
                     }
 
                     return filtered;
