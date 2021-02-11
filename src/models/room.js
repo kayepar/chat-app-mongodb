@@ -40,31 +40,30 @@ roomSchema.methods.deleteIfInactive = async function (activity) {
 };
 
 roomSchema.methods.getActiveUsers = async function () {
-    const populatedRoom = await this.populate({
-        path: 'users',
-        select: 'username',
-    }).execPopulate();
+    try {
+        const populatedRoom = await this.populate({
+            path: 'users',
+            select: 'username',
+        }).execPopulate();
 
-    return populatedRoom.users;
+        return populatedRoom.users;
+    } catch (error) {
+        console.log(error);
+    }
 };
 
 // todo: handle errors properly
 roomSchema.statics.createRoom = async function (name) {
     try {
-        const room = await this.create({ name }).then(null, async (error) => {
+        return await this.create({ name }).then(null, async (error) => {
             if (error.code === 11000) {
                 // if duplicate, return existing
                 return await Room.findOne({ name });
             } else {
-                console.log('throw');
                 throw new Error(error);
             }
         });
-
-        // return await room.execPopulate('users');
-        return room;
     } catch (error) {
-        console.log('catch');
         console.log(error);
     }
 };

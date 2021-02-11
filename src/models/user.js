@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-// const Room = require('./Room');
 
 const userSchema = new mongoose.Schema({
     sessionId: {

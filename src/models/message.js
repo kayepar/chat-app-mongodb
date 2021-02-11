@@ -23,12 +23,6 @@ const messageSchema = new mongoose.Schema(
     }
 );
 
-// messageSchema.virtual('user', {
-//     ref: 'User',
-//     localField: 'sender',
-//     foreignField: '_id',
-// });
-
 messageSchema.statics.dataCleanup = ({ sender, text, createdAt }) => {
     return {
         sender: { email: sender.email, username: sender.username },
