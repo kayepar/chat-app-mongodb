@@ -40,8 +40,9 @@ const chatSocket = (io) => {
                     // note: this will re-populate the users object to get the updated list
                 });
 
-                // todo: handle error
                 Room.getActiveRooms((error, rooms) => {
+                    if (error) throw new Error(error);
+
                     socket.broadcast.emit('activeRoomsUpdate', {
                         allActiveRooms: rooms,
                     });
@@ -66,10 +67,11 @@ const chatSocket = (io) => {
             try {
                 const user = await User.findOne({ sessionId: socket.id });
                 io.to(user.chatroom.name).emit('message', await Message.generateMessage(user, message));
+
+                callback();
             } catch (error) {
                 console.log(error);
             }
-            callback();
         });
 
         socket.on('typing', async (message, callback) => {
@@ -81,11 +83,10 @@ const chatSocket = (io) => {
                         .to(user.chatroom.name)
                         .emit('typing', Message.generateNotification(user.username, user.chatroom.name, message));
                 }
+                callback();
             } catch (error) {
                 console.log(error);
             }
-
-            callback();
         });
 
         socket.on('disconnect', async () => {
