@@ -30,7 +30,7 @@ $(document).ready(function () {
 
     const displayMessage = (message) => {
         const rawTimestamp = message.createdAt;
-        const type = message.sender.username === username ? 'sent' : 'received';
+        const type = message.sender.email === email ? 'sent' : 'received';
 
         message['type'] = type;
         message['createdAt'] = moment(message.createdAt).format('MM-D h:mm a');
@@ -55,6 +55,8 @@ $(document).ready(function () {
             room,
         },
         (error) => {
+            // todo: handle other errors, probably customize message on modal window
+            // todo: send email?
             if (error) {
                 $('#duplicate-name-modal').modal('show');
             }
