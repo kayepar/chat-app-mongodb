@@ -29,7 +29,7 @@ roomSchema.methods.validateUser = async function (email, username) {
             ? false
             : true;
     } catch (error) {
-        console.log(error);
+        throw new Error(error);
     }
 };
 
@@ -41,33 +41,24 @@ roomSchema.methods.deleteIfInactive = async function (activity) {
 
 roomSchema.methods.getActiveUsers = async function () {
     try {
-        // todo: change to shorthand
-        const populatedRoom = await this.populate({
-            path: 'users',
-            select: 'username',
-        }).execPopulate();
+        const populatedRoom = await this.populate('users', 'username').execPopulate();
 
         return populatedRoom.users;
     } catch (error) {
-        console.log(error);
+        throw new Error(error);
     }
 };
 
 roomSchema.methods.getMessages = async function () {
     try {
-        // const populatedRoom = await this.populate('messages', 'text sender createdAt').execPopulate();
-        const populatedRoom = await this.populate({
-            path: 'messages',
-            select: 'text sender createdAt',
-        }).execPopulate();
+        const populatedRoom = await this.populate('messages', 'text sender createdAt').execPopulate();
 
         return populatedRoom.messages;
     } catch (error) {
-        console.log(error);
+        throw new Error(error);
     }
 };
 
-// todo: handle errors properly
 roomSchema.statics.createRoom = async function (name) {
     try {
         return await this.create({ name }).then(null, async (error) => {
@@ -79,7 +70,7 @@ roomSchema.statics.createRoom = async function (name) {
             }
         });
     } catch (error) {
-        console.log(error);
+        throw new Error(error);
     }
 };
 
@@ -102,7 +93,7 @@ roomSchema.statics.getActiveRooms = function (callback) {
                 callback(null, activeRooms);
             });
     } catch (error) {
-        console.log(error);
+        throw new Error(error);
     }
 };
 
@@ -132,7 +123,7 @@ roomSchema.statics.isRoomActive = async function (room, activity) {
 
         return isActive;
     } catch (error) {
-        console.log(error);
+        throw new Error(error);
     }
 };
 
