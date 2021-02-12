@@ -59,7 +59,6 @@ roomSchema.methods.getMessages = async function () {
         const populatedRoom = await this.populate({
             path: 'messages',
             select: 'text sender createdAt',
-            populate: { path: 'sender' },
         }).execPopulate();
 
         return populatedRoom.messages;
@@ -116,7 +115,6 @@ roomSchema.statics.isRoomActive = async function (room, activity) {
             })
             .populate({
                 path: 'messages',
-                select: 'sender',
             })
             .execPopulate();
 

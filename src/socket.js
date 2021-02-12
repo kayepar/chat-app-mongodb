@@ -4,11 +4,9 @@ const User = require('./models/user');
 const Room = require('./models/room');
 const Message = require('./models/message');
 
-// todo: get routes back up again
 // todo: change focus on e2e test - should be email
+// todo: tests - feedback error messages
 // todo: fixtures in unit tests
-// todo: invalid email checking
-// todo: remove try catch in models?
 
 const chatSocket = (io) => {
     io.on('connection', (socket) => {
@@ -29,14 +27,17 @@ const chatSocket = (io) => {
 
                 socket.join(room);
 
+                socket.emit('loadMessages', await chatRoom.getMessages());
+
                 socket.emit('message', Message.generateNotification('Admin', room, `Welcome, ${username}!`));
                 socket.broadcast
                     .to(room)
                     .emit('message', Message.generateNotification('Admin', room, `${user.username} has joined!`));
 
-                io.to(room).emit('roomData', {
+                io.to(room).emit('usersInRoomUpdate', {
                     room,
                     users: await chatRoom.getActiveUsers(),
+                    // note: this will re-populate the users object to get the updated list
                 });
 
                 // todo: handle error
@@ -111,7 +112,7 @@ const chatSocket = (io) => {
                         Message.generateNotification('Admin', room.name, `${user.username} has left!`)
                     );
 
-                    io.to(room.name).emit('roomData', {
+                    io.to(room.name).emit('usersInRoomUpdate', {
                         room: room.name,
                         users: await room.getActiveUsers(),
                     });
