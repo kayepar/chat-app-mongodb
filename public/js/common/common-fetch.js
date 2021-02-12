@@ -18,7 +18,16 @@ const getActiveRooms = async () => {
     return rooms;
 };
 
+const getMessages = async (room) => {
+    const response = await fetch(`/getMessages?room=${room}`);
+
+    if (!response.ok) throw new Error(`An error has occured: ${response.status}`);
+
+    return [];
+};
+
 module.exports = {
     isUserValid,
     getActiveRooms,
+    getMessages,
 };

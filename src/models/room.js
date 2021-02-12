@@ -41,12 +41,28 @@ roomSchema.methods.deleteIfInactive = async function (activity) {
 
 roomSchema.methods.getActiveUsers = async function () {
     try {
+        // todo: change to shorthand
         const populatedRoom = await this.populate({
             path: 'users',
             select: 'username',
         }).execPopulate();
 
         return populatedRoom.users;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+roomSchema.methods.getMessages = async function () {
+    try {
+        // const populatedRoom = await this.populate('messages', 'text sender createdAt').execPopulate();
+        const populatedRoom = await this.populate({
+            path: 'messages',
+            select: 'text sender createdAt',
+            populate: { path: 'sender' },
+        }).execPopulate();
+
+        return populatedRoom.messages;
     } catch (error) {
         console.log(error);
     }

@@ -34,4 +34,16 @@ router.get('/getActiveRooms', async (req, res) => {
     }
 });
 
+router.get('/getMessages', async (req, res) => {
+    try {
+        const room = await Room.findOne({ name: req.query.room });
+        const messages = await room.getMessages();
+        console.log(messages);
+    } catch (error) {
+        res.status(400).send({
+            error: error.message,
+        });
+    }
+});
+
 module.exports = router;

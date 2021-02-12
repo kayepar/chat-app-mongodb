@@ -3,7 +3,7 @@ const qs = require('qs');
 const moment = require('moment');
 
 const { autoscroll, removeTypingIndicatorMsg } = require('./chat-utils');
-const { getActiveRooms } = require('../common/common-fetch');
+const { getActiveRooms, getMessages } = require('../common/common-fetch');
 const { registerHbsHelper, displayData, displayAsList } = require('../common/common-utils');
 
 $(document).ready(function () {
@@ -41,6 +41,9 @@ $(document).ready(function () {
             }
         }
     );
+
+    initialize();
+    getMessages(room);
 
     socket.on('message', (message) => {
         removeTypingIndicatorMsg(message.sender.username);
@@ -137,6 +140,4 @@ $(document).ready(function () {
             }
         });
     });
-
-    initialize();
 });
