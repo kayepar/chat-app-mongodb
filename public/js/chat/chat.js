@@ -28,25 +28,7 @@ $(document).ready(function () {
         }
     };
 
-    socket.emit(
-        'join',
-        {
-            email,
-            username,
-            room,
-        },
-        (error) => {
-            if (error) {
-                $('#duplicate-name-modal').modal('show');
-            }
-        }
-    );
-
-    initialize();
-    getMessages(room);
-
-    socket.on('message', (message) => {
-        removeTypingIndicatorMsg(message.sender.username);
+    const displayMessage = (message) => {
         const rawTimestamp = message.createdAt;
         const type = message.sender.username === username ? 'sent' : 'received';
 
@@ -62,8 +44,30 @@ $(document).ready(function () {
             },
             position: 'beforeend',
         });
-
         autoscroll();
+    };
+
+    socket.emit(
+        'join',
+        {
+            email,
+            username,
+            room,
+        },
+        (error) => {
+            if (error) {
+                $('#duplicate-name-modal').modal('show');
+            }
+        }
+    );
+
+    socket.on('loadMessages', (messages) => {
+        messages.forEach((message) => displayMessage(message));
+    });
+
+    socket.on('message', (message) => {
+        removeTypingIndicatorMsg(message.sender.username);
+        displayMessage(message);
     });
 
     // * Typing...
@@ -90,6 +94,7 @@ $(document).ready(function () {
         message['id'] = `${message.username}-temp-msg-div`;
 
         if (!document.querySelector(`#${message.id}`)) {
+            // prevent duplicate notifs
             displayData({
                 template: document.querySelector('#message-template'),
                 parent_element: document.querySelector('#messages-div'),
@@ -140,4 +145,6 @@ $(document).ready(function () {
             }
         });
     });
+
+    initialize();
 });
