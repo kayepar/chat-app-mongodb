@@ -52,9 +52,14 @@ messageSchema.statics.generateMessage = async function ({ email, username, chatr
     if (!text) {
         return;
     }
-    const message = await this.create({ sender: { email, username }, chatroom, text });
 
-    return this.dataCleanup(await message.execPopulate('sender', 'username email'));
+    try {
+        const message = await this.create({ sender: { email, username }, chatroom, text });
+
+        return this.dataCleanup(await message.execPopulate('sender', 'username email'));
+    } catch (error) {
+        throw new Error(error);
+    }
 };
 
 // Notifications are not saved to DB
