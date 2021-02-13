@@ -25,6 +25,7 @@ roomSchema.pre('save', { document: true, query: false }, function (next) {
 
 roomSchema.methods.validateUser = async function (email, username) {
     try {
+        // valid if both email and username are unique in room
         return this.users.some((user) => user.email === email) || this.users.some((user) => user.username === username)
             ? false
             : true;
@@ -33,8 +34,8 @@ roomSchema.methods.validateUser = async function (email, username) {
     }
 };
 
-roomSchema.methods.deleteIfInactive = async function (activity) {
-    const isActive = await this.model('Room').isRoomActive(this, activity);
+roomSchema.methods.deleteIfInactive = async function (event) {
+    const isActive = await this.model('Room').isRoomStillActive(this, event);
 
     if (!isActive) return await this.deleteOne();
 };
@@ -82,9 +83,9 @@ roomSchema.statics.getActiveRooms = function (callback) {
                 if (error) throw new Error(error);
 
                 const activeRooms = rooms.reduce((filtered, room) => {
+                    // room is active if it has online users
                     if (room.users.length > 0) {
                         filtered.push(room.name);
-                        // filtered.push(room);
                     }
 
                     return filtered;
@@ -97,7 +98,8 @@ roomSchema.statics.getActiveRooms = function (callback) {
     }
 };
 
-roomSchema.statics.isRoomActive = async function (room, activity) {
+// used for housekeeping - DB cleanup upon server start or when a user leaves room
+roomSchema.statics.isRoomStillActive = async function (room, event) {
     try {
         const myRoom = await room
             .populate({
@@ -109,17 +111,13 @@ roomSchema.statics.isRoomActive = async function (room, activity) {
             })
             .execPopulate();
 
-        // console.log(myRoom.users);
-        // console.log(myRoom.messages);
-
         let isActive = myRoom.messages.length > 0;
 
-        if (activity === 'disconnect' && !isActive) {
+        if (event === 'disconnect' && !isActive) {
             // check if there is another user in room
             // (apart from the one who just disconnected which represents users[0])
             isActive = myRoom.users.length > 1;
         }
-        // console.log(`${room.name} is active: ${isActive}`);
 
         return isActive;
     } catch (error) {
@@ -127,7 +125,6 @@ roomSchema.statics.isRoomActive = async function (room, activity) {
     }
 };
 
-// used to create virtual properties --> not saved in Db
 roomSchema.virtual('users', {
     ref: 'User',
     localField: '_id',

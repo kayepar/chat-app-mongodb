@@ -2,7 +2,7 @@ const io = require('socket.io-client');
 const qs = require('qs');
 const moment = require('moment');
 
-const { autoscroll, removeTypingIndicatorMsg } = require('./chat-utils');
+const { autoscroll, displayMessage, removeTypingIndicatorMsg } = require('./chat-utils');
 const { getActiveRooms } = require('../common/common-fetch');
 const { registerHbsHelper, displayData, displayAsList } = require('../common/common-utils');
 
@@ -26,25 +26,6 @@ $(document).ready(function () {
         } catch (error) {
             console.log(`Error: ${error.message}`);
         }
-    };
-
-    const displayMessage = (message) => {
-        const rawTimestamp = message.createdAt;
-        const type = message.sender.email === email ? 'sent' : 'received';
-
-        message['type'] = type;
-        message['createdAt'] = moment(message.createdAt).format('MM-D h:mm a');
-        message['id'] = `${message.sender.username}-${rawTimestamp}-msg-div`;
-
-        displayData({
-            template: document.querySelector('#message-template'),
-            parent_element: document.querySelector('#messages-div'),
-            content: {
-                message,
-            },
-            position: 'beforeend',
-        });
-        autoscroll();
     };
 
     socket.emit(

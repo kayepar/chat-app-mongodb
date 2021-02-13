@@ -6,6 +6,7 @@ const { email, username } = qs.parse(location.search, {
     ignoreQueryPrefix: true,
 });
 
+// users/rooms collapse component - displayed
 $(document).on('show.bs.collapse', '#users-set2-div, #rooms-set2-div', function (e) {
     const list_set2_div = e.target;
     const collapse_link_div = list_set2_div.previousElementSibling;
@@ -16,6 +17,7 @@ $(document).on('show.bs.collapse', '#users-set2-div, #rooms-set2-div', function 
     collapse_link_div.remove();
 });
 
+// users/rooms collapse component - hidden
 $(document).on('hidden.bs.collapse', '#users-set2-div, #rooms-set2-div', function (e) {
     const list_set2_div = e.target;
     const list_set1_div = e.target.previousElementSibling;
@@ -40,10 +42,6 @@ $('#sidebar-toggler-2').on('click', function () {
 $('#sidebar-toggler-1, .overlay').on('click', function () {
     $('#sidebar-menu').removeClass('active');
     $('.overlay').removeClass('active');
-});
-
-document.querySelector('#exit-room-button').addEventListener('click', () => {
-    $('#exit-room-modal').modal('show');
 });
 
 document.querySelector('#sidebar-content').addEventListener('click', (e) => {
@@ -84,6 +82,10 @@ document.querySelector('#modal-checkbox-no-show').addEventListener('change', (e)
     } else {
         localStorage.removeItem('join-room-modal-checked');
     }
+});
+
+document.querySelector('#exit-room-button').addEventListener('click', () => {
+    $('#exit-room-modal').modal('show');
 });
 
 document.querySelector('#message-textbox').addEventListener('textInput', function (e) {
