@@ -23,12 +23,33 @@ roomSchema.pre('save', { document: true, query: false }, function (next) {
     next();
 });
 
-roomSchema.methods.validateUser = async function (email, username) {
+roomSchema.methods.validateUser = function (email, username) {
     try {
+        const results = this.validateUser2(email, username);
+        console.log(results);
         // valid if both email and username are unique in room
         return this.users.some((user) => user.email === email) || this.users.some((user) => user.username === username)
             ? false
             : true;
+    } catch (error) {
+        throw new Error(error);
+    }
+};
+
+roomSchema.methods.validateUser2 = function (email, username) {
+    const user = { email, username };
+    const duplicateFields = [];
+
+    try {
+        Object.keys(user).forEach((key) => {
+            const duplicate = this.users.some((dbUser) => dbUser[key] === user[key]);
+            if (duplicate) duplicateFields.push(key);
+        });
+
+        return {
+            valid: duplicateFields.length > 0 ? false : true,
+            duplicateFields,
+        };
     } catch (error) {
         throw new Error(error);
     }
