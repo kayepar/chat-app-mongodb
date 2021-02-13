@@ -6,7 +6,7 @@ router.get('/validateUser', async (req, res) => {
     try {
         const { email, username, room } = req.query;
         const chatRoom = await Room.findOne({ name: room });
-        const isValid = chatRoom ? await chatRoom.validateUser(email, username) : true;
+        const isValid = chatRoom ? chatRoom.validateUser(email, username) : true;
 
         res.status(200).send({
             isValid,
@@ -18,7 +18,7 @@ router.get('/validateUser', async (req, res) => {
     }
 });
 
-router.get('/getActiveRooms', async (req, res) => {
+router.get('/getActiveRooms', (req, res) => {
     try {
         Room.getActiveRooms((error, rooms) => {
             if (error) throw new Error(error);

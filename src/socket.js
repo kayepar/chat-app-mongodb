@@ -13,7 +13,7 @@ const chatSocket = (io) => {
         socket.on('join', async ({ email, username, room }, callback) => {
             try {
                 const chatRoom = await Room.createRoom(room);
-                const userValid = await chatRoom.validateUser(email, username);
+                const userValid = chatRoom.validateUser(email, username);
 
                 if (!userValid) return callback('Username/Email Address already in use.');
 
