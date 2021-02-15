@@ -1,11 +1,11 @@
-const isUserValid = async (email, username, room) => {
+const validateUser = async (email, username, room) => {
     const response = await fetch(`/validateUser?email=${email}&username=${username}&room=${room}`);
 
     if (!response.ok) throw new Error(`An error has occured: ${response.status}`);
 
-    const { isValid } = await response.json();
+    const { result } = await response.json();
 
-    return isValid;
+    return result;
 };
 
 const getActiveRooms = async () => {
@@ -19,6 +19,6 @@ const getActiveRooms = async () => {
 };
 
 module.exports = {
-    isUserValid,
+    validateUser,
     getActiveRooms,
 };

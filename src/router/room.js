@@ -6,10 +6,11 @@ router.get('/validateUser', async (req, res) => {
     try {
         const { email, username, room } = req.query;
         const chatRoom = await Room.findOne({ name: room });
-        const isValid = chatRoom ? chatRoom.validateUser(email, username) : true;
+        const result = chatRoom ? chatRoom.validateUser(email, username) : { valid: true, duplicateFields: [] };
 
+        console.log(result);
         res.status(200).send({
-            isValid,
+            result,
         });
     } catch (error) {
         res.status(400).send({

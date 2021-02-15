@@ -24,19 +24,6 @@ roomSchema.pre('save', { document: true, query: false }, function (next) {
 });
 
 roomSchema.methods.validateUser = function (email, username) {
-    try {
-        const results = this.validateUser2(email, username);
-        console.log(results);
-        // valid if both email and username are unique in room
-        return this.users.some((user) => user.email === email) || this.users.some((user) => user.username === username)
-            ? false
-            : true;
-    } catch (error) {
-        throw new Error(error);
-    }
-};
-
-roomSchema.methods.validateUser2 = function (email, username) {
     const user = { email, username };
     const duplicateFields = [];
 
@@ -119,6 +106,7 @@ roomSchema.statics.getActiveRooms = function (callback) {
     }
 };
 
+// todo: change this to a method
 // used for housekeeping - DB cleanup upon server start or when a user leaves room
 roomSchema.statics.isRoomStillActive = async function (room, event) {
     try {

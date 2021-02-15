@@ -1,13 +1,14 @@
 const {
     cleanseFields,
     cleanseField,
+    clearFeedbackMsgs,
     clearActiveStyle,
     setActiveRoom,
     showDuplicateRoomModal,
     isRoomExisting,
 } = require('./index-utils');
 
-const { isUserValid } = require('../common/common-fetch');
+const { validateUser } = require('../common/common-fetch');
 
 const form = document.querySelector('#chat-form');
 
@@ -16,8 +17,7 @@ form.addEventListener('submit', (e) => {
 
     // trim and transform to lowercase
     cleanseFields();
-    const username_feedback = document.querySelector('#username-feedback');
-    username_feedback.style.display = 'none';
+    clearFeedbackMsgs();
 
     // if form passed basic constraint checking
     if (form.checkValidity()) {
@@ -43,9 +43,16 @@ form.addEventListener('submit', (e) => {
                 }
             }
 
-            isUserValid(email, username, room_qs.value)
-                .then((isValid) => {
-                    isValid ? form.submit() : (username_feedback.style.display = 'block');
+            validateUser(email, username, room_qs.value)
+                .then((result) => {
+                    if (result.valid) {
+                        form.submit();
+                    } else {
+                        result.duplicateFields.forEach((field) => {
+                            const feedbackField = document.querySelector(`#${field}-feedback`);
+                            feedbackField.style.display = 'block';
+                        });
+                    }
                 })
                 .catch((error) => console.log(`Error: ${error.message}`));
         }
@@ -65,6 +72,12 @@ document.querySelector('#room-text').addEventListener('blur', function () {
 document.querySelector('#username-text').addEventListener('keyup', (event) => {
     if (event.key !== 'Enter') {
         document.querySelector('#username-feedback').style.display = 'none';
+    }
+});
+
+document.querySelector('#email-text').addEventListener('keyup', (event) => {
+    if (event.key !== 'Enter') {
+        document.querySelector('#email-feedback').style.display = 'none';
     }
 });
 
