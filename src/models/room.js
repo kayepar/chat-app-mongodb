@@ -43,9 +43,35 @@ roomSchema.methods.validateUser = function (email, username) {
 };
 
 roomSchema.methods.deleteIfInactive = async function (event) {
-    const isActive = await this.model('Room').isRoomStillActive(this, event);
+    const isActive = await this.isRoomStillActive(event);
 
     if (!isActive) return await this.deleteOne();
+};
+
+// used for housekeeping - DB cleanup upon server start or when a user leaves room
+roomSchema.methods.isRoomStillActive = async function (event) {
+    try {
+        const myRoom = await this.populate({
+            path: 'users',
+            select: 'username',
+        })
+            .populate({
+                path: 'messages',
+            })
+            .execPopulate();
+
+        let isActive = myRoom.messages.length > 0;
+
+        if (event === 'disconnect' && !isActive) {
+            // check if there is another user in room
+            // (apart from the one who just disconnected which represents users[0])
+            isActive = myRoom.users.length > 1;
+        }
+
+        return isActive;
+    } catch (error) {
+        throw new Error(error);
+    }
 };
 
 roomSchema.methods.getActiveUsers = async function () {
@@ -101,34 +127,6 @@ roomSchema.statics.getActiveRooms = function (callback) {
 
                 callback(null, activeRooms);
             });
-    } catch (error) {
-        throw new Error(error);
-    }
-};
-
-// todo: change this to a method
-// used for housekeeping - DB cleanup upon server start or when a user leaves room
-roomSchema.statics.isRoomStillActive = async function (room, event) {
-    try {
-        const myRoom = await room
-            .populate({
-                path: 'users',
-                select: 'username',
-            })
-            .populate({
-                path: 'messages',
-            })
-            .execPopulate();
-
-        let isActive = myRoom.messages.length > 0;
-
-        if (event === 'disconnect' && !isActive) {
-            // check if there is another user in room
-            // (apart from the one who just disconnected which represents users[0])
-            isActive = myRoom.users.length > 1;
-        }
-
-        return isActive;
     } catch (error) {
         throw new Error(error);
     }
