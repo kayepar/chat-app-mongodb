@@ -8,7 +8,6 @@ router.get('/validateUser', async (req, res) => {
         const chatRoom = await Room.findOne({ name: room });
         const result = chatRoom ? chatRoom.validateUser(email, username) : { valid: true, duplicateFields: [] };
 
-        console.log(result);
         res.status(200).send({
             result,
         });
@@ -28,18 +27,6 @@ router.get('/getActiveRooms', (req, res) => {
                 rooms,
             });
         });
-    } catch (error) {
-        res.status(400).send({
-            error: error.message,
-        });
-    }
-});
-
-router.get('/getMessages', async (req, res) => {
-    try {
-        const room = await Room.findOne({ name: req.query.room });
-        const messages = await room.getMessages();
-        console.log(messages);
     } catch (error) {
         res.status(400).send({
             error: error.message,

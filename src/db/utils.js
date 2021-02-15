@@ -14,8 +14,8 @@ const cleanupDb = async () => {
         );
 
         await User.deleteMany({});
-    } catch (e) {
-        console.log(e);
+    } catch (error) {
+        console.log(error);
     }
 };
 
