@@ -42,6 +42,14 @@ const cleanseField = (field) => {
     field.value = value;
 };
 
+const clearFeedbackMsgs = () => {
+    const fields = ['email', 'username'];
+
+    fields.forEach((field) => {
+        document.querySelector(`#${field}-feedback`).style.display = 'none';
+    });
+};
+
 const clearActiveStyle = () => {
     const items = document.querySelectorAll('.dropdown-item');
 
@@ -84,6 +92,7 @@ module.exports = {
     isRoomExisting,
     cleanseFields,
     cleanseField,
+    clearFeedbackMsgs,
     clearActiveStyle,
     setActiveRoom,
     showDuplicateRoomModal,
