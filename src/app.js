@@ -29,6 +29,10 @@ app.use(express.json());
 app.use(morgan('dev'));
 app.use(roomRouter);
 
+app.use((req, res, next) => {
+    res.status(404).send({ error: 'Page not found' });
+});
+
 dbUtils.cleanupDb();
 require('./socket')(io);
 
