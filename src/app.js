@@ -30,9 +30,7 @@ app.use(morgan('dev'));
 app.use(roomRouter);
 
 app.use((req, res, next) => {
-    // todo: create a separate page
     res.status(404).sendFile(path.join(__dirname, '../dist/404.html'));
-    // next();
 });
 
 // todo: add 500 error handler

@@ -1,0 +1,12 @@
+<!-- helpers come from handlebars-layouts package, which is included in parcel-plugin-handlebars -->
+{{#extend "main"}}
+    {{#content "styles" mode="prepend"}}
+       <link rel="stylesheet" href="../../public/css/styles.css">
+    {{/content}}
+
+    {{#content "content"}}
+        <div class="container-fluid h-50 d-flex justify-content-center pt5">
+            <h3 class="my-auto">Page not found</h3>
+        </div>
+    {{/content}}
+{{/extend}}
