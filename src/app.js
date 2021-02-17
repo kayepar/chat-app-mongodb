@@ -30,8 +30,12 @@ app.use(morgan('dev'));
 app.use(roomRouter);
 
 app.use((req, res, next) => {
-    res.status(404).send({ error: 'Page not found' });
+    // todo: create a separate page
+    res.status(404).sendFile(path.join(__dirname, '../dist/404.html'));
+    // next();
 });
+
+// todo: add 500 error handler
 
 dbUtils.cleanupDb();
 require('./socket')(io);
