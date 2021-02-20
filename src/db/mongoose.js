@@ -8,4 +8,4 @@ mongoose
         useUnifiedTopology: true,
         useFindAndModify: false,
     })
-    .catch((error) => console.log('DB error encountered', error));
+    .catch((error) => console.log('DB error encountered:', error));
