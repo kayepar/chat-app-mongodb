@@ -30,10 +30,14 @@ app.use(morgan('dev'));
 app.use(roomRouter);
 
 app.use((req, res, next) => {
-    res.status(404).sendFile(path.join(__dirname, '../dist/404.html'));
+    res.test = 'callie';
+    // res.status(404).sendFile(path.join(__dirname, '../dist/404.html'));
+    res.render('404');
 });
 
-// todo: add 500 error handler
+app.use(function (err, req, res, next) {
+    res.status(400).send({ error: err.message });
+});
 
 dbUtils.cleanupDb();
 require('./socket')(io);
