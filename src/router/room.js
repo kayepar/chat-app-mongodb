@@ -2,9 +2,14 @@ const express = require('express');
 const router = new express.Router();
 const Room = require('../models/room');
 
-router.get('/validateUser', async (req, res) => {
+router.get('/validateUser', async (req, res, next) => {
     try {
         const { email, username, room } = req.query;
+
+        if (!email || !username || !room) {
+            throw new Error('Incomplete input');
+        }
+
         const chatRoom = await Room.findOne({ name: room });
         const result = chatRoom ? chatRoom.validateUser(email, username) : { valid: true, duplicateFields: [] };
 
@@ -12,13 +17,11 @@ router.get('/validateUser', async (req, res) => {
             result,
         });
     } catch (error) {
-        res.status(400).send({
-            error: error.message,
-        });
+        return next(error);
     }
 });
 
-router.get('/getActiveRooms', (req, res) => {
+router.get('/getActiveRooms', (req, res, next) => {
     try {
         Room.getActiveRooms((error, rooms) => {
             if (error) throw new Error(error);
@@ -28,9 +31,7 @@ router.get('/getActiveRooms', (req, res) => {
             });
         });
     } catch (error) {
-        res.status(400).send({
-            error: error.message,
-        });
+        return next(error);
     }
 });
 
