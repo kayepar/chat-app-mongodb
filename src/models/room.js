@@ -114,7 +114,7 @@ roomSchema.statics.getActiveRooms = function (callback) {
         this.find({})
             .populate('users')
             .exec((error, rooms) => {
-                if (error) throw new Error(error);
+                if (error) callback(error);
 
                 const activeRooms = rooms.reduce((filtered, room) => {
                     // room is active if it has online users
@@ -128,6 +128,7 @@ roomSchema.statics.getActiveRooms = function (callback) {
                 callback(null, activeRooms);
             });
     } catch (error) {
+        console.log('error thrown');
         throw new Error(error);
     }
 };
