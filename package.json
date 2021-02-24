@@ -2,14 +2,14 @@
     "name": "express-hbs-starter-project",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
+    "main": "server.js",
     "scripts": {
-        "start": "node src/index.js",
+        "start": "node src/server.js",
         "parcel-watch": "parcel watch templates/views/*.hbs --no-cache",
         "parcel-dev": "concurrently -k \"npm run parcel-watch\" \"npm run dev\"",
-        "parcel-build": "parcel build templates/views/*.hbs --no-cache",
+        "parcel-build": "parcel build --public-url . views/*.hbs",
         "heroku-postbuild": "npm run parcel-build",
-        "dev": "env-cmd -f ./config/dev.env nodemon src/index.js -e js, hbs",
+        "dev": "env-cmd -f ./config/dev.env nodemon src/server.js -e js, hbs",
         "test": "jest --runInBand --detectOpenHandles --coverage --watchAll --no-cache",
         "test:e2e": "jest --config jest.e2e.config.js --runInBand --detectOpenHandles --watchAll --no-cache",
         "lint": "eslint ./"
