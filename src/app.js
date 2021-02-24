@@ -8,6 +8,7 @@ require('./db/mongoose');
 
 const roomRouter = require('./router/room');
 const dbUtils = require('./db/utils');
+const CustomError = require('./error/CustomError');
 
 const app = express();
 const server = http.createServer(app);
@@ -30,13 +31,19 @@ app.use(morgan('dev'));
 app.use(roomRouter);
 
 app.use((req, res, next) => {
-    res.test = 'callie';
-    // res.status(404).sendFile(path.join(__dirname, '../dist/404.html'));
-    res.render('404');
+    next(new CustomError('Page not found', 404));
 });
 
-app.use(function (err, req, res, next) {
-    res.status(400).send({ error: err.message });
+app.use((err, req, res, next) => {
+    const postscript =
+        err.status === 500 ? 'Administrator has already been notified. Please check back again later.' : '';
+
+    res.status(err.status);
+    res.render('customError', {
+        layout: 'error',
+        message: err.message,
+        postscript,
+    });
 });
 
 dbUtils.cleanupDb();

@@ -54,7 +54,11 @@ form.addEventListener('submit', (e) => {
                         });
                     }
                 })
-                .catch((error) => console.log(`Error: ${error.message}`));
+                .catch((error) => {
+                    console.log(`Error: ${error.message}`);
+                    // todo: send email?
+                    window.location.href = '500.html';
+                });
         }
     }
     form.classList.add('was-validated');
