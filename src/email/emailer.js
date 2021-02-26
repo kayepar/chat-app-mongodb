@@ -8,20 +8,20 @@ const transporter = nodemailer.createTransport({
         user: process.env.EMAIL_ACCOUNT,
         pass: process.env.EMAIL_PASSWORD,
     },
-    secure: true, // upgrades later with STARTTLS -- change this based on the PORT
+    secure: true,
 });
 
-const emailDetails = {
-    from: process.env.EMAIL_ACCOUNT,
-    to: process.env.EMAIL_ADMIN_ACCOUNT,
-    subject: 'myChat: Critical Error encountered',
-    text: 'test',
-    html: '<h1>hi</h1>',
-};
+const sendEmail = ({ cause, stack }) => {
+    const emailDetails = {
+        from: process.env.EMAIL_ACCOUNT,
+        to: process.env.EMAIL_ADMIN_ACCOUNT,
+        subject: 'myChat: Critical Error encountered',
+        text: `Please check below error: \n\n Cause: \n ${cause} \n\n Custom Stack: \n ${stack}`,
+    };
 
-const sendEmail = () => {
+    // console.log(`stack from emailer: ${stack}`);
     transporter.sendMail(emailDetails, (error, info) => {
-        if (error) return new CustomError('Failed to send email', 500);
+        if (error) return new CustomError('Failed to send email', error.stack, 500);
 
         return info.messageId;
     });

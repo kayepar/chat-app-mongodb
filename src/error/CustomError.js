@@ -1,10 +1,18 @@
+const emailer = require('../email/emailer');
+
 class CustomError extends Error {
-    constructor(message, status) {
+    constructor(message, cause, status = 500, sendEmail = false) {
         super(message);
-
         this.name = this.constructor.name;
+        this.status = status;
+        this.cause = cause;
+        Error.captureStackTrace(this, this.constructor);
 
-        this.status = status || 500;
+        // console.log(`customerror cause: ${this.cause}`);
+        // console.log(`customerror stack: ${this.stack}`);
+        if (sendEmail) {
+            emailer.sendEmail(this);
+        }
     }
 }
 
