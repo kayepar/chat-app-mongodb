@@ -4,9 +4,15 @@ const User = require('./models/user');
 const Room = require('./models/room');
 const Message = require('./models/message');
 
+const CustomError = require('./error/CustomError');
+// test todos:
 // todo: change focus on e2e test - should be email
-// todo: tests - feedback error messages
+// todo: feedback error messages for email
 // todo: fixtures in unit tests
+// todo: re-login to show saved messages
+
+// todo: add logger - winston
+// todo: add emailer
 
 const chatSocket = (io) => {
     io.on('connection', (socket) => {
@@ -53,7 +59,8 @@ const chatSocket = (io) => {
                 // todo: fix error message - always saying duplicates (modal)
                 console.log('try catch');
                 console.log(error);
-                // return callback(error);
+
+                new CustomError(`Socket 'join' error`, error.stack, 500, true);
             }
         });
 
@@ -71,6 +78,7 @@ const chatSocket = (io) => {
                 callback();
             } catch (error) {
                 console.log(error);
+                new CustomError(`Socket 'sendMessage' error`, error.stack, 500, true);
             }
         });
 
@@ -86,6 +94,7 @@ const chatSocket = (io) => {
                 callback();
             } catch (error) {
                 console.log(error);
+                new CustomError(`Socket 'typing' error`, error.stack, 500, true);
             }
         });
 
@@ -120,6 +129,7 @@ const chatSocket = (io) => {
                 }
             } catch (error) {
                 console.log(error);
+                new CustomError(`Socket 'disconnect' error`, error.stack, 500, true);
             }
         });
     });
