@@ -5,6 +5,8 @@ const Room = require('./models/room');
 const Message = require('./models/message');
 
 const CustomError = require('./error/CustomError');
+const logger = require('./utilities/logger');
+
 // test todos:
 // todo: change focus on e2e test - should be email
 // todo: feedback error messages for email
@@ -29,7 +31,7 @@ const chatSocket = (io) => {
                     username,
                     chatroom: chatRoom._id,
                 });
-                console.log(`${user.username} joined`);
+                logger.info(`${user.username} joined`);
 
                 socket.join(room);
 
@@ -56,10 +58,7 @@ const chatSocket = (io) => {
 
                 callback();
             } catch (error) {
-                // todo: fix error message - always saying duplicates (modal)
-                console.log('try catch');
-                console.log(error);
-
+                logger.error(error);
                 new CustomError(`Socket 'join' error`, error.stack, 500, true);
             }
         });
@@ -77,7 +76,7 @@ const chatSocket = (io) => {
 
                 callback();
             } catch (error) {
-                console.log(error);
+                logger.error(error);
                 new CustomError(`Socket 'sendMessage' error`, error.stack, 500, true);
             }
         });
@@ -93,7 +92,7 @@ const chatSocket = (io) => {
                 }
                 callback();
             } catch (error) {
-                console.log(error);
+                logger.error(error);
                 new CustomError(`Socket 'typing' error`, error.stack, 500, true);
             }
         });
@@ -103,7 +102,7 @@ const chatSocket = (io) => {
                 const user = await User.findOne({ sessionId: socket.id });
 
                 if (user) {
-                    console.log(`${user.username} disconnected`);
+                    logger.info(`${user.username} disconnected`);
                     await user.deleteOne();
 
                     const room = user.chatroom;
@@ -128,7 +127,7 @@ const chatSocket = (io) => {
                     });
                 }
             } catch (error) {
-                console.log(error);
+                logger.error(error);
                 new CustomError(`Socket 'disconnect' error`, error.stack, 500, true);
             }
         });

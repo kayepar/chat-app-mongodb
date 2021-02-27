@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const logger = require('../utilities/logger');
 
 // mongoose.connection.on('error', console.log.bind(console, 'connection refused !!!!!'));
 mongoose
@@ -8,4 +9,4 @@ mongoose
         useUnifiedTopology: true,
         useFindAndModify: false,
     })
-    .catch((error) => console.log('DB error encountered:', error));
+    .catch((error) => logger.error('DB error encountered:', error));

@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const Room = require('../models/room');
+const logger = require('../utilities/logger');
 
 // Utility that will delete all users and inactive rooms
 // Called when server is started
@@ -15,7 +16,7 @@ const cleanupDb = async () => {
 
         await User.deleteMany({});
     } catch (error) {
-        console.log(error);
+        logger.error(error);
     }
 };
 
