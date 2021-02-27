@@ -7,8 +7,7 @@ const morgan = require('morgan');
 require('./db/mongoose');
 
 const roomRouter = require('./router/room');
-const emailRouter = require('./router/email');
-const dbUtils = require('./db/utils');
+const dbUtils = require('./db/dbUtils');
 const CustomError = require('./error/CustomError');
 
 const app = express();
@@ -30,7 +29,6 @@ app.use(express.static(path.join(__dirname, '../dist')));
 app.use(express.json());
 app.use(morgan('dev'));
 app.use(roomRouter);
-app.use(emailRouter);
 
 app.use((req, res, next) => {
     next(new CustomError('Page not found', 'Resource unavailable', 404));
@@ -39,7 +37,7 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
     // console.log(`middleware stack: ${err.stack}`);
     const postscript =
-        err.status === 500 ? 'Administrator has already been notified. Please check back again later.' : '';
+        err.status === 500 ? 'The administrator has already been notified. Please check back again later.' : '';
 
     res.status(err.status);
     res.render('customError', {
