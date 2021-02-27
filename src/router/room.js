@@ -14,11 +14,9 @@ router.get('/validateUser', async (req, res, next) => {
         const chatRoom = await Room.findOne({ name: room });
         const result = chatRoom ? chatRoom.validateUser(email, username) : { valid: true, duplicateFields: [] };
 
-        // res.status(200).send({
-        //     result,
-        // });
-
-        res.status(200).send(result());
+        res.status(200).send({
+            result,
+        });
     } catch (error) {
         if (!(error instanceof CustomError)) {
             return next(new CustomError('Something went wrong', error.stack, 500, true));
