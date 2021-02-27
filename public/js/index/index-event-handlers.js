@@ -55,8 +55,7 @@ form.addEventListener('submit', (e) => {
                     }
                 })
                 .catch((error) => {
-                    console.log(`Error: ${error.message}`);
-                    // todo: send email?
+                    console.log(`Error: ${error}`);
                     window.location.href = '500.html';
                 });
         }
