@@ -9,6 +9,7 @@ require('./db/mongoose');
 const roomRouter = require('./router/room');
 const dbUtils = require('./db/dbUtils');
 const CustomError = require('./error/CustomError');
+const logger = require('./utilities/logger');
 
 const app = express();
 const server = http.createServer(app);
@@ -34,8 +35,10 @@ app.use((req, res, next) => {
     next(new CustomError('Page not found', 'Resource unavailable', 404));
 });
 
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-    // console.log(`middleware stack: ${err.stack}`);
+    logger.error(err);
+
     const postscript =
         err.status === 500 ? 'The administrator has already been notified. Please check back again later.' : '';
 

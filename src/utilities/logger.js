@@ -4,16 +4,19 @@ const { format } = require('logform');
 let options = {
     console: {
         format: format.combine(
-            format.simple(),
             format.colorize(),
-            // format.metadata(),
-
+            format.metadata(),
             format.timestamp(),
-            format.errors({ stack: true })
+            format.prettyPrint(),
+            format.printf(({ level, message, timestamp, metadata }) => {
+                // eslint-disable-next-line no-prototype-builtins
+                if (metadata.metadata.hasOwnProperty('stack')) {
+                    return `${timestamp} ${level}: ${message} - ${metadata.metadata.status} ${metadata.metadata.cause} - ${metadata.metadata.stack}`;
+                }
 
-            // format.printf((info) => `${info.timestamp} ${info.level}: ${info.message}`)
+                return `${timestamp} ${level}: ${message}`;
+            })
         ),
-        level: 'info',
         handleExceptions: true,
         json: false,
         colorize: true,
@@ -34,7 +37,7 @@ const loggerFormat = format.combine(
 );
 
 const logger = winston.createLogger({
-    // level: 'info',
+    level: 'info',
     format: loggerFormat,
     transports: [new winston.transports.File(options.file), new winston.transports.Console(options.console)],
 });
