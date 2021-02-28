@@ -28,7 +28,7 @@ app.engine(
 // setup static directory to serve
 app.use(express.static(path.join(__dirname, '../dist')));
 app.use(express.json());
-app.use(morgan('dev'));
+app.use(morgan('dev', { stream: logger.stream }));
 app.use(roomRouter);
 
 app.use((req, res, next) => {
