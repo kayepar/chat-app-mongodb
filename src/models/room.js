@@ -128,7 +128,6 @@ roomSchema.statics.getActiveRooms = function (callback) {
                 callback(null, activeRooms);
             });
     } catch (error) {
-        console.log('error thrown');
         throw new Error(error);
     }
 };
