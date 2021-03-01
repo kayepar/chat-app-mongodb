@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const CustomError = require('../error/CustomError');
 
 const roomSchema = new mongoose.Schema({
     name: {
@@ -24,6 +25,8 @@ roomSchema.pre('save', { document: true, query: false }, function (next) {
 });
 
 roomSchema.methods.validateUser = function (email, username) {
+    if (!email || !username) throw new CustomError('Invalid request', 'Missing input', 400);
+
     const user = { email, username };
     const duplicateFields = [];
 
@@ -38,7 +41,7 @@ roomSchema.methods.validateUser = function (email, username) {
             duplicateFields,
         };
     } catch (error) {
-        throw new Error(error);
+        throw new CustomError('Invalid request', 'Validation Error', 400);
     }
 };
 
