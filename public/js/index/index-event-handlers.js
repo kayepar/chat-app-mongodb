@@ -44,11 +44,11 @@ form.addEventListener('submit', (e) => {
             }
 
             validateUser(email, username, room_qs.value)
-                .then((result) => {
-                    if (result.valid) {
+                .then((user) => {
+                    if (user.isAllowed) {
                         form.submit();
                     } else {
-                        result.duplicateFields.forEach((field) => {
+                        user.duplicateFields.forEach((field) => {
                             const feedbackField = document.querySelector(`#${field}-feedback`);
                             feedbackField.style.display = 'block';
                         });
