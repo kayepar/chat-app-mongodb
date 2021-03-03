@@ -1,20 +1,24 @@
 const { getActiveRooms } = require('../common/common-fetch');
 const { displayData } = require('../common/common-utils');
 
+const displayAvailableRooms = async () => {
+    const rooms = await getAvailableRooms();
+    console.log(rooms);
+    if (rooms.length > 0) {
+        displayData({
+            template: document.querySelector('#active-rooms-template'),
+            parent_element: document.querySelector('#room-div'),
+            content: {
+                rooms,
+            },
+            position: 'afterend',
+        });
+    }
+};
+
 const getAvailableRooms = async () => {
     try {
-        const rooms = await getActiveRooms();
-
-        if (rooms.length > 0) {
-            displayData({
-                template: document.querySelector('#active-rooms-template'),
-                parent_element: document.querySelector('#room-div'),
-                content: {
-                    rooms,
-                },
-                position: 'afterend',
-            });
-        }
+        return await getActiveRooms();
     } catch (error) {
         console.log(`Error: ${error.message}`);
     }
@@ -50,20 +54,9 @@ const clearFeedbackMsgs = () => {
     });
 };
 
-const clearActiveStyle = () => {
-    const items = document.querySelectorAll('.dropdown-item');
-
-    items.forEach((item) => item.classList.remove('active-room'));
-};
-
 const setActiveRoom = (name, selectedItem) => {
     clearActiveStyle();
-
-    document.querySelector('#active-room-text').textContent = name;
-
-    const room_text = document.querySelector('#room-text');
-    room_text.value = '';
-    room_text.removeAttribute('required');
+    setRoomInputBox();
 
     // add cyan background
     if (selectedItem) {
@@ -81,6 +74,21 @@ const setActiveRoom = (name, selectedItem) => {
     }
 };
 
+const clearActiveStyle = () => {
+    const items = document.querySelectorAll('.dropdown-item');
+
+    // todo: change loop - should only remove first match
+    items.forEach((item) => item.classList.remove('active-room'));
+};
+
+const setRoomInputBox = (name) => {
+    document.querySelector('#active-room-text').textContent = name;
+
+    const room_text = document.querySelector('#room-text');
+    room_text.value = '';
+    room_text.removeAttribute('required');
+};
+
 const showDuplicateRoomModal = (room) => {
     $('#duplicate-room-modal').modal('show', {
         room: room,
@@ -88,12 +96,12 @@ const showDuplicateRoomModal = (room) => {
 };
 
 module.exports = {
-    getAvailableRooms,
+    displayAvailableRooms,
     isRoomExisting,
     cleanseFields,
     cleanseField,
     clearFeedbackMsgs,
-    clearActiveStyle,
     setActiveRoom,
+    clearActiveStyle,
     showDuplicateRoomModal,
 };

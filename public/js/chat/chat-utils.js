@@ -49,13 +49,8 @@ const toggleCollapseLinkText = (parentElement) => {
     }
 };
 
-const displayMessage = (message) => {
-    const rawTimestamp = message.createdAt;
-    const type = message.sender.email === email ? 'sent' : 'received';
-
-    message['type'] = type;
-    message['createdAt'] = moment(message.createdAt).format('MM-D h:mm a');
-    message['id'] = `${message.sender.username}-${rawTimestamp}-msg-div`;
+const displayMessage = (tempMessage) => {
+    const message = constructFinalMessage(tempMessage);
 
     displayData({
         template: document.querySelector('#message-template'),
@@ -67,6 +62,17 @@ const displayMessage = (message) => {
     });
 
     autoscroll();
+};
+
+const constructFinalMessage = (message) => {
+    const rawTimestamp = message.createdAt;
+    const type = message.sender.email === email ? 'sent' : 'received';
+
+    message['type'] = type;
+    message['createdAt'] = moment(message.createdAt).format('MM-D h:mm a');
+    message['id'] = `${message.sender.username}-${rawTimestamp}-msg-div`;
+
+    return message;
 };
 
 const removeTypingIndicatorMsg = (username) => {
