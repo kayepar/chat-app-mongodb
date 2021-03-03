@@ -24,10 +24,24 @@ roomSchema.pre('save', { document: true, query: false }, function (next) {
     next();
 });
 
-roomSchema.methods.validateUser = function (email, username) {
+roomSchema.methods.isUserAllowedToJoin = function (email, username) {
     if (!email || !username) throw new CustomError('Invalid request', 'Missing input', 400);
 
     const user = { email, username };
+
+    try {
+        const duplicateFields = this.checkDuplicateCredentials(user);
+
+        return {
+            isAllowed: duplicateFields.length > 0 ? false : true,
+            duplicateFields,
+        };
+    } catch (error) {
+        throw new CustomError('Invalid request', 'Validation Error', 400);
+    }
+};
+
+roomSchema.methods.checkDuplicateCredentials = function (user) {
     const duplicateFields = [];
 
     try {
@@ -35,14 +49,10 @@ roomSchema.methods.validateUser = function (email, username) {
             const duplicate = this.users.some((dbUser) => dbUser[key] === user[key]);
             if (duplicate) duplicateFields.push(key);
         });
-
-        return {
-            valid: duplicateFields.length > 0 ? false : true,
-            duplicateFields,
-        };
     } catch (error) {
-        throw new CustomError('Invalid request', 'Validation Error', 400);
+        throw new Error(error);
     }
+    return duplicateFields;
 };
 
 roomSchema.methods.deleteIfInactive = async function (event) {
@@ -100,12 +110,10 @@ roomSchema.methods.getMessages = async function () {
 roomSchema.statics.createRoom = async function (name) {
     try {
         return await this.create({ name }).then(null, async (error) => {
-            if (error.code === 11000) {
-                // if duplicate, return existing
-                return await Room.findOne({ name });
-            } else {
-                throw new Error(error);
-            }
+            if (error.code !== 11000) throw new Error(error);
+
+            // if duplicate (code 11000), return existing
+            return await Room.findOne({ name });
         });
     } catch (error) {
         throw new Error(error);

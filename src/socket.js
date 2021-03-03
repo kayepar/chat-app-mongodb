@@ -12,18 +12,19 @@ const logger = require('./utilities/logger');
 // todo: feedback error messages for email
 // todo: fixtures in unit tests
 // todo: re-login to show saved messages
-
-// todo: add logger - winston
-// todo: add emailer
+// todo: customerror - accept object instead?
 
 const chatSocket = (io) => {
     io.on('connection', (socket) => {
         socket.on('join', async ({ email, username, room }, callback) => {
             try {
                 const chatRoom = await Room.createRoom(room);
-                const result = chatRoom.validateUser(email, username);
+                const result = chatRoom.isUserAllowedToJoin(email, username);
 
-                if (!result.valid) return callback('Username/Email Address already in use.');
+                logger.info(result.isAllowed);
+                if (!result.isAllowed)
+                    // todo: just throw this
+                    return callback(new CustomError('Invalid request', 'Username/Email Address already in use', 400));
 
                 const user = await User.create({
                     sessionId: socket.id,
@@ -58,6 +59,9 @@ const chatSocket = (io) => {
 
                 callback();
             } catch (error) {
+                // todo: handle all errors(should be CustomError) here and call callback(error)
+                // todo: should not send email
+                logger.info('try catch');
                 logger.error(error);
                 new CustomError(`Socket 'join' error`, error.stack, 500, true);
             }
