@@ -10,7 +10,8 @@ document.querySelector('#modal-yes-button').addEventListener('click', () => {
 });
 
 const overrideRoomName = () => {
-    setActiveRoom(document.querySelector('#room-text').value, undefined);
+    // get room value from room textbox
+    setActiveRoom(document.querySelector('#room-text').value);
 
     $('#duplicate-room-modal').modal('hide');
     document.querySelector('#start-button').focus();

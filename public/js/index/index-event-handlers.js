@@ -6,13 +6,14 @@ const {
     setActiveRoom,
     showDuplicateRoomModal,
     isRoomExisting,
+    getSelectedRoom,
 } = require('./index-utils');
 
 const { validateUser } = require('../common/common-fetch');
 
 const form = document.querySelector('#chat-form');
 
-form.addEventListener('submit', (e) => {
+form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     // trim and transform to lowercase
@@ -26,38 +27,28 @@ form.addEventListener('submit', (e) => {
         const username = document.querySelector('#username-text').value;
         const email = document.querySelector('#email-text').value;
 
-        // check if room name already exists
         if (isRoomExisting(room)) {
             e.preventDefault();
             showDuplicateRoomModal(room);
         } else {
-            // set room query string - default value coming from room textbox
-            room_qs.value = room;
+            // set room query string - get from dropdown list or from room textbox (default)
+            room_qs.value = getSelectedRoom() || room;
 
-            // but if an active room is selected...
-            if (document.querySelector('#active-room-text')) {
-                const selected_item = document.querySelector('#active-room-text').textContent;
-                // set the "room" qs to that instead
-                if (selected_item !== 'Join an active room') {
-                    room_qs.value = selected_item;
+            try {
+                const user = await validateUser(email, username, room_qs.value);
+
+                if (user.isAllowed) {
+                    form.submit();
+                } else {
+                    user.duplicateFields.forEach((field) => {
+                        const feedbackField = document.querySelector(`#${field}-feedback`);
+                        feedbackField.style.display = 'block';
+                    });
                 }
+            } catch (error) {
+                console.log(`Error: ${error}`);
+                window.location.href = '500.html';
             }
-
-            validateUser(email, username, room_qs.value)
-                .then((user) => {
-                    if (user.isAllowed) {
-                        form.submit();
-                    } else {
-                        user.duplicateFields.forEach((field) => {
-                            const feedbackField = document.querySelector(`#${field}-feedback`);
-                            feedbackField.style.display = 'block';
-                        });
-                    }
-                })
-                .catch((error) => {
-                    console.log(`Error: ${error}`);
-                    window.location.href = '500.html';
-                });
         }
     }
     form.classList.add('was-validated');
@@ -88,7 +79,7 @@ form.addEventListener('click', (e) => {
     // Note: implemented event delegation here since the active rooms dropdown is dynamically added to the DOM.
     // Can't assume that it's there all the time, thus, we cannot attach an event to its items.
 
-    // active rooms dropdown
+    // active rooms dropdown - changed selected item
     if (e.target.className.includes('dropdown-item')) {
         clearActiveStyle();
         const selectedItem = e.target;

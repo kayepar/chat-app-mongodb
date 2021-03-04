@@ -3,7 +3,7 @@ const { displayData } = require('../common/common-utils');
 
 const displayAvailableRooms = async () => {
     const rooms = await getAvailableRooms();
-    console.log(rooms);
+
     if (rooms.length > 0) {
         displayData({
             template: document.querySelector('#active-rooms-template'),
@@ -34,6 +34,16 @@ const isRoomExisting = (room) => {
     return rooms.includes(room);
 };
 
+const getSelectedRoom = () => {
+    if (!document.querySelector('#active-room-text')) return;
+
+    const selected_item = document.querySelector('#active-room-text').textContent;
+
+    if (selected_item === 'Join an active room') return;
+
+    return selected_item;
+};
+
 const cleanseFields = () => {
     const input_fields = document.querySelectorAll('input[type=text]');
 
@@ -54,36 +64,31 @@ const clearFeedbackMsgs = () => {
     });
 };
 
-const setActiveRoom = (name, selectedItem) => {
+const setActiveRoom = (name, selectedItem = undefined) => {
     clearActiveStyle();
-    setRoomInputBox();
+    clearRoomInputBox();
 
-    // add cyan background
-    if (selectedItem) {
-        selectedItem.classList.add('active-room');
-    } else {
-        // with confirmation coming from modal window
+    document.querySelector('#active-room-text').textContent = name;
+
+    // coming from modal window
+    if (!selectedItem) {
         const items = document.querySelectorAll('.dropdown-item');
 
         // find the room name from the dropdown
-        items.forEach((item) => {
-            if (item.text === name) {
-                item.classList.add('active-room');
-            }
-        });
+        selectedItem = Array.from(items).find((item) => item.text === name);
     }
+    // add cyan background
+    selectedItem.classList.add('active-room');
 };
 
 const clearActiveStyle = () => {
     const items = document.querySelectorAll('.dropdown-item');
+    const activeItem = Array.from(items).find((item) => item.classList.contains('active-room'));
 
-    // todo: change loop - should only remove first match
-    items.forEach((item) => item.classList.remove('active-room'));
+    if (activeItem) activeItem.classList.remove('active-room');
 };
 
-const setRoomInputBox = (name) => {
-    document.querySelector('#active-room-text').textContent = name;
-
+const clearRoomInputBox = () => {
     const room_text = document.querySelector('#room-text');
     room_text.value = '';
     room_text.removeAttribute('required');
@@ -98,6 +103,7 @@ const showDuplicateRoomModal = (room) => {
 module.exports = {
     displayAvailableRooms,
     isRoomExisting,
+    getSelectedRoom,
     cleanseFields,
     cleanseField,
     clearFeedbackMsgs,
