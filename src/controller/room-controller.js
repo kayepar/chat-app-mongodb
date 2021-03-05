@@ -6,7 +6,7 @@ const validateUser = async (req, res, next) => {
         const { email, username, room } = req.query;
 
         if (!email || !username || !room) {
-            throw new CustomError('Invalid request', 'Missing input', 400);
+            throw new CustomError('Invalid request', 'Incomplete user details', 400);
         }
 
         const chatRoom = await Room.findOne({ name: room });
