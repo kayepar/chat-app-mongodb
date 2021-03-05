@@ -29,26 +29,12 @@ const displayData = ({ template, parent_element, content, position }) => {
 };
 
 const displayAsList = (list, type) => {
-    let items = [];
+    const items = getItemsFromList(list, type);
+    const targetNumOfItems = 5;
 
-    if (type === 'users') {
-        list.forEach((item) => {
-            const name = item.username === username ? `${item.username} (you)` : item.username;
-
-            items.push(name);
-        });
-    } else {
-        items = list;
-    }
-
-    // todo: delete! for testing purposes only
-    // for (let i = 0; i < 7; i++) {
-    //     items.push(`*${type.substring(0, type.length - 1)}-${i}`);
-    // }
-
-    if (items.length > 5) {
-        const set1 = items.slice(0, 5);
-        const set2 = items.slice(5, items.length);
+    if (items.length > targetNumOfItems) {
+        const set1 = items.slice(0, targetNumOfItems);
+        const set2 = items.slice(targetNumOfItems, items.length);
 
         displayData({
             template: document.querySelector('#more-items-template'),
@@ -69,6 +55,27 @@ const displayAsList = (list, type) => {
             },
         });
     }
+};
+
+const getItemsFromList = (list, type) => {
+    let items = [];
+
+    if (type === 'users') {
+        list.forEach((item) => {
+            const name = item.username === username ? `${item.username} (you)` : item.username;
+
+            items.push(name);
+        });
+    } else {
+        items = list;
+    }
+
+    // todo: delete! for testing purposes only
+    // for (let i = 0; i < 7; i++) {
+    //     items.push(`*${type.substring(0, type.length - 1)}-${i}`);
+    // }
+
+    return items;
 };
 
 const isMobile = function () {
