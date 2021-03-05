@@ -25,7 +25,7 @@ roomSchema.pre('save', { document: true, query: false }, function (next) {
 });
 
 roomSchema.methods.isUserAllowedToJoin = function (email, username) {
-    if (!email || !username) throw new CustomError('Invalid request', 'Missing input', 400);
+    if (!email || !username) throw new CustomError('Invalid request', 'Incomplete user details', 400);
 
     const user = { email, username };
 
