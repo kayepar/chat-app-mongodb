@@ -13,6 +13,7 @@ const logger = require('./utilities/logger');
 // todo: fixtures in unit tests
 // todo: re-login to show saved messages
 // todo: customerror - accept object instead?
+// todo: check - join another room from sidebar, then leave. the other room (the one you just left) becomes inactive (will go missing from the sidebar) --> can't replicate anymore
 
 const chatSocket = (io) => {
     io.on('connection', (socket) => {
@@ -21,10 +22,8 @@ const chatSocket = (io) => {
                 const chatRoom = await Room.createRoom(room);
                 const result = chatRoom.isUserAllowedToJoin(email, username);
 
-                logger.info(result.isAllowed);
                 if (!result.isAllowed)
-                    // todo: just throw this
-                    return callback(new CustomError('Invalid request', 'Username/Email Address already in use', 400));
+                    throw new CustomError('Invalid request', 'Username/Email address already in use', 400);
 
                 const user = await User.create({
                     sessionId: socket.id,
@@ -59,11 +58,12 @@ const chatSocket = (io) => {
 
                 callback();
             } catch (error) {
-                // todo: handle all errors(should be CustomError) here and call callback(error)
-                // todo: should not send email
-                logger.info('try catch');
-                logger.error(error);
-                new CustomError(`Socket 'join' error`, error.stack, 500, true);
+                if (error instanceof CustomError) {
+                    callback(error);
+                } else {
+                    logger.error(error);
+                    new CustomError(`Socket 'join' error`, error.stack, 500, true);
+                }
             }
         });
 
