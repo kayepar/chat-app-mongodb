@@ -184,19 +184,18 @@
                             </form>
                         </div>
 
-                        <div class="modal fade" data-backdrop="static" id="duplicate-name-modal" tabindex="-1" role="dialog">
+                         <div class="modal fade" data-backdrop="static" id="error-modal" tabindex="-1" role="dialog">
                             <div class="modal-dialog modal-dialog-centered" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title">Duplicate Credentials</h5>
+                                        <h5 class="modal-title" id="error-modal-title"></h5>
                                     </div>
                                     <div class="modal-body">
-                                        <span>Username/Email address already in use. Click OK button to return to login screen. </span>
+                                        <span id="error-modal-body"></span><span>. Click OK button to return to login screen. </span>
                                     </div>
                                     <div class="modal-footer">
                                         <form action="/">
-                                            {{!-- <button type="button" class="btn modal-no-button" data-dismiss="modal">No</button> --}}
-                                            <button type="submit" class="btn modal-yes-button" id="modal-duplicate-name-yes-button">OK</button>
+                                            <button type="submit" class="btn modal-yes-button" id="error-modal-yes-button">OK</button>
                                         </form>
                                     </div>
                                 </div>
@@ -239,13 +238,13 @@
                                     </div>
                                     <div class="modal-footer">
                                         <div class="mr-auto">
-                                            <input type="checkbox" id="modal-checkbox-no-show">
-                                            <label id="modal-label-no-show">Don't show me again</label>
+                                            <input type="checkbox" id="join-room-modal-checkbox-no-show">
+                                            <label id="join-room-modal-label-no-show">Don't show me again</label>
                                         </div>
                                         <form>
                                             <input type="hidden" name="chosen-room" id="chosen-room">
                                             <button type="button" class="btn modal-no-button" data-dismiss="modal">No</button>
-                                            <button type="button" class="btn modal-yes-button" id="modal-join-yes-button">Yes</button>
+                                            <button type="button" class="btn modal-yes-button" id="join-room-modal-yes-button">Yes</button>
                                         </form>
                                     </div>
                                 </div>
@@ -260,6 +259,7 @@
     {{#content "scripts" mode="prepend"}}
         <script src="../../public/js/chat/emoji.js"></script>
         <script src="../../public/js/chat/chat-event-handlers.js"></script>
+        <script src="../../public/js/chat/chat-modal.js"></script>
         <script src="../../public/js/chat/chat.js"></script>
     {{/content}}
 {{/extend}}  

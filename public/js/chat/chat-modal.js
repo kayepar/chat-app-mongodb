@@ -4,6 +4,12 @@ const { email, username } = qs.parse(location.search, {
     ignoreQueryPrefix: true,
 });
 
+// used to pass in the title and message to the error modal
+$('#error-modal').on('show.bs.modal', function (e) {
+    document.querySelector('#error-modal-title').textContent = e.relatedTarget.title;
+    document.querySelector('#error-modal-body').textContent = e.relatedTarget.message;
+});
+
 // modal for joining another room from the sidebar
 document.querySelector('#join-room-modal-yes-button').addEventListener('click', (e) => {
     e.preventDefault();

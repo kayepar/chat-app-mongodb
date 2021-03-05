@@ -1,6 +1,7 @@
 const io = require('socket.io-client');
 const qs = require('qs');
 const moment = require('moment');
+const CustomError = require('../../../src/error/CustomError');
 
 const { autoscroll, displayMessage, removeTypingIndicatorMsg } = require('./chat-utils');
 const { getActiveRooms } = require('../common/common-fetch');
@@ -24,6 +25,7 @@ $(document).ready(function () {
             const filteredRooms = allRooms.filter((activeRoom) => activeRoom !== room);
             displayAsList(filteredRooms, 'rooms');
         } catch (error) {
+            // todo: do something else with the error?
             console.log(`Error: ${error.message}`);
         }
     };
@@ -36,10 +38,20 @@ $(document).ready(function () {
             room,
         },
         (error) => {
-            // todo: handle other errors, probably customize message on modal window
             // todo: send email?
-            if (error) {
-                $('#duplicate-name-modal').modal('show');
+            console.log(error);
+            if (error.name === 'CustomError') {
+                if (error.status === 400) {
+                    const title =
+                        error.cause === 'Incomplete user details' ? 'Invalid Request' : 'Duplicate Credentials';
+                    const modalOptions = { title, message: error.cause };
+
+                    $('#error-modal').modal('show', modalOptions);
+                } else {
+                    // todo: test this!
+                    window.location.href = '500.html';
+                    d;
+                }
             }
         }
     );
@@ -68,9 +80,7 @@ $(document).ready(function () {
     });
 
     socket.on('typing', (message) => {
-        if (message.text === 'idle') {
-            return removeTypingIndicatorMsg(message.username);
-        }
+        if (message.text === 'idle') return removeTypingIndicatorMsg(message.username);
 
         message['type'] = 'received';
         message['createdAt'] = moment(message.createdAt).format('MM-D h:mm a');
