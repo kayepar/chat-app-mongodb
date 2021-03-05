@@ -2,10 +2,10 @@ const { setActiveRoom } = require('./index-utils');
 
 // used to pass in the name of the duplicate room
 $('#duplicate-room-modal').on('show.bs.modal', function (e) {
-    document.querySelector('#modal-duplicate-room').textContent = e.relatedTarget.room;
+    document.querySelector('#duplicate-room-modal-roomname').textContent = e.relatedTarget.room;
 });
 
-document.querySelector('#modal-yes-button').addEventListener('click', () => {
+document.querySelector('#duplicate-room-modal-yes-button').addEventListener('click', () => {
     overrideRoomName();
 });
 
@@ -17,7 +17,7 @@ const overrideRoomName = () => {
     document.querySelector('#start-button').focus();
 };
 
-document.querySelectorAll('#modal-no-button, #modal-x-button').forEach((button) => {
+document.querySelectorAll('#duplicate-room-modal-no-button, #duplicate-room-modal-x-button').forEach((button) => {
     button.addEventListener('click', () => {
         closeModalWindow();
     });
