@@ -40,16 +40,18 @@ $(document).ready(function () {
         (error) => {
             // todo: send email?
             console.log(error);
-            if (error.name === 'CustomError') {
-                if (error.status === 400) {
-                    const title =
-                        error.cause === 'Incomplete user details' ? 'Invalid Request' : 'Duplicate Credentials';
-                    const modalOptions = { title, message: error.cause };
+            if (error) {
+                if (error.name === 'CustomError') {
+                    if (error.status === 400) {
+                        const title =
+                            error.cause === 'Incomplete user details' ? 'Invalid Request' : 'Duplicate Credentials';
+                        const modalOptions = { title, message: error.cause };
 
-                    $('#error-modal').modal('show', modalOptions);
-                } else {
-                    // todo: test this!
-                    window.location.href = '500.html';
+                        $('#error-modal').modal('show', modalOptions);
+                    } else {
+                        // todo: test this!
+                        window.location.href = '500.html';
+                    }
                 }
             }
         }
