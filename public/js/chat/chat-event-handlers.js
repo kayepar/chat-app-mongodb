@@ -59,35 +59,7 @@ document.querySelector('#sidebar-content').addEventListener('click', (e) => {
     }
 });
 
-document.querySelector('#modal-join-yes-button').addEventListener('click', (e) => {
-    e.preventDefault();
-    // get selected room from hidden element
-    const chosenRoom = document.querySelector('#chosen-room').value;
-
-    window.open(`/chat.html?room=${chosenRoom}&email=${email}&username=${username}`, '_blank');
-    $('#join-room-modal').modal('hide');
-});
-
-document.querySelector('#modal-label-no-show').addEventListener('click', () => {
-    const checkbox = document.querySelector('#modal-checkbox-no-show');
-    checkbox.checked ? (checkbox.checked = false) : (checkbox.checked = true);
-    checkbox.dispatchEvent(new Event('change'));
-});
-
-document.querySelector('#modal-checkbox-no-show').addEventListener('change', (e) => {
-    e.stopPropagation();
-
-    if (e.currentTarget.checked) {
-        localStorage.setItem('join-room-modal-checked', true);
-    } else {
-        localStorage.removeItem('join-room-modal-checked');
-    }
-});
-
-document.querySelector('#exit-room-button').addEventListener('click', () => {
-    $('#exit-room-modal').modal('show');
-});
-
+// submit message on enter
 document.querySelector('#message-textbox').addEventListener('textInput', function (e) {
     if (e.data.includes('\n')) {
         e.preventDefault();
