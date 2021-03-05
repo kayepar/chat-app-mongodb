@@ -50,7 +50,6 @@ $(document).ready(function () {
                 } else {
                     // todo: test this!
                     window.location.href = '500.html';
-                    d;
                 }
             }
         }
