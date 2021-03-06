@@ -52,11 +52,14 @@ roomSchema.methods.checkDuplicateCredentials = function (user) {
     } catch (error) {
         throw new Error(error);
     }
+
     return duplicateFields;
 };
 
 roomSchema.methods.deleteIfInactive = async function (event) {
     const isActive = await this.isRoomStillActive(event);
+
+    console.log(`${this.name} is active: ${isActive}`);
 
     if (!isActive) return await this.deleteOne();
 };
@@ -73,15 +76,36 @@ roomSchema.methods.isRoomStillActive = async function (event) {
             })
             .execPopulate();
 
-        let isActive = myRoom.messages.length > 0;
+        const hasMessages = myRoom.messages.length > 0;
+        const hasUsers = myRoom.users.length > 0;
 
-        if (event === 'disconnect' && !isActive) {
-            // check if there is another user in room
-            // (apart from the one who just disconnected which represents users[0])
-            isActive = myRoom.users.length > 1;
+        if (event === 'cleanup') return hasMessages;
+
+        // return myRoom.messages.length > 0 && myRoom.users.length > 0;
+
+        // if has users - active
+        // if has no users but has messages - active
+
+        console.log(`hasMessages: ${hasMessages}`);
+        console.log(`hasUsers: ${hasUsers}`);
+
+        let isActive = hasUsers;
+
+        if (!hasUsers) {
+            if (hasMessages) isActive = true;
         }
 
         return isActive;
+        // let isActive = myRoom.messages.length > 0;
+
+        // if (event === 'disconnect') {
+        //     // check if there is another user in room
+        //     // (apart from the one who just disconnected)
+        //     console.log(myRoom.users);
+        //     isActive = myRoom.users.length > 0;
+        // }
+
+        // return isActive;
     } catch (error) {
         throw new Error(error);
     }
