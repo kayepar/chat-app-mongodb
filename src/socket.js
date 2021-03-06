@@ -13,7 +13,6 @@ const logger = require('./utilities/logger');
 // todo: fixtures in unit tests
 // todo: re-login to show saved messages
 // todo: customerror - accept object instead?
-// todo: check - join another room from sidebar, then leave. the other room (the one you just left) becomes inactive (will go missing from the sidebar) --> can't replicate anymore
 
 const chatSocket = (io) => {
     io.on('connection', (socket) => {
@@ -31,7 +30,7 @@ const chatSocket = (io) => {
                     username,
                     chatroom: chatRoom._id,
                 });
-                logger.info(`${user.username} joined`);
+                logger.info(`${user.username} joined ${room}`);
 
                 socket.join(room);
 
@@ -106,7 +105,7 @@ const chatSocket = (io) => {
                 const user = await User.findOne({ sessionId: socket.id });
 
                 if (user) {
-                    logger.info(`${user.username} disconnected`);
+                    logger.info(`${user.username} disconnected from ${user.chatroom.name}`);
                     await user.deleteOne();
 
                     const room = user.chatroom;
