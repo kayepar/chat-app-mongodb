@@ -49,8 +49,8 @@ const toggleCollapseLinkText = (parentElement) => {
     }
 };
 
-const displayMessage = (tempMessage) => {
-    const message = constructFinalMessage(tempMessage);
+const displayMessage = (tempMessage, type = 'post') => {
+    const message = type === 'post' ? constructFinalMessage(tempMessage) : constructTypingIndicatorMessage(tempMessage);
 
     displayData({
         template: document.querySelector('#message-template'),
@@ -75,15 +75,32 @@ const constructFinalMessage = (message) => {
     return message;
 };
 
+const constructTypingIndicatorMessage = (message) => {
+    message['type'] = 'received';
+    message['createdAt'] = moment(message.createdAt).format('MM-D h:mm a');
+    message['id'] = `${message.username}-temp-msg-div`;
+
+    return message;
+};
+
 const removeTypingIndicatorMsg = (username) => {
     if (document.querySelector(`#${username}-temp-msg-div`)) {
         document.querySelector(`#${username}-temp-msg-div`).remove();
     }
 };
 
+const clearMessagebox = () => {
+    const message_textbox = document.querySelector('#message-textbox');
+
+    message_textbox.focus();
+    message_textbox.value = '';
+};
+
 module.exports = {
     toggleCollapseLinkText,
     autoscroll,
     displayMessage,
+    constructTypingIndicatorMessage,
     removeTypingIndicatorMsg,
+    clearMessagebox,
 };

@@ -57,10 +57,11 @@ const chatSocket = (io) => {
 
                 callback();
             } catch (error) {
+                logger.error(error);
+
                 if (error instanceof CustomError) {
                     callback(error);
                 } else {
-                    logger.error(error);
                     new CustomError(`Socket 'join' error`, error.stack, 500, true);
                 }
             }

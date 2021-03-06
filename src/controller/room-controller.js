@@ -9,7 +9,7 @@ const validateUser = async (req, res, next) => {
             throw new CustomError('Invalid request', 'Incomplete user details', 400);
         }
 
-        const chatRoom = await Room.findOne({ name: room });
+        const chatRoom = await getChatRoom(room);
         // if room is not yet existing, credentials are automatically valid
         const result = chatRoom
             ? chatRoom.isUserAllowedToJoin(email, username)
@@ -18,6 +18,7 @@ const validateUser = async (req, res, next) => {
         res.status(200).send({
             result,
         });
+        // res.send(result());
     } catch (error) {
         if (!(error instanceof CustomError)) {
             return next(new CustomError('Something went wrong', error.stack, 500, true));
@@ -25,6 +26,10 @@ const validateUser = async (req, res, next) => {
 
         return next(error);
     }
+};
+
+const getChatRoom = async (room) => {
+    return await Room.findOne({ name: room });
 };
 
 const getActiveRooms = (req, res, next) => {

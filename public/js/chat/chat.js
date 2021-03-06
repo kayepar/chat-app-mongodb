@@ -1,9 +1,7 @@
 const io = require('socket.io-client');
 const qs = require('qs');
-const moment = require('moment');
-const CustomError = require('../../../src/error/CustomError');
 
-const { autoscroll, displayMessage, removeTypingIndicatorMsg } = require('./chat-utils');
+const { autoscroll, displayMessage, removeTypingIndicatorMsg, clearMessagebox } = require('./chat-utils');
 const { getActiveRooms } = require('../common/common-fetch');
 const { registerHbsHelper, displayData, displayAsList } = require('../common/common-utils');
 
@@ -25,7 +23,6 @@ $(document).ready(function () {
             const filteredRooms = allRooms.filter((activeRoom) => activeRoom !== room);
             displayAsList(filteredRooms, 'rooms');
         } catch (error) {
-            // todo: do something else with the error?
             console.log(`Error: ${error.message}`);
         }
     };
@@ -38,8 +35,6 @@ $(document).ready(function () {
             room,
         },
         (error) => {
-            // todo: send email?
-            console.log(error);
             if (error) {
                 if (error.name === 'CustomError') {
                     if (error.status === 400) {
@@ -83,20 +78,9 @@ $(document).ready(function () {
     socket.on('typing', (message) => {
         if (message.text === 'idle') return removeTypingIndicatorMsg(message.username);
 
-        message['type'] = 'received';
-        message['createdAt'] = moment(message.createdAt).format('MM-D h:mm a');
-        message['id'] = `${message.username}-temp-msg-div`;
-
-        if (!document.querySelector(`#${message.id}`)) {
-            // prevent duplicate notifs
-            displayData({
-                template: document.querySelector('#message-template'),
-                parent_element: document.querySelector('#messages-div'),
-                content: {
-                    message,
-                },
-                position: 'beforeend',
-            });
+        // prevent duplicate notifs
+        if (!document.querySelector(`#${message.username}-temp-msg-div`)) {
+            displayMessage(message, 'indicator');
         }
 
         autoscroll();
@@ -126,8 +110,7 @@ $(document).ready(function () {
         event.preventDefault();
 
         const message = message_textbox.value.trim();
-        message_textbox.focus();
-        message_textbox.value = '';
+        clearMessagebox();
 
         if (message.length < 1) {
             return;

@@ -6,7 +6,7 @@ const logger = require('../utilities/logger');
 // Called when server is started
 const cleanupDb = async () => {
     try {
-        const rooms = await Room.find({});
+        const rooms = await getRooms();
 
         await Promise.all(
             rooms.map(async (room) => {
@@ -18,6 +18,10 @@ const cleanupDb = async () => {
     } catch (error) {
         logger.error(error);
     }
+};
+
+const getRooms = async () => {
+    return await Room.find({});
 };
 
 module.exports = {
