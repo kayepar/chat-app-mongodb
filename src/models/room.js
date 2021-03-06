@@ -81,14 +81,6 @@ roomSchema.methods.isRoomStillActive = async function (event) {
 
         if (event === 'cleanup') return hasMessages;
 
-        // return myRoom.messages.length > 0 && myRoom.users.length > 0;
-
-        // if has users - active
-        // if has no users but has messages - active
-
-        console.log(`hasMessages: ${hasMessages}`);
-        console.log(`hasUsers: ${hasUsers}`);
-
         let isActive = hasUsers;
 
         if (!hasUsers) {
@@ -96,16 +88,6 @@ roomSchema.methods.isRoomStillActive = async function (event) {
         }
 
         return isActive;
-        // let isActive = myRoom.messages.length > 0;
-
-        // if (event === 'disconnect') {
-        //     // check if there is another user in room
-        //     // (apart from the one who just disconnected)
-        //     console.log(myRoom.users);
-        //     isActive = myRoom.users.length > 0;
-        // }
-
-        // return isActive;
     } catch (error) {
         throw new Error(error);
     }
