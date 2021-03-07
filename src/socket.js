@@ -47,12 +47,8 @@ const chatSocket = (io) => {
                     // note: this will re-populate the users object to get the updated list
                 });
 
-                Room.getActiveRooms((error, rooms) => {
-                    if (error) throw new Error(error);
-
-                    socket.broadcast.emit('activeRoomsUpdate', {
-                        allActiveRooms: rooms,
-                    });
+                socket.broadcast.emit('activeRoomsUpdate', {
+                    allActiveRooms: await Room.getActiveRooms(),
                 });
 
                 callback();
@@ -112,12 +108,8 @@ const chatSocket = (io) => {
                     const room = user.chatroom;
                     await room.deleteIfInactive('disconnect');
 
-                    Room.getActiveRooms((error, rooms) => {
-                        if (error) throw new Error(error);
-
-                        socket.broadcast.emit('activeRoomsUpdate', {
-                            allActiveRooms: rooms,
-                        });
+                    socket.broadcast.emit('activeRoomsUpdate', {
+                        allActiveRooms: await Room.getActiveRooms(),
                     });
 
                     io.to(room.name).emit(

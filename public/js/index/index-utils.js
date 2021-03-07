@@ -2,17 +2,21 @@ const { getActiveRooms } = require('../common/common-fetch');
 const { displayData } = require('../common/common-utils');
 
 const displayAvailableRooms = async () => {
-    const rooms = await getAvailableRooms();
+    try {
+        const rooms = await getAvailableRooms();
 
-    if (rooms.length > 0) {
-        displayData({
-            template: document.querySelector('#active-rooms-template'),
-            parent_element: document.querySelector('#room-div'),
-            content: {
-                rooms,
-            },
-            position: 'afterend',
-        });
+        if (rooms.length > 0) {
+            displayData({
+                template: document.querySelector('#active-rooms-template'),
+                parent_element: document.querySelector('#room-div'),
+                content: {
+                    rooms,
+                },
+                position: 'afterend',
+            });
+        }
+    } catch (error) {
+        throw new Error(error);
     }
 };
 

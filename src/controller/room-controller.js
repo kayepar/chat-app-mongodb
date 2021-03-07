@@ -10,7 +10,9 @@ const validateUser = async (req, res, next) => {
         }
 
         const chatRoom = await getChatRoom(room);
-        // if room is not yet existing, credentials are automatically valid
+
+        // if room is not existing, credentials are automatically valid since there are
+        // no users yet
         const result = chatRoom
             ? chatRoom.isUserAllowedToJoin(email, username)
             : { isAllowed: true, duplicateFields: [] };
@@ -18,7 +20,6 @@ const validateUser = async (req, res, next) => {
         res.status(200).send({
             result,
         });
-        // res.send(result());
     } catch (error) {
         if (!(error instanceof CustomError)) {
             return next(new CustomError('Something went wrong', error.stack, 500, true));
@@ -32,15 +33,11 @@ const getChatRoom = async (room) => {
     return await Room.findOne({ name: room });
 };
 
-const getActiveRooms = (req, res, next) => {
+const getActiveRooms = async (req, res, next) => {
     try {
-        Room.getActiveRooms((error, rooms) => {
-            if (error) throw new CustomError('Something went wrong', error.stack, 500, true);
+        const rooms = await Room.getActiveRooms();
 
-            res.status(200).send({
-                rooms,
-            });
-        });
+        res.status(200).send({ rooms });
     } catch (error) {
         return next(error);
     }

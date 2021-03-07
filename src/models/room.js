@@ -59,7 +59,7 @@ roomSchema.methods.checkDuplicateCredentials = function (user) {
 roomSchema.methods.deleteIfInactive = async function (event) {
     const isActive = await this.isRoomStillActive(event);
 
-    console.log(`${this.name} is active: ${isActive}`);
+    // console.log(`${this.name} is active: ${isActive}`);
 
     if (!isActive) return await this.deleteOne();
 };
@@ -126,24 +126,26 @@ roomSchema.statics.createRoom = async function (name) {
     }
 };
 
-roomSchema.statics.getActiveRooms = function (callback) {
+roomSchema.statics.getActiveRooms = async function () {
     try {
-        this.find({})
-            .populate('users')
-            .exec((error, rooms) => {
-                if (error) callback(error);
+        const rooms = await this.getRooms();
 
-                const activeRooms = rooms.reduce((filtered, room) => {
-                    // room is active if it has online users
-                    if (room.users.length > 0) {
-                        filtered.push(room.name);
-                    }
+        return rooms.reduce((filtered, room) => {
+            // room is active if it has online users
+            if (room.users.length > 0) {
+                filtered.push(room.name);
+            }
 
-                    return filtered;
-                }, []);
+            return filtered;
+        }, []);
+    } catch (error) {
+        throw new Error(error);
+    }
+};
 
-                callback(null, activeRooms);
-            });
+roomSchema.statics.getRooms = async function () {
+    try {
+        return await this.find({}).populate('users').exec();
     } catch (error) {
         throw new Error(error);
     }
