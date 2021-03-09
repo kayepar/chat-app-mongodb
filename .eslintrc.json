@@ -5,9 +5,10 @@
         "es2020": true,
         "node": true,
         "jquery": true,
-        "jest": true
+        "jest": true,
+        "jest/globals": true
     },
-    "extends": "eslint:recommended",
+    "extends": ["eslint:recommended", "plugin:jest/recommended", "plugin:jest/style", "plugin:jest-formatting/strict"],
     "parserOptions": {
         "ecmaVersion": 11
     },
