@@ -9,13 +9,15 @@ const validateUser = async (req, res, next) => {
             throw new CustomError('Invalid request', 'Incomplete user details', 400);
         }
 
-        const chatRoom = await getChatRoom(room);
+        const chatRoom = await lib.getChatRoom(room);
 
-        // if room is not existing, credentials are automatically valid since there are
-        // no users yet
+        console.log(chatRoom);
+
         const result = chatRoom
-            ? chatRoom.isUserAllowedToJoin(email, username)
+            ? lib.checkUserAccess(chatRoom, email, username)
             : { isAllowed: true, duplicateFields: [] };
+
+        console.log(result);
 
         res.status(200).send({
             result,
@@ -30,7 +32,12 @@ const validateUser = async (req, res, next) => {
 };
 
 const getChatRoom = async (room) => {
+    console.log('getChatroom original function');
     return await Room.findOne({ name: room });
+};
+
+const checkUserAccess = (room, email, username) => {
+    return room.isUserAllowedToJoin(email, username);
 };
 
 const getActiveRooms = async (req, res, next) => {
@@ -43,7 +50,13 @@ const getActiveRooms = async (req, res, next) => {
     }
 };
 
-module.exports = {
+// ! note1: needed to combine all functions into an object for easier mocking with spyOn
+// ! note2: to call functions from within this module, use lib object (i.e. lib.getChatRoom())
+const lib = {
     validateUser,
+    getChatRoom,
     getActiveRooms,
+    checkUserAccess,
 };
+
+module.exports = lib;
