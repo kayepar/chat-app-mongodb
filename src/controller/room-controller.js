@@ -11,19 +11,16 @@ const validateUser = async (req, res, next) => {
 
         const chatRoom = await lib.getChatRoom(room);
 
-        console.log(chatRoom);
-
         const result = chatRoom
             ? lib.checkUserAccess(chatRoom, email, username)
             : { isAllowed: true, duplicateFields: [] };
-
-        console.log(result);
 
         res.status(200).send({
             result,
         });
     } catch (error) {
         if (!(error instanceof CustomError)) {
+            console.log('here');
             return next(new CustomError('Something went wrong', error.stack, 500, true));
         }
 
