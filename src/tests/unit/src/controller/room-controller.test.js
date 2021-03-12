@@ -54,6 +54,7 @@ describe('tests for rooms-controller - mocked request and response', () => {
                 await room_controller.validateUser(req, res, next);
 
                 expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 400 }));
+                expect(getChatRoomMock).not.toHaveBeenCalled();
             });
 
             test('should call error middleware (with HTTP 400) if username parameter is missing', async () => {
@@ -64,6 +65,7 @@ describe('tests for rooms-controller - mocked request and response', () => {
                 await room_controller.validateUser(req, res, next);
 
                 expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 400 }));
+                expect(getChatRoomMock).not.toHaveBeenCalled();
             });
 
             test('should call error middleware (with HTTP 500) if any other issue is encountered', async () => {
@@ -79,6 +81,7 @@ describe('tests for rooms-controller - mocked request and response', () => {
                 await room_controller.validateUser(req, res, next);
 
                 expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 500 }));
+                expect(getChatRoomMock).not.toHaveBeenCalled();
             });
         });
 
