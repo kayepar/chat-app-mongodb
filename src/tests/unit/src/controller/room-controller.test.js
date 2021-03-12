@@ -1,17 +1,5 @@
-jest.mock('../../../../error/CustomError');
-
-const { Error } = require('mongoose');
-// jest.mock('../../../../models/room', () => ({
-//     isUserAllowedToJoin: jest.fn(),
-// }));
-// jest.mock('../../../../error/CustomError', function () {
-//     return this;
-// });
-
 const RoomModel = require('../../../../models/room');
-// const isUserAllowedToJoin = require('../../../../models/room').isUserAllowedToJoin;
 const room_controller = require('../../../../controller/room-controller');
-const CustomError = require('../../../../error/CustomError');
 
 const mockRequest = (queryData) => ({
     query: queryData,
@@ -25,12 +13,16 @@ const mockResponse = () => {
     return res;
 };
 
-// const mockNext = jest.fn();
-
 const mockNext = () => {
     const next = jest.fn();
     return next;
 };
+
+let getChatRoomMock;
+
+beforeEach(() => {
+    getChatRoomMock = jest.spyOn(room_controller, 'getChatRoom');
+});
 
 afterEach(() => {
     jest.clearAllMocks();
@@ -43,41 +35,18 @@ afterAll(() => {
 describe('tests for rooms-controller - mocked request and response', () => {
     describe('/validateUser route', () => {
         describe('invalid responses', () => {
-            beforeAll(() => {
-                CustomError.mockImplementation(() => {
-                    console.log('custom error');
-                    return {
-                        name: 'CustomError',
-                        status: 400,
-                        message: 'Invalid request',
-                        cause: 'Incomplete user details',
-                    };
-                });
-            });
-
-            afterAll(() => {
-                jest.resetAllMocks();
-            });
-
-            test.only('should throw error 400 if room parameter is missing', async () => {
+            test('should call error middleware (with HTTP 400) if room parameter is missing', async () => {
                 const req = mockRequest({ email: 'kaye.cenizal@gmail.com', username: 'kaye' });
                 const res = mockResponse();
                 const next = mockNext();
 
-                // await room_controller.validateUser(req, res, next);
-                expect(room_controller.validateUser(req, res, next)).toThrow();
-                // expect(() => room_controller.validateUser(req, res, next)).toThrow();
+                await room_controller.validateUser(req, res, next);
 
-                // expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 400 }));
-
-                // try {
-                //     await room_controller.validateUser(req, res, next);
-                // } catch (error) {
-                //     expect(error).toEqual(new CustomError());
-                // }
+                expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 400 }));
+                expect(getChatRoomMock).not.toHaveBeenCalled();
             });
 
-            test('should throw error 400 if email parameter is missing', async () => {
+            test('should call error middleware (with HTTP 400) if email parameter is missing', async () => {
                 const req = mockRequest({ username: 'kaye', room: 'javascript' });
                 const res = mockResponse();
                 const next = mockNext();
@@ -87,7 +56,7 @@ describe('tests for rooms-controller - mocked request and response', () => {
                 expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 400 }));
             });
 
-            test('should throw error 400 if username parameter is missing', async () => {
+            test('should call error middleware (with HTTP 400) if username parameter is missing', async () => {
                 const req = mockRequest({ email: 'kaye.cenizal@gmail.com', room: 'javascript' });
                 const res = mockResponse();
                 const next = mockNext();
@@ -97,29 +66,26 @@ describe('tests for rooms-controller - mocked request and response', () => {
                 expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 400 }));
             });
 
-            // test('should throw error 500 if any other issue is encountered', async () => {
-            //     const req = mockRequest({ email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'javascript' });
-            //     const res = mockResponse();
-            //     const next = mockNext();
+            test('should call error middleware (with HTTP 500) if any other issue is encountered', async () => {
+                const req = mockRequest({ email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'javascript' });
+                const res = mockResponse();
+                const next = mockNext();
 
-            //     const getChatRoomMock = jest.spyOn(room_controller, 'getChatRoom');
-            //     getChatRoomMock.mockImplementationOnce(() => {
-            //         throw new Error();
-            //     });
+                const getChatRoomMock = jest.spyOn(room_controller, 'getChatRoom');
+                getChatRoomMock.mockImplementationOnce(() => {
+                    throw new Error('Mock Error');
+                });
 
-            //     await room_controller.validateUser(req, res, next);
+                await room_controller.validateUser(req, res, next);
 
-            //     // expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 500 }));
-            //     expect(next.mock.calls).toHaveLength(1);
-            // });
+                expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 500 }));
+            });
         });
 
-        let getChatRoomMock;
         let checkUserAccessMock;
 
         describe('valid responses', () => {
             beforeEach(() => {
-                getChatRoomMock = jest.spyOn(room_controller, 'getChatRoom');
                 checkUserAccessMock = jest.spyOn(room_controller, 'checkUserAccess');
             });
 
@@ -225,7 +191,7 @@ describe('tests for rooms-controller - mocked request and response', () => {
 
     describe('/getActiveRooms route', () => {
         describe('valid responses', () => {
-            test('Should return HTTP 200 and empty rooms array', async () => {
+            test(`Should return HTTP 200 and empty 'rooms' array if there are no active rooms`, async () => {
                 const getActiveRoomsMock = jest.spyOn(RoomModel, 'getActiveRooms');
                 getActiveRoomsMock.mockImplementationOnce(() => {
                     return [];
@@ -244,7 +210,7 @@ describe('tests for rooms-controller - mocked request and response', () => {
                 expect(getActiveRoomsMock).toHaveBeenCalled();
             });
 
-            test('Should return HTTP 200 and rooms array', async () => {
+            test(`Should return HTTP 200 and 'rooms' array with existing room names`, async () => {
                 const getActiveRoomsMock = jest.spyOn(RoomModel, 'getActiveRooms');
                 getActiveRoomsMock.mockImplementationOnce(() => {
                     return ['javascript', 'python'];
