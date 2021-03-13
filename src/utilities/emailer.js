@@ -11,14 +11,14 @@ const transporter = nodemailer.createTransport({
     secure: true,
 });
 
-const sendEmail = ({ cause, stack }) => {
+const sendEmail = async ({ cause, stack }) => {
     const emailDetails = getEmailDetails(cause, stack);
 
-    transporter.sendMail(emailDetails, (error, info) => {
-        if (error) return new CustomError('Failed to send email', error.stack, 500);
-
-        return info.messageId;
-    });
+    try {
+        return transporter.sendMail(emailDetails);
+    } catch (error) {
+        return new CustomError('Failed to send email', error.stack, 500);
+    }
 };
 
 const getEmailDetails = (cause, stack) => {
