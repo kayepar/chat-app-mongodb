@@ -6,7 +6,6 @@ const validateUser = async (req, res, next) => {
         const { email, username, room } = req.query;
 
         if (!email || !username || !room) {
-            console.log('will throw');
             throw new CustomError('Invalid request', 'Incomplete user details', 400);
         }
 
@@ -19,6 +18,7 @@ const validateUser = async (req, res, next) => {
         res.status(200).send({
             result,
         });
+        // res.status(200).send(result());
     } catch (error) {
         if (!(error instanceof CustomError)) {
             return next(new CustomError('Something went wrong', error.stack, 500, true));
@@ -29,7 +29,7 @@ const validateUser = async (req, res, next) => {
 };
 
 const getChatRoom = async (room) => {
-    return await Room.findOne({ name: room });
+    return Room.findOne({ name: room });
 };
 
 const checkUserAccess = (room, email, username) => {
