@@ -119,7 +119,7 @@ roomSchema.statics.createRoom = async function (name) {
             if (error.code !== 11000) throw new Error(error);
 
             // if duplicate (code 11000), return existing
-            return await Room.findOne({ name });
+            return Room.findOne({ name });
         });
     } catch (error) {
         throw new Error(error);
@@ -145,7 +145,7 @@ roomSchema.statics.getActiveRooms = async function () {
 
 roomSchema.statics.getRooms = async function () {
     try {
-        return await this.find({}).populate('users').exec();
+        return this.find({}).populate('users').exec();
     } catch (error) {
         throw new Error(error);
     }

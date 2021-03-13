@@ -22,7 +22,7 @@ const displayAvailableRooms = async () => {
 
 const getAvailableRooms = async () => {
     try {
-        return await getActiveRooms();
+        return getActiveRooms();
     } catch (error) {
         console.log(`Error: ${error.message}`);
     }
