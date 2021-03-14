@@ -10,7 +10,7 @@
         "parcel-build": "parcel build templates/views/*.hbs",
         "heroku-postbuild": "npm run parcel-build",
         "dev": "env-cmd -f ./config/dev.env nodemon src/server.js -e js, hbs",
-        "test": "jest --runInBand --detectOpenHandles --coverage --watchAll --no-cache",
+        "test": "env-cmd -f ./config/test.env jest --runInBand --detectOpenHandles --coverage --watchAll --no-cache",
         "test:e2e": "jest --config jest.e2e.config.js --runInBand --detectOpenHandles --watchAll --no-cache",
         "lint": "eslint ./"
     },
