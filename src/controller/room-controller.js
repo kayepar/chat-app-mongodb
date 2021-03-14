@@ -18,7 +18,6 @@ const validateUser = async (req, res, next) => {
         res.status(200).send({
             result,
         });
-        // res.status(200).send(result());
     } catch (error) {
         if (!(error instanceof CustomError)) {
             return next(new CustomError('Something went wrong', error.stack, 500, true));
@@ -29,7 +28,11 @@ const validateUser = async (req, res, next) => {
 };
 
 const getChatRoom = async (room) => {
-    return Room.findOne({ name: room });
+    try {
+        return await Room.findOne({ name: room });
+    } catch (error) {
+        throw new Error(error);
+    }
 };
 
 const checkUserAccess = (room, email, username) => {
