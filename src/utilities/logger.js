@@ -1,6 +1,8 @@
 const winston = require('winston');
 const { format } = require('logform');
 
+let silent = process.env.NODE_ENV === 'test' ? true : false;
+
 let options = {
     console: {
         format: format.combine(
@@ -20,6 +22,7 @@ let options = {
         handleExceptions: true,
         json: false,
         colorize: true,
+        silent,
     },
     file: {
         filename: `logs/app.log`,
