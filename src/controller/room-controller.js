@@ -1,13 +1,21 @@
+const validator = require('validator');
+
 const Room = require('../models/room');
 const CustomError = require('../error/CustomError');
 
 const validateUser = async (req, res, next) => {
     try {
-        const { email, username, room } = req.query;
+        checkInput(req.query);
 
-        if (!email || !username || !room) {
-            throw new CustomError('Invalid request', 'Incomplete user details', 400);
-        }
+        const { email, username, room } = req.query;
+        console.log(email + '|');
+        // if (!validator.isEmail(email)) {
+        //     email = undefined;
+        // }
+
+        // if (!email || !username || !room) {
+        //     throw new CustomError('Invalid request', 'Incomplete user details', 400);
+        // }
 
         const chatRoom = await lib.getChatRoom(room);
 
@@ -24,6 +32,16 @@ const validateUser = async (req, res, next) => {
         }
 
         return next(error);
+    }
+};
+
+const checkInput = ({ email, username, room }) => {
+    if (!email || !username || !room) {
+        throw new CustomError('Invalid request', 'Incomplete user details', 400);
+    }
+
+    if (!validator.isEmail(email.trim())) {
+        throw new CustomError('Invalid request', 'Invalid email address', 400);
     }
 };
 
