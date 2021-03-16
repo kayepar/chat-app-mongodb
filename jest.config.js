@@ -4,7 +4,7 @@ module.exports = {
         URL: 'http://localhost',
     },
     // testMatch: ['**/tests/**/*.test.js'],
-    testPathIgnorePatterns: ['<rootDir>/tests/e2e'],
+    testPathIgnorePatterns: ['<rootDir>/tests/e2e', '<rootDir>/node_modules'],
     verbose: true,
     coverageThreshold: {
         global: {
