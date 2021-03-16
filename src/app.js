@@ -32,7 +32,7 @@ app.use(morgan('dev', { stream: logger.stream }));
 app.use(roomRouter);
 
 app.use((req, res, next) => {
-    next(new CustomError('Page not found', 'Resource unavailable', 404));
+    next(new CustomError('Page not found', `Resource unavailable - ${req.url}`, 404));
 });
 
 // eslint-disable-next-line no-unused-vars
