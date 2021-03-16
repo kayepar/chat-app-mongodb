@@ -7,7 +7,7 @@ const morgan = require('morgan');
 require('./db/mongoose');
 
 const roomRouter = require('./router/room');
-const dbUtils = require('./db/dbUtils');
+const dbUtils = require('./db/db-utils');
 const CustomError = require('./error/CustomError');
 const logger = require('./utilities/logger');
 
