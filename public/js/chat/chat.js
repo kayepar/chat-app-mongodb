@@ -39,7 +39,9 @@ $(document).ready(function () {
                 if (error.name === 'CustomError') {
                     if (error.status === 400) {
                         const title =
-                            error.cause === 'Incomplete user details' ? 'Invalid Request' : 'Duplicate Credentials';
+                            error.cause === 'Incomplete user details' || error.cause === 'Invalid email address'
+                                ? 'Invalid Request'
+                                : 'Duplicate Credentials';
                         const modalOptions = { title, message: error.cause };
 
                         $('#error-modal').modal('show', modalOptions);

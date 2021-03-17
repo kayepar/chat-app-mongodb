@@ -29,7 +29,12 @@ const chatSocket = (io) => {
                     email,
                     username,
                     chatroom: chatRoom._id,
+                }).catch((error) => {
+                    if (error.message.includes('User validation failed')) {
+                        throw new CustomError('Invalid request', 'Invalid email address', 400);
+                    }
                 });
+
                 logger.info(`${user.username} joined ${room}`);
 
                 socket.join(room);
