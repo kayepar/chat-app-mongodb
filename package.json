@@ -25,6 +25,7 @@
         "bad-words": "^3.0.4",
         "express": "^4.17.1",
         "express-hbs": "^2.3.4",
+        "express-validator": "^6.10.0",
         "handlebars": "^4.7.6",
         "moment": "^2.29.1",
         "mongodb": "^3.6.3",
