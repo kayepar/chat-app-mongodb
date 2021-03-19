@@ -1,21 +1,13 @@
-const validator = require('validator');
+const { validationResult } = require('express-validator');
 
 const Room = require('../models/room');
 const CustomError = require('../error/CustomError');
 
 const validateUser = async (req, res, next) => {
     try {
-        checkInput(req.query);
+        lib.processValidationResults(req);
 
         const { email, username, room } = req.query;
-        console.log(email + '|');
-        // if (!validator.isEmail(email)) {
-        //     email = undefined;
-        // }
-
-        // if (!email || !username || !room) {
-        //     throw new CustomError('Invalid request', 'Incomplete user details', 400);
-        // }
 
         const chatRoom = await lib.getChatRoom(room);
 
@@ -35,14 +27,16 @@ const validateUser = async (req, res, next) => {
     }
 };
 
-const checkInput = ({ email, username, room }) => {
-    if (!email || !username || !room) {
-        throw new CustomError('Invalid request', 'Incomplete user details', 400);
-    }
+const processValidationResults = (req) => {
+    const { errors } = validationResult(req);
 
-    if (!validator.isEmail(email.trim())) {
-        throw new CustomError('Invalid request', 'Invalid email address', 400);
-    }
+    if (errors.length === 0) return;
+
+    const invalidEmail = errors.some((error) => error.msg === 'Invalid email');
+
+    const message = invalidEmail ? 'Invalid email address' : 'Incomplete user details';
+
+    throw new CustomError('Invalid request', message, 400);
 };
 
 const getChatRoom = async (room) => {
@@ -71,6 +65,7 @@ const getActiveRooms = async (req, res, next) => {
 // ! note2: to call functions from within this module, use lib object (i.e. lib.getChatRoom())
 const lib = {
     validateUser,
+    processValidationResults,
     getChatRoom,
     getActiveRooms,
     checkUserAccess,
