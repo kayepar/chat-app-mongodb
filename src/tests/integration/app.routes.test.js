@@ -2,13 +2,8 @@ const request = require('supertest');
 const app = require('../../app');
 const { configureDb } = require('./fixtures/db');
 const RoomModel = require('../../models/room');
-const UserModel = require('../../models/user');
 
 beforeEach(configureDb);
-
-// afterAll(() => {
-//     jest.resetAllMocks();
-// });
 
 describe('integration tests for app routes', () => {
     describe('/validateUser route', () => {
@@ -38,57 +33,113 @@ describe('integration tests for app routes', () => {
 
                 expect(response.status).toEqual(400);
             });
+
+            test('if any other issue is encountered, should send HTTP 500 error', async () => {
+                const findOneMock = jest.spyOn(RoomModel, 'findOne');
+                findOneMock.mockImplementationOnce(() => {
+                    throw new Error('Something went wrong');
+                });
+
+                const response = await request(app).get(
+                    `/validateUser?email=kaye.cenizal@gmail.com&username=kaye&room=javascript`
+                );
+
+                expect(response.status).toEqual(500);
+            });
         });
 
         describe('valid responses', () => {
-            test('if room is not existing, isAllowed is true with empty duplicateFields', async () => {
-                const response = await request(app).get(
-                    `/validateUser?email=chatuser1@example.com&username=chatuser1&room=testroom`
-                );
+            describe('non existing room', () => {
+                test('if credentials are valid, user should be allowed to join in', async () => {
+                    const response = await request(app).get(
+                        `/validateUser?email=chatuser1@example.com&username=chatuser1&room=testroom`
+                    );
 
-                const expectedResults = { result: { isAllowed: true, duplicateFields: [] } };
+                    const expectedResults = { result: { isAllowed: true, duplicateFields: [] } };
 
-                expect(response.body).toEqual(expectedResults);
+                    expect(response.status).toEqual(200);
+                    expect(response.body).toEqual(expectedResults);
+                });
             });
 
-            test('if room is existing and user is valid, isAllowed is true with empty duplicateFields', async () => {
-                const response = await request(app).get(
-                    `/validateUser?email=chatuser1@example.com&username=chatuser1&room=html`
-                );
+            describe('existing room', () => {
+                test('if credentials are valid, user should be allowed to join in', async () => {
+                    const response = await request(app).get(
+                        `/validateUser?email=chatuser1@example.com&username=chatuser1&room=html`
+                    );
 
-                const expectedResults = { result: { isAllowed: true, duplicateFields: [] } };
+                    const expectedResults = { result: { isAllowed: true, duplicateFields: [] } };
 
-                expect(response.body).toEqual(expectedResults);
+                    expect(response.status).toEqual(200);
+                    expect(response.body).toEqual(expectedResults);
+                });
+
+                test(`if email already in use, user should NOT be allowed to join in`, async () => {
+                    const response = await request(app).get(
+                        `/validateUser?email=kaye.cenizal@gmail.com&username=kcenizal&room=javascript`
+                    );
+
+                    const expectedResults = { result: { isAllowed: false, duplicateFields: ['email'] } };
+
+                    expect(response.status).toEqual(200);
+                    expect(response.body).toEqual(expectedResults);
+                });
+
+                test(`if username already in use, user should NOT be allowed to join in`, async () => {
+                    const response = await request(app).get(
+                        `/validateUser?email=callie.madison.par@gmail.com&username=callie&room=javascript`
+                    );
+
+                    const expectedResults = { result: { isAllowed: false, duplicateFields: ['username'] } };
+
+                    expect(response.status).toEqual(200);
+                    expect(response.body).toEqual(expectedResults);
+                });
+
+                test(`if both email and username are in use, user should NOT be allowed to join in`, async () => {
+                    const response = await request(app).get(
+                        `/validateUser?email=john.par@gmail.com&username=john&room=css`
+                    );
+
+                    const expectedResults = { result: { isAllowed: false, duplicateFields: ['email', 'username'] } };
+
+                    expect(response.status).toEqual(200);
+                    expect(response.body).toEqual(expectedResults);
+                });
+            });
+        });
+    });
+
+    describe('/getActiveRooms route', () => {
+        describe('invalid responses', () => {
+            test('if error is encountered, should return HTTP 500', async () => {
+                const getActiveRoomsMock = jest.spyOn(RoomModel, 'getActiveRooms');
+                getActiveRoomsMock.mockImplementationOnce(() => {
+                    throw new Error('Something went wrong');
+                });
+
+                const response = await request(app).get(`/getActiveRooms`);
+
+                expect(response.status).toEqual(500);
+            });
+        });
+
+        describe('valid responses', () => {
+            test(`if there are no active rooms, should return array`, async () => {
+                await RoomModel.deleteMany();
+
+                const response = await request(app).get(`/getActiveRooms`);
+
+                expect(response.status).toEqual(200);
+                expect(response.body.rooms).toEqual([]);
             });
 
-            test(`if room is existing and email already in use, isAllowed should be false and duplicateFields to contain 'email'`, async () => {
-                const response = await request(app).get(
-                    `/validateUser?email=kaye.cenizal@gmail.com&username=kcenizal&room=javascript`
-                );
+            test(`if there are active rooms, should return array of room names`, async () => {
+                const expectedResults = ['javascript', 'css'];
+                const response = await request(app).get(`/getActiveRooms`);
 
-                const expectedResults = { result: { isAllowed: false, duplicateFields: ['email'] } };
-
-                expect(response.body).toEqual(expectedResults);
-            });
-
-            test(`if room is existing and username already in use, isAllowed should be false and duplicateFields to contain 'username'`, async () => {
-                const response = await request(app).get(
-                    `/validateUser?email=callie.madison.par@gmail.com&username=callie&room=javascript`
-                );
-
-                const expectedResults = { result: { isAllowed: false, duplicateFields: ['username'] } };
-
-                expect(response.body).toEqual(expectedResults);
-            });
-
-            test(`if room is existing and both email and username are in use, isAllowed should be false and duplicateFields to contain 'email' and 'username'`, async () => {
-                const response = await request(app).get(
-                    `/validateUser?email=john.par@gmail.com&username=john&room=css`
-                );
-
-                const expectedResults = { result: { isAllowed: false, duplicateFields: ['email', 'username'] } };
-
-                expect(response.body).toEqual(expectedResults);
+                expect(response.status).toEqual(200);
+                expect(response.body.rooms).toEqual(expectedResults);
             });
         });
     });
