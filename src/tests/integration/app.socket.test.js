@@ -32,7 +32,7 @@ const createSocket = () => {
 
         // define event handler for sucessfull connection
         socket.on('connect', () => {
-            console.log('connected');
+            // console.log('connected');
             resolve(socket);
         });
 
@@ -46,7 +46,6 @@ const createSocket = () => {
 jest.setTimeout(20000);
 
 beforeAll((done) => {
-    // pass a callback to tell jest it is async
     server.listen(80, () => {
         done();
     });
@@ -60,21 +59,9 @@ afterAll((done) => {
 
 beforeEach(async () => {
     jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
-    Date.now = jest.fn().mockImplementation(() => 1466424490000);
+    Date.now = jest.fn().mockImplementation(() => '1466424490000');
 
     await configureDb();
-
-    // socketA = createSocket().on('connect', () => {
-    //     // console.log('a done');
-    // });
-    // socketB = createSocket().on('connect', () => {
-    //     // console.log('b done');
-    // });
-    // socketC = createSocket().on('connect', () => {
-    //     console.log('c done');
-
-    //     done();
-    // });
 
     socketA = await createSocket();
     socketB = await createSocket();
@@ -153,10 +140,15 @@ describe('integration tests for app - sockets', () => {
             });
         });
 
-        test('if both email and username are already in use, user should NOT be able to join in', (done) => {
+        test.only('if both email and username are already in use, user should NOT be able to join in', (done) => {
+            // todo: need to check why user is still created
             const testUser = { email: 'user1@gmail.com', username: 'user1', room: 'html' };
 
-            socketA.emit('join', testUser, (callback) => {
+            socketA.emit('join', testUser, async (callback) => {
+                // const room = await RoomModel.findOne({ name: 'html' });
+
+                // console.log(`room users - test: ${room.users}`);
+
                 expect(callback).toBeUndefined();
             });
 
@@ -169,10 +161,10 @@ describe('integration tests for app - sockets', () => {
             }, 100);
         });
 
-        test('if previous session disconnects and then same credentials are used again, user should be able to join in', (done) => {
-            const testUser = { email: 'user1@gmail.com', username: 'user1', room: 'html' };
+        test.only('if previous session disconnects and then same credentials are used again, user should be able to join in', async (done) => {
+            const testUser = { email: 'user2@gmail.com', username: 'user2', room: 'css' };
 
-            socketA.emit('join', testUser, (callback) => {
+            socketA.emit('join', testUser, async (callback) => {
                 expect(callback).toBeUndefined();
 
                 socketA.disconnect();
@@ -180,17 +172,116 @@ describe('integration tests for app - sockets', () => {
                 expect(socketA.connected).toBe(false);
             });
 
-            setTimeout(() => {
-                socketB.emit('join', testUser, async (callback) => {
-                    const user = await UserModel.findOne({ email: testUser.email });
+            await new Promise((res) => setTimeout(res, 300));
 
-                    expect(user).not.toBeNull();
-                    expect(user.chatroom.name).toBe(testUser.room);
-                    expect(callback).toBeUndefined();
+            socketB.emit('join', testUser, async (callback) => {
+                const user = await UserModel.findOne({ email: testUser.email });
+
+                expect(user).not.toBeNull();
+                expect(user.chatroom.name).toBe(testUser.room);
+                expect(callback).toBeUndefined();
+
+                done();
+            });
+        });
+    });
+
+    describe('send/receive messages', () => {
+        describe('admin messages', () => {
+            test('if new user, should get welcome message from admin upon joining', (done) => {
+                const testUser = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
+
+                socketA.emit('join', testUser, () => {});
+
+                const testMessage = {
+                    sender: {
+                        username: 'Admin',
+                    },
+                    text: `Welcome, ${testUser.username}!`,
+                    chatroom: testUser.room,
+                    createdAt: new Date().getTime(),
+                };
+
+                socketA.on('message', async (message) => {
+                    expect(message).toEqual(testMessage);
+
+                    // const room = await RoomModel.findOne({ name: testUser.room });
+                    // console.log(room);
+                    // const messages = await room.getMessages();
+
+                    // console.log(messages);
 
                     done();
                 });
-            }, 300);
+            });
+
+            test('if existing user, should get notification from admin when someone joins room', (done) => {
+                const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
+                const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'css' };
+
+                socketA.emit('join', testUser1, () => {});
+                socketB.emit('join', testUser2, () => {});
+
+                const testMessage = {
+                    sender: {
+                        username: 'Admin',
+                    },
+                    text: `${testUser2.username} has joined!`,
+                    chatroom: testUser1.room,
+                    createdAt: new Date().getTime(),
+                };
+
+                let msgCount = 0;
+                socketA.on('message', (message) => {
+                    msgCount = msgCount += 1;
+
+                    if (msgCount === 2) {
+                        expect(message).toEqual(testMessage);
+                    }
+                    done();
+                });
+            });
+        });
+
+        describe('chatroom messages', () => {
+            test('if in the same room, user should be able to receive messages sent over to the chatroom', async (done) => {
+                const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
+                const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'css' };
+
+                socketA.emit('join', testUser1, () => {});
+                socketB.emit('join', testUser2, () => {});
+
+                const testMessage = {
+                    sender: {
+                        username: testUser1.username,
+                        email: testUser1.email,
+                    },
+                    text: `Hello ${testUser1.room}! My name is ${testUser1.username}`,
+                    createdAt: new Date().toISOString(),
+                };
+
+                await new Promise((res) => setTimeout(res, 300));
+
+                socketA.emit('sendMessage', `Hello ${testUser1.room}! My name is ${testUser1.username}`, () => {});
+
+                socketB.on('message', (message) => {
+                    expect(message).toEqual(testMessage);
+
+                    done();
+                });
+            });
+
+            test('if on a different room, user should not be able to receive message sent over to another chatroom', (done) => {});
+
+            test('user should be able to receive own message', (done) => {});
+
+            test('if message has profanity, should receive error message', (done) => {});
         });
     });
+
+    describe('activeRooms update', () => {});
+
+    describe('roomData update', () => {}); // todo: check the name - changed recently
+
+    describe('disconnect from room', () => {});
 });
