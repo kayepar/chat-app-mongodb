@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const RoomModel = require('../../../models/room');
 const UserModel = require('../../../models/user');
+const MessageModel = require('../../../models/message');
 
 const room1 = { _id: new mongoose.Types.ObjectId(), name: 'javascript' };
 const room2 = { _id: new mongoose.Types.ObjectId(), name: 'css' };
@@ -31,6 +32,7 @@ const user3 = {
 const configureDb = async () => {
     await RoomModel.deleteMany();
     await UserModel.deleteMany();
+    await MessageModel.deleteMany();
     await new RoomModel(room1).save();
     await new RoomModel(room2).save();
     await new RoomModel(room3).save();
