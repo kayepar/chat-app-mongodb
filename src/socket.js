@@ -24,6 +24,7 @@ const chatSocket = (io) => {
                 if (!result.isAllowed)
                     throw new CustomError('Invalid request', 'Username/Email address already in use', 400);
 
+                // console.log('before user create');
                 const user = await User.create({
                     sessionId: socket.id,
                     email,
@@ -34,6 +35,8 @@ const chatSocket = (io) => {
                         throw new CustomError('Invalid request', 'Invalid email address', 400);
                     }
                 });
+                // console.log('after user create');
+                // console.log(`user after create: ${user}`);
 
                 logger.info(`${user.username} joined ${room}`);
 
@@ -61,9 +64,10 @@ const chatSocket = (io) => {
                 logger.error(error);
 
                 if (error instanceof CustomError) {
-                    callback(error);
+                    return callback(error);
                 } else {
-                    new CustomError(`Socket 'join' error`, error.stack, 500, true);
+                    console.log('500 error, will email');
+                    new CustomError(`Socket 'join' error`, error.stack, 500, false);
                 }
             }
         });
@@ -74,6 +78,8 @@ const chatSocket = (io) => {
             if (filter.isProfane(message)) {
                 return callback('Profanity is not allowed!');
             }
+
+            console.log(`socket message, ${message}`);
 
             try {
                 const user = await User.findOne({ sessionId: socket.id });
@@ -106,8 +112,15 @@ const chatSocket = (io) => {
             try {
                 const user = await User.findOne({ sessionId: socket.id });
 
+                // const availRooms = await Room.find({});
+                // console.log(`room disconnect: ${availRooms}`);
+
+                // console.log(`socket id disconnect: ${socket.id}`);
+                // console.log(`user disconnect: ${user}`);
+
                 if (user) {
                     logger.info(`${user.username} disconnected from ${user.chatroom.name}`);
+
                     await user.deleteOne();
 
                     const room = user.chatroom;
