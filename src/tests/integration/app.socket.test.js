@@ -6,7 +6,7 @@ const server = require('../../../src/app');
 const { configureDb } = require('./fixtures/db');
 const RoomModel = require('../../models/room');
 const UserModel = require('../../models/user');
-require('log-timestamp');
+// require('log-timestamp');
 
 let socketA;
 let socketB;
@@ -67,8 +67,8 @@ afterAll((done) => {
 });
 
 beforeEach(async () => {
-    // jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
-    // Date.now = jest.fn().mockImplementation(() => '1466424490000');
+    jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
+    Date.now = jest.fn().mockImplementation(() => '1466424490000');
 
     await configureDb();
 
@@ -245,7 +245,6 @@ describe('integration tests for app - sockets', () => {
 
                 let msgCount = 0;
                 socketA.on('message', (message) => {
-                    console.log(message);
                     msgCount = msgCount += 1;
 
                     // check for the second message (the first one is the welcome message)
@@ -286,52 +285,9 @@ describe('integration tests for app - sockets', () => {
                 });
             });
 
-            test.only('2 users test', async (done) => {
+            test('user should not be able to receive messages sent over to a different chatroom', (done) => {
                 const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
-                const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'css' };
-
-                socketA.emit('join', testUser1, async (callback) => {
-                    expect(callback).toBeUndefined();
-
-                    console.log('testuser 1 join');
-
-                    socketB.emit('join', testUser2, (callback) => {
-                        expect(callback).toBeUndefined();
-
-                        console.log('testuser 2 join');
-                    });
-                });
-
-                await new Promise((res) => setTimeout(res, 1000));
-                console.log('to emit');
-                socketA.emit('sendMessage', `Hello! This is a message from '${testUser1.room}'`, () => {});
-
-                socketB.on('message', (message) => {
-                    console.log(message);
-                    console.log('on message');
-
-                    // gets the welcome message and not the one emitted by socketA
-
-                    // expect(message).not.toEqual(testMessage);
-
-                    done();
-                });
-            });
-
-            test('if on a different room, user should not be able to receive message sent over to another chatroom', async (done) => {
-                const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
-                const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'css' };
-
-                socketA.emit('join', testUser1, () => {});
-                // await new Promise((res) => setTimeout(res, 100));
-
-                socketB.emit('join', testUser2, () => {});
-                // socketA.emit('join', testUser1, (callback) => {
-                //     expect(callback).toBeUndefined();
-                // });
-                // socketB.emit('join', testUser2, (callback) => {
-                //     expect(callback).toBeUndefined();
-                // });
+                const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'html' };
 
                 const testMessage = {
                     sender: {
@@ -342,47 +298,78 @@ describe('integration tests for app - sockets', () => {
                     createdAt: new Date().toISOString(),
                 };
 
-                // await new Promise((res) => setTimeout(res, 100));
-                console.log('after timeout');
+                socketA.emit('join', testUser1, () => {});
+                socketB.emit('join', testUser2, () => {});
 
-                socketA.emit('sendMessage', `Hello! This is a message from '${testUser1.room}'`, () => {});
-
-                console.log('after sendmessage');
-                // let msgCount = 0;
-                // socketB.on('message', (message) => {
-                //     console.log(message);
-
-                //     // msgCount = msgCount += 1;
-
-                //     // await new Promise((res) => setTimeout(res, 1000));
-
-                //     // if (msgCount === 2) {
-                //     //     // gets own message backd
-                //     expect(message).not.toEqual(testMessage);
-                //     // }
-
-                //     done();
-                // });
-                // await new Promise((res) => setTimeout(res, 6000));
-                let msgCount = 0;
-
+                let socketB_msgCount = 0;
                 socketB.on('message', (message) => {
+                    socketB_msgCount = socketB_msgCount += 1;
+
+                    // only gets welcome message and not testUser1's
+                    expect(socketB_msgCount).toBe(1);
+
+                    // todo: check db, message should not be in socketB's room
+                });
+
+                let socketA_msgCount = 0;
+                socketA.on('message', (message) => {
+                    socketA_msgCount = socketA_msgCount += 1;
+
+                    if (socketA_msgCount === 2) {
+                        // gets own message back
+                        expect(message).toEqual(testMessage);
+
+                        done();
+                    }
+                });
+
+                setTimeout(() => {
+                    socketA.emit('sendMessage', `Hello! This is a message from '${testUser1.room}' room`, () => {});
+                }, 500);
+            });
+
+            test('user should be able to receive own message', (done) => {
+                const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
+
+                const testMessage = {
+                    sender: {
+                        username: testUser1.username,
+                        email: testUser1.email,
+                    },
+                    text: `Hello!`,
+                    createdAt: new Date().toISOString(),
+                };
+
+                socketA.emit('join', testUser1, () => {});
+
+                let msgCount = 0;
+                socketA.on('message', (message) => {
                     msgCount = msgCount += 1;
-                    console.log(`message count: ${msgCount}`);
-                    console.log(message);
-                    console.log('on message');
 
-                    // gets the welcome message and not the one emitted by socketA
+                    if (msgCount === 2) {
+                        // gets own message back (message1 === welcome message)
+                        expect(message).toEqual(testMessage);
 
-                    // expect(message).not.toEqual(testMessage);
+                        done();
+                    }
+                });
+
+                setTimeout(() => {
+                    socketA.emit('sendMessage', 'Hello!', () => {});
+                }, 100);
+            });
+
+            test('if message has profanity, should receive error message', (done) => {
+                const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
+
+                socketA.emit('join', testUser1, () => {});
+
+                socketA.emit('sendMessage', 'damn', (callback) => {
+                    expect(callback).toBe('Profanity is not allowed!');
 
                     done();
                 });
             });
-
-            test.skip('user should be able to receive own message', () => {});
-
-            test.skip('if message has profanity, should receive error message', () => {});
         });
     });
 
