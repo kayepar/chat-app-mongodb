@@ -125,7 +125,7 @@ describe('integration tests for app routes', () => {
         });
 
         describe('valid responses', () => {
-            test(`if there are no active rooms, should return array`, async () => {
+            test(`if there are no active rooms, should return empty array`, async () => {
                 await RoomModel.deleteMany();
 
                 const response = await request(app).get(`/getActiveRooms`);
