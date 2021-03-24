@@ -188,6 +188,8 @@ describe('integration tests for app - sockets', () => {
                     done();
                 });
             });
+
+            // todo: invalid email
         });
     });
 
@@ -204,7 +206,6 @@ describe('integration tests for app - sockets', () => {
                     },
                     text: `Welcome, ${testUser.username}!`,
                     chatroom: testUser.room,
-                    // createdAt: new Date().getTime(),
                 };
 
                 socketA.on('message', async (message) => {
@@ -214,7 +215,7 @@ describe('integration tests for app - sockets', () => {
                 });
             });
 
-            test('if existing user, should get notification from admin when someone joins room', (done) => {
+            test('if existing user, should get notification from admin when someone joins the same room', (done) => {
                 const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
                 const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'css' };
 
@@ -227,24 +228,81 @@ describe('integration tests for app - sockets', () => {
                     },
                     text: `${testUser2.username} has joined!`,
                     chatroom: testUser1.room,
-                    // createdAt: new Date().getTime(),
                 };
 
                 let msgCount = 0;
                 socketA.on('message', (message) => {
                     msgCount = msgCount += 1;
 
-                    // check for the second message (the first one is the welcome message)
+                    // check for the second message since the first one is the welcome message
                     if (msgCount === 2) {
                         expect(message).toMatchObject(testMessage);
+
+                        done();
                     }
-                    done();
                 });
+            });
+
+            test('if existing user, should get notification when someone leaves the same room', (done) => {
+                const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
+                const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'css' };
+
+                socketA.emit('join', testUser1, () => {});
+                socketB.emit('join', testUser2, () => {});
+
+                const testMessage = {
+                    sender: { username: 'Admin' },
+                    chatroom: 'css',
+                    text: `${testUser2.username} has left!`,
+                };
+
+                let msgCount = 0;
+                socketA.on('message', (message) => {
+                    msgCount = msgCount += 1;
+
+                    // check the 3rd one, since the first couple of messages are welcome messages
+                    if (msgCount === 3) {
+                        expect(message).toMatchObject(testMessage);
+
+                        done();
+                    }
+                });
+
+                setTimeout(() => {
+                    socketB.disconnect();
+
+                    expect(socketB.connected).toBe(false);
+                }, 100);
+            });
+
+            test('user should not get notification from admin if someone from a different room leaves', (done) => {
+                const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
+                const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'html' };
+
+                socketA.emit('join', testUser1, () => {});
+                socketB.emit('join', testUser2, () => {});
+
+                let msgCount = 0;
+                socketA.on('message', (message) => {
+                    msgCount = msgCount += 1;
+                });
+
+                setTimeout(() => {
+                    socketB.disconnect();
+
+                    expect(socketB.connected).toBe(false);
+                }, 100);
+
+                setTimeout(() => {
+                    expect(msgCount).toBe(1); // meaning socketA only received the welcome message, not socketB's disconnection
+
+                    done();
+                }, 200);
             });
         });
 
         describe('chatroom messages', () => {
-            test('if in the same room, user should be able to receive messages sent over to the chatroom', async (done) => {
+            test('user should be able to receive messages sent over to the chatroom', async (done) => {
                 const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
                 const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'css' };
 
@@ -257,7 +315,6 @@ describe('integration tests for app - sockets', () => {
                         email: testUser1.email,
                     },
                     text: `Hello ${testUser1.room}! My name is ${testUser1.username}`,
-                    // createdAt: new Date().toISOString(),
                 };
 
                 await new Promise((res) => setTimeout(res, 300));
@@ -282,7 +339,6 @@ describe('integration tests for app - sockets', () => {
                         email: testUser1.email,
                     },
                     text: `Hello! This is a message from '${testUser1.room}' room`,
-                    // createdAt: new Date().toISOString(),
                 };
 
                 socketA.emit('join', testUser1, () => {});
@@ -325,7 +381,6 @@ describe('integration tests for app - sockets', () => {
                         email: testUser1.email,
                     },
                     text: `Hello!`,
-                    // createdAt: new Date().toISOString(),
                 };
 
                 socketA.emit('join', testUser1, () => {});
@@ -362,7 +417,7 @@ describe('integration tests for app - sockets', () => {
     });
 
     describe('activeRoomsUpdate event', () => {
-        test(`if another user joins a room, existing users (regardless of room) should get 'activeRoomsUpdate' event`, (done) => {
+        test(`if another user joins a room, existing user (regardless of room) should get 'activeRoomsUpdate' event`, (done) => {
             const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
             const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'html' };
 
@@ -379,7 +434,7 @@ describe('integration tests for app - sockets', () => {
             });
         });
 
-        test(`if another user leaves, existing users (regardless of room) should get 'activeRoomsUpdate' event`, (done) => {
+        test(`if another user leaves, existing user (regardless of room) should get 'activeRoomsUpdate' event`, (done) => {
             // todo: db test that room becomes inactive when the last user leaves (and if it has no saved messages)
 
             const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
@@ -411,7 +466,7 @@ describe('integration tests for app - sockets', () => {
     });
 
     describe('usersInRoomUpdate event', () => {
-        test(`if user joins in, existing users in the same room should get 'usersInRoomUpdate' event`, (done) => {
+        test(`if user joins in, existing user in the same room should get 'usersInRoomUpdate' event`, (done) => {
             const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'html' };
             const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'html' };
             const testUser3 = { email: 'john.par@gmail.com', username: 'john', room: 'html' };
@@ -425,7 +480,6 @@ describe('integration tests for app - sockets', () => {
             let msgCount = 0;
             socketA.on('usersInRoomUpdate', (message) => {
                 msgCount = msgCount += 1;
-                console.log(message);
 
                 expect(message.users).toHaveLength(3);
                 expect(message).toMatchObject(testResult);
@@ -434,10 +488,76 @@ describe('integration tests for app - sockets', () => {
             });
         });
 
-        test(`if user leaves, existing users in the same room should get 'usersInRoomUpdate' event`, () => {});
+        test(`if user leaves, existing user in the same room should get 'usersInRoomUpdate' event`, (done) => {
+            const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'html' };
+            const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'html' };
+            const testUser3 = { email: 'john.par@gmail.com', username: 'john', room: 'html' };
+
+            socketA.emit('join', testUser1, () => {});
+            socketB.emit('join', testUser2, () => {});
+            socketC.emit('join', testUser3, () => {});
+
+            const testResult = { users: [{ username: 'kaye' }, { username: 'john' }] };
+
+            let msgCount = 0;
+            socketA.on('usersInRoomUpdate', (message) => {
+                msgCount = msgCount += 1;
+
+                // first 3 messages are 'usersInRoomUpdate' events received after users joined
+                if (msgCount === 4) {
+                    expect(message).toMatchObject(testResult);
+
+                    done();
+                }
+            });
+
+            setTimeout(() => {
+                socketB.disconnect();
+
+                expect(socketB.connected).toBe(false);
+            }, 500);
+        });
     });
 
-    describe('typing indicator', () => {});
+    describe('typing indicator', () => {
+        test('if another user starts typing, existing user in the same room should get typing indicator', (done) => {
+            const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
+            const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'css' };
 
-    describe('disconnect from room', () => {});
+            socketA.emit('join', testUser1, () => {});
+            socketB.emit('join', testUser2, () => {});
+
+            const testMessage = {
+                sender: { username: 'kaye' },
+                chatroom: 'css',
+                text: '...',
+            };
+
+            socketB.on('typing', (message) => {
+                expect(message).toMatchObject(testMessage);
+
+                done();
+            });
+
+            setTimeout(() => {
+                socketA.emit('typing', '...', () => {});
+            }, 100);
+        });
+    });
+
+    describe('disconnect from room', () => {
+        test('user should be disconnected', (done) => {
+            const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
+
+            socketA.emit('join', testUser1, () => {});
+
+            socketA.disconnect();
+
+            expect(socketA.connected).toBe(false);
+
+            done();
+
+            // todo: check this on db level
+        });
+    });
 });
