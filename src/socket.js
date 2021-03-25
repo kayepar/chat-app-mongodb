@@ -10,7 +10,6 @@ const logger = require('./utilities/logger');
 // test todos:
 // todo: change focus on e2e test - should be email
 // todo: feedback error messages for email
-// todo: fixtures in unit tests
 // todo: re-login to show saved messages
 // todo: customerror - accept object instead?
 
@@ -75,8 +74,6 @@ const chatSocket = (io) => {
             if (filter.isProfane(message)) {
                 return callback('Profanity is not allowed!');
             }
-
-            console.log(`socket message, ${message}`);
 
             try {
                 const user = await User.findOne({ sessionId: socket.id });
