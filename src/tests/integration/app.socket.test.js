@@ -1,7 +1,8 @@
 /* eslint-disable jest/no-conditional-expect */
 /* eslint-disable jest/no-done-callback */
 const io = require('socket.io-client');
-const server = require('../../../src/app');
+const server = require('../../app');
+const mongoose = require('mongoose');
 
 const { configureDb } = require('./fixtures/db');
 const RoomModel = require('../../models/room');
@@ -23,7 +24,6 @@ const createSocket = () => {
 
         // define event handler for sucessfull connection
         socket.on('connect', () => {
-            // console.log('connected');
             resolve(socket);
         });
 
@@ -36,13 +36,10 @@ const createSocket = () => {
 
 const disconnectSocket = (socket) => {
     return new Promise((resolve, reject) => {
-        // check if socket connected
         if (socket.connected) {
-            // disconnect socket
             socket.disconnect();
             resolve(true);
         } else {
-            // not connected
             resolve(false);
         }
     });
@@ -56,7 +53,9 @@ beforeAll((done) => {
     });
 });
 
-afterAll((done) => {
+afterAll(async (done) => {
+    await mongoose.connection.close();
+
     server.close(() => {
         done();
     });
@@ -189,7 +188,15 @@ describe('integration tests for app - sockets', () => {
                 });
             });
 
-            // todo: invalid email
+            test('if email is invalid, should return error', (done) => {
+                const testUser = { email: 'kaye.cenizal!live.com', username: 'kaye.cenizal', room: 'javascript' };
+
+                socketA.emit('join', testUser, (callback) => {
+                    expect(callback).toHaveProperty('cause', 'Invalid email address');
+
+                    done();
+                });
+            });
         });
     });
 
@@ -294,7 +301,8 @@ describe('integration tests for app - sockets', () => {
                 }, 100);
 
                 setTimeout(() => {
-                    expect(msgCount).toBe(1); // meaning socketA only received the welcome message, not socketB's disconnection
+                    expect(msgCount).toBe(1);
+                    // meaning socketA only received the welcome message, not socketB's disconnection
 
                     done();
                 }, 200);
@@ -360,7 +368,6 @@ describe('integration tests for app - sockets', () => {
 
                     if (socketA_msgCount === 2) {
                         // gets own message back
-                        // expect(message).toEqual(testMessage);
                         expect(message).toMatchObject(testMessage);
 
                         done();
@@ -390,7 +397,7 @@ describe('integration tests for app - sockets', () => {
                     msgCount = msgCount += 1;
 
                     if (msgCount === 2) {
-                        // gets own message back (message1 === welcome message)
+                        // gets own message back (first message would be the welcome message)
                         expect(message).toMatchObject(testMessage);
 
                         done();
@@ -481,8 +488,10 @@ describe('integration tests for app - sockets', () => {
             socketA.on('usersInRoomUpdate', (message) => {
                 msgCount = msgCount += 1;
 
-                expect(message.users).toHaveLength(3);
-                expect(message).toMatchObject(testResult);
+                setTimeout(() => {
+                    expect(message.users).toHaveLength(3);
+                    expect(message).toMatchObject(testResult);
+                }, 500);
 
                 done();
             });
