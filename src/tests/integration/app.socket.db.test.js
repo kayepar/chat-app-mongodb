@@ -91,6 +91,8 @@ describe('integration tests for app - sockets and db', () => {
         });
     });
 
+    // todo: create room
+
     describe('join room', () => {
         describe('success', () => {
             test('if email and username are unique (in specific room), user should be saved to db', (done) => {
@@ -99,14 +101,10 @@ describe('integration tests for app - sockets and db', () => {
                 socketA.emit('join', testUser, async (callback) => {
                     expect(callback).toBeUndefined(); // meaning there's no error in adding user to room
 
-                    // todo: try using socket session id to query then just check the chatroom name
-                    const room = await RoomModel.findOne({ name: 'javascript' });
+                    const user = await UserModel.findOne({ sessionId: socketA.id });
 
-                    expect(room.users).toEqual(
-                        expect.arrayContaining([
-                            expect.objectContaining({ email: testUser.email, username: testUser.username }),
-                        ])
-                    );
+                    expect(user).not.toBeNull();
+                    expect(user.chatroom.name).toBe(testUser.room);
 
                     done();
                 });
@@ -127,7 +125,7 @@ describe('integration tests for app - sockets and db', () => {
                 });
             });
 
-            test('if previous session disconnects and then same credentials are used again, user should saved to db', async (done) => {
+            test('if previous session disconnects and then same credentials are used again, user should be saved to db', async (done) => {
                 const testUser = { email: 'user2@gmail.com', username: 'user2', room: 'css' };
 
                 socketA.emit('join', testUser, async (callback) => {
@@ -151,53 +149,94 @@ describe('integration tests for app - sockets and db', () => {
     });
 
     describe('failure', () => {
-        test('if email is already in use, user should NOT be able saved to db', (done) => {
+        test('if email is already in use, user should NOT be saved to db', (done) => {
             const testUser = { email: 'kaye.cenizal@gmail.com', username: 'catherine', room: 'javascript' };
 
             socketA.emit('join', testUser, async (callback) => {
-                const user = await UserModel.findOne({ email: testUser.email });
+                const room = await RoomModel.findOne({ name: testUser.room });
+                const user = room.users.find((user) => user.email === testUser.email);
 
-                expect(user).not.toBeNull();
                 expect(user.sessionId).not.toBe(socketA.id);
 
                 done();
             });
         });
 
-        test('if username is already in use, user should NOT be able to join in', (done) => {
+        test('if username is already in use, user should NOT be saved to db', (done) => {
             const testUser = { email: 'kaye.cenizal@live.com', username: 'kaye', room: 'javascript' };
 
-            socketA.emit('join', testUser, (callback) => {
-                expect(callback).toHaveProperty('cause', 'Username/Email address already in use');
+            socketA.emit('join', testUser, async (callback) => {
+                const room = await RoomModel.findOne({ name: testUser.room });
+                const user = room.users.find((user) => user.username === testUser.username);
+
+                expect(user.sessionId).not.toBe(socketA.id);
 
                 done();
             });
         });
 
-        test('if both email and username are already in use, user should NOT be able to join in', async (done) => {
+        test('if both email and username are already in use, user should NOT be saved to db', async (done) => {
             const testUser = { email: 'user1@gmail.com', username: 'user1', room: 'html' };
 
-            socketA.emit('join', testUser, (callback) => {
-                expect(callback).toBeUndefined();
-            });
+            socketA.emit('join', testUser, (callback) => {});
 
             await new Promise((res) => setTimeout(res, 100));
 
-            socketB.emit('join', testUser, (callback) => {
-                expect(callback).toHaveProperty('cause', 'Username/Email address already in use');
+            socketB.emit('join', testUser, async (callback) => {
+                const room = await RoomModel.findOne({ name: testUser.room });
+                const user = room.users.find((user) => user.email === testUser.email);
+
+                expect(user.sessionId).not.toBe(socketB.id);
 
                 done();
             });
         });
 
-        test('if email is invalid, should return error', (done) => {
+        test('if email is invalid, user should NOT be saved to db', (done) => {
             const testUser = { email: 'kaye.cenizal!live.com', username: 'kaye.cenizal', room: 'javascript' };
 
-            socketA.emit('join', testUser, (callback) => {
-                expect(callback).toHaveProperty('cause', 'Invalid email address');
+            socketA.emit('join', testUser, async (callback) => {
+                const room = await RoomModel.findOne({ name: testUser.room });
+
+                const user = room.users.find((user) => user.email === testUser.email);
+
+                expect(user).toBeUndefined();
 
                 done();
             });
         });
     });
+
+    describe('chatroom messages', () => {
+        test.only('sent message should be saved to db', async (done) => {
+            const testUser = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
+
+            socketA.emit('join', testUser, () => {});
+
+            await new Promise((res) => setTimeout(res, 300));
+
+            socketA.emit('sendMessage', `Hello!`, async () => {
+                const room = await RoomModel.findOne({ name: testUser.room });
+                const allMessages = await room.getMessages();
+
+                // get only messages from testUser
+                const userMessages = allMessages.reduce((text, message) => {
+                    if (message.sender.email === testUser.email) {
+                        text.push(message.text);
+                    }
+
+                    return text;
+                }, []);
+
+                expect(userMessages).toEqual(expect.arrayContaining(['Hello!']));
+
+                done();
+            });
+        });
+    });
+
+    // todo: if room not yet existing....should be created --> should add this to socket test itself
+    // todo: if room has no users and no messages...should be deleted (on disconnect)
+    // todo: if room has existing user ... should not be deleted
+    // todo: if room has saved messages ....should not be deleted
 });
