@@ -93,35 +93,33 @@ describe('integration tests for app - sockets and db', () => {
 
     describe('join room', () => {
         describe('success', () => {
-            test.only('if email and username are unique (in room), user should be saved to db', (done) => {
+            test('if email and username are unique (in specific room), user should be saved to db', (done) => {
                 const testUser = { email: 'catherine.par@gmail.com', username: 'catherine', room: 'javascript' };
 
                 socketA.emit('join', testUser, async (callback) => {
                     expect(callback).toBeUndefined(); // meaning there's no error in adding user to room
 
+                    // todo: try using socket session id to query then just check the chatroom name
                     const room = await RoomModel.findOne({ name: 'javascript' });
-                    console.log(room.users);
 
-                    console.log('==============');
-                    const users = await UserModel.findOne({ email: 'catherine.par@gmail.com' });
-                    console.log(users);
-                    // const user = await UserModel.findOne({ email: testUser.email, room: 'javascript' });
-
-                    // expect(user).not.toBeNull();
-                    // expect(user.chatroom.name).toBe(testUser.room);
+                    expect(room.users).toEqual(
+                        expect.arrayContaining([
+                            expect.objectContaining({ email: testUser.email, username: testUser.username }),
+                        ])
+                    );
 
                     done();
                 });
             });
 
-            test('if multiple unique users, all should saved to db', (done) => {
-                const testUser1 = { email: 'user1@gmail.com', username: 'user1', room: 'html' };
-                const testUser2 = { email: 'user2@gmail.com', username: 'user2', room: 'html' };
+            test('if multiple unique users (in specific room), all should be saved to db', (done) => {
+                const testUser1 = { email: 'user1@gmail.com', username: 'user1', room: 'test' };
+                const testUser2 = { email: 'user2@gmail.com', username: 'user2', room: 'test' };
 
                 socketA.emit('join', testUser1, () => {});
 
                 socketB.emit('join', testUser2, async (callback) => {
-                    const room = await RoomModel.findOne({ name: 'html' });
+                    const room = await RoomModel.findOne({ name: 'test' });
 
                     expect(room.users).toHaveLength(2);
 
@@ -141,7 +139,7 @@ describe('integration tests for app - sockets and db', () => {
                 await new Promise((res) => setTimeout(res, 300));
 
                 socketB.emit('join', testUser, async (callback) => {
-                    const user = await UserModel.findOne({ email: testUser.email });
+                    const user = await UserModel.findOne({ sessionId: socketB.id });
 
                     expect(user).not.toBeNull();
                     expect(user.chatroom.name).toBe(testUser.room);
