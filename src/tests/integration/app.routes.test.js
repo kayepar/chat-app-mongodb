@@ -142,7 +142,7 @@ describe('integration tests for app routes', () => {
             });
 
             test(`if there are active rooms, should return array of room names`, async () => {
-                const expectedResults = ['javascript', 'css'];
+                const expectedResults = ['javascript', 'css', 'html'];
                 const response = await request(app).get(`/getActiveRooms`);
 
                 expect(response.status).toEqual(200);
