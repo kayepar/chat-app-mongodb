@@ -5,8 +5,6 @@ const server = require('../../app');
 const mongoose = require('mongoose');
 
 const { configureDb } = require('./fixtures/db');
-const RoomModel = require('../../models/room');
-const UserModel = require('../../models/user');
 // require('log-timestamp');
 
 let socketA;
@@ -75,9 +73,9 @@ afterEach(async (done) => {
     await disconnectSocket(socketC);
 
     // 1sec delay to let disconnection to finish
-    await new Promise((res) => setTimeout(res, 1000));
-
-    done();
+    setTimeout(() => {
+        done();
+    }, 1000);
 });
 
 describe('integration tests for app - sockets', () => {
@@ -97,10 +95,6 @@ describe('integration tests for app - sockets', () => {
                 const testUser = { email: 'catherine.par@gmail.com', username: 'catherine', room: 'javascript' };
 
                 socketA.emit('join', testUser, async (callback) => {
-                    const user = await UserModel.findOne({ email: testUser.email });
-
-                    expect(user).not.toBeNull();
-                    expect(user.chatroom.name).toBe(testUser.room);
                     expect(callback).toBeUndefined(); // meaning there's no error in adding user to room
 
                     done();
@@ -118,10 +112,6 @@ describe('integration tests for app - sockets', () => {
                 socketB.emit('join', testUser2, async (callback) => {
                     expect(callback).toBeUndefined();
 
-                    const room = await RoomModel.findOne({ name: 'html' });
-
-                    expect(room.users).toHaveLength(2);
-
                     done();
                 });
             });
@@ -137,17 +127,13 @@ describe('integration tests for app - sockets', () => {
                     expect(socketA.connected).toBe(false);
                 });
 
-                await new Promise((res) => setTimeout(res, 300));
+                setTimeout(() => {
+                    socketB.emit('join', testUser, async (callback) => {
+                        expect(callback).toBeUndefined();
 
-                socketB.emit('join', testUser, async (callback) => {
-                    const user = await UserModel.findOne({ email: testUser.email });
-
-                    expect(user).not.toBeNull();
-                    expect(user.chatroom.name).toBe(testUser.room);
-                    expect(callback).toBeUndefined();
-
-                    done();
-                });
+                        done();
+                    });
+                }, 300);
             });
         });
 
@@ -179,13 +165,13 @@ describe('integration tests for app - sockets', () => {
                     expect(callback).toBeUndefined();
                 });
 
-                await new Promise((res) => setTimeout(res, 100));
+                setTimeout(() => {
+                    socketB.emit('join', testUser, (callback) => {
+                        expect(callback).toHaveProperty('cause', 'Username/Email address already in use');
 
-                socketB.emit('join', testUser, (callback) => {
-                    expect(callback).toHaveProperty('cause', 'Username/Email address already in use');
-
-                    done();
-                });
+                        done();
+                    });
+                }, 100);
             });
 
             test('if email is invalid, should return error', (done) => {
@@ -227,7 +213,6 @@ describe('integration tests for app - sockets', () => {
                 const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'css' };
 
                 socketA.emit('join', testUser1, () => {});
-                socketB.emit('join', testUser2, () => {});
 
                 const testMessage = {
                     sender: {
@@ -248,14 +233,17 @@ describe('integration tests for app - sockets', () => {
                         done();
                     }
                 });
+
+                setTimeout(() => {
+                    socketB.emit('join', testUser2, () => {});
+                }, 100);
             });
 
-            test('if existing user, should get notification when someone leaves the same room', (done) => {
+            test('if existing user, should get admin notification when someone leaves the same room', (done) => {
                 const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
                 const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'css' };
 
                 socketA.emit('join', testUser1, () => {});
-                socketB.emit('join', testUser2, () => {});
 
                 const testMessage = {
                     sender: { username: 'Admin' },
@@ -276,9 +264,13 @@ describe('integration tests for app - sockets', () => {
                 });
 
                 setTimeout(() => {
-                    socketB.disconnect();
+                    socketB.emit('join', testUser2, (callback) => {
+                        expect(callback).toBeUndefined();
 
-                    expect(socketB.connected).toBe(false);
+                        socketB.disconnect();
+
+                        expect(socketB.connected).toBe(false);
+                    });
                 }, 100);
             });
 
@@ -287,22 +279,24 @@ describe('integration tests for app - sockets', () => {
                 const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'html' };
 
                 socketA.emit('join', testUser1, () => {});
-                socketB.emit('join', testUser2, () => {});
 
                 let msgCount = 0;
-                socketA.on('message', (message) => {
+                socketA.on('message', () => {
                     msgCount = msgCount += 1;
                 });
 
                 setTimeout(() => {
-                    socketB.disconnect();
+                    socketB.emit('join', testUser2, (callback) => {
+                        expect(callback).toBeUndefined();
 
-                    expect(socketB.connected).toBe(false);
+                        socketB.disconnect();
+
+                        expect(socketB.connected).toBe(false);
+                    });
                 }, 100);
 
                 setTimeout(() => {
                     expect(msgCount).toBe(1);
-                    // meaning socketA only received the welcome message, not socketB's disconnection
 
                     done();
                 }, 200);
@@ -310,12 +304,11 @@ describe('integration tests for app - sockets', () => {
         });
 
         describe('chatroom messages', () => {
-            test('user should be able to receive messages sent over to the chatroom', async (done) => {
+            test('user should be able to send/receive messages sent over to the chatroom', async (done) => {
                 const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
                 const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'css' };
 
                 socketA.emit('join', testUser1, () => {});
-                socketB.emit('join', testUser2, () => {});
 
                 const testMessage = {
                     sender: {
@@ -325,16 +318,24 @@ describe('integration tests for app - sockets', () => {
                     text: `Hello ${testUser1.room}! My name is ${testUser1.username}`,
                 };
 
-                await new Promise((res) => setTimeout(res, 300));
-
-                socketA.emit('sendMessage', `Hello ${testUser1.room}! My name is ${testUser1.username}`, () => {});
-
+                let msgCount = 0;
                 socketB.on('message', (message) => {
-                    expect(message).toMatchObject(testMessage);
+                    msgCount = msgCount += 1;
 
-                    // todo: check db for saved message
-                    done();
+                    if (msgCount === 2) {
+                        expect(message).toMatchObject(testMessage);
+
+                        done();
+                    }
                 });
+
+                setTimeout(() => {
+                    socketB.emit('join', testUser2, () => {});
+                }, 100);
+
+                setTimeout(() => {
+                    socketA.emit('sendMessage', `Hello ${testUser1.room}! My name is ${testUser1.username}`, () => {});
+                }, 200);
             });
 
             test('user should not be able to receive messages sent over to a different chatroom', (done) => {
@@ -353,7 +354,7 @@ describe('integration tests for app - sockets', () => {
                 socketB.emit('join', testUser2, () => {});
 
                 let socketB_msgCount = 0;
-                socketB.on('message', (message) => {
+                socketB.on('message', () => {
                     socketB_msgCount = socketB_msgCount += 1;
 
                     // only gets welcome message and not testUser1's
@@ -410,9 +411,9 @@ describe('integration tests for app - sockets', () => {
             });
 
             test('if message has profanity, generate error message', (done) => {
-                const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
+                const testUser = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
 
-                socketA.emit('join', testUser1, () => {});
+                socketA.emit('join', testUser, () => {});
 
                 socketA.emit('sendMessage', 'damn', (callback) => {
                     expect(callback).toBe('Profanity is not allowed!');
@@ -448,9 +449,8 @@ describe('integration tests for app - sockets', () => {
             const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'html' };
 
             socketA.emit('join', testUser1, () => {});
-            socketB.emit('join', testUser2, () => {});
 
-            const testResult = { allActiveRooms: ['javascript', 'css'] };
+            const testResult = { allActiveRooms: ['javascript', 'css', 'html'] };
 
             let msgCount = 0;
             socketA.on('activeRoomsUpdate', (message) => {
@@ -465,22 +465,24 @@ describe('integration tests for app - sockets', () => {
             });
 
             setTimeout(() => {
-                socketB.disconnect();
+                socketB.emit('join', testUser2, (callback) => {
+                    expect(callback).toBeUndefined();
 
-                expect(socketB.connected).toBe(false);
-            }, 500);
+                    socketB.disconnect();
+
+                    expect(socketB.connected).toBe(false);
+                });
+            }, 300);
         });
     });
 
     describe('usersInRoomUpdate event', () => {
-        test(`if user joins in, existing user in the same room should get 'usersInRoomUpdate' event`, (done) => {
-            const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'html' };
-            const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'html' };
-            const testUser3 = { email: 'john.par@gmail.com', username: 'john', room: 'html' };
+        test(`if user joins in, existing user in the same room should get 'usersInRoomUpdate' event`, async (done) => {
+            const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'bootstrap' };
+            const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'bootstrap' };
+            const testUser3 = { email: 'john.par@gmail.com', username: 'john', room: 'bootstrap' };
 
             socketA.emit('join', testUser1, () => {});
-            socketB.emit('join', testUser2, () => {});
-            socketC.emit('join', testUser3, () => {});
 
             const testResult = { users: [{ username: 'kaye' }, { username: 'callie' }, { username: 'john' }] };
 
@@ -488,19 +490,24 @@ describe('integration tests for app - sockets', () => {
             socketA.on('usersInRoomUpdate', (message) => {
                 msgCount = msgCount += 1;
 
-                setTimeout(() => {
+                if (msgCount === 3) {
                     expect(message.users).toHaveLength(3);
                     expect(message).toMatchObject(testResult);
-                }, 500);
 
-                done();
+                    done();
+                }
             });
+
+            setTimeout(() => {
+                socketB.emit('join', testUser2, () => {});
+                socketC.emit('join', testUser3, () => {});
+            }, 200);
         });
 
         test(`if user leaves, existing user in the same room should get 'usersInRoomUpdate' event`, (done) => {
-            const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'html' };
-            const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'html' };
-            const testUser3 = { email: 'john.par@gmail.com', username: 'john', room: 'html' };
+            const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'bootstrap' };
+            const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'bootstrap' };
+            const testUser3 = { email: 'john.par@gmail.com', username: 'john', room: 'bootstrap' };
 
             socketA.emit('join', testUser1, () => {});
             socketB.emit('join', testUser2, () => {});
@@ -524,7 +531,7 @@ describe('integration tests for app - sockets', () => {
                 socketB.disconnect();
 
                 expect(socketB.connected).toBe(false);
-            }, 500);
+            }, 300);
         });
     });
 
