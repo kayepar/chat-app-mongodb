@@ -32,6 +32,7 @@ const createSocket = () => {
 };
 
 const disconnectSocket = (socket) => {
+    // eslint-disable-next-line no-unused-vars
     return new Promise((resolve, reject) => {
         if (socket.connected) {
             socket.disconnect();
