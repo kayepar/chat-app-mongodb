@@ -72,7 +72,7 @@ afterEach(async (done) => {
     await disconnectSocket(socketB);
     await disconnectSocket(socketC);
 
-    // 1sec delay to let disconnection to finish
+    // 1 sec delay to let disconnection to finish
     setTimeout(() => {
         done();
     }, 1000);
@@ -437,14 +437,11 @@ describe('integration tests for app - sockets', () => {
             socketA.on('activeRoomsUpdate', (message) => {
                 expect(message).toEqual(testResult);
 
-                // todo: test getting data from db
                 done();
             });
         });
 
         test(`if another user leaves, existing user (regardless of room) should get 'activeRoomsUpdate' event`, (done) => {
-            // todo: db test that room becomes inactive when the last user leaves (and if it has no saved messages)
-
             const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
             const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'html' };
 
@@ -575,8 +572,6 @@ describe('integration tests for app - sockets', () => {
             expect(socketA.connected).toBe(false);
 
             done();
-
-            // todo: check this on db level
         });
     });
 });
