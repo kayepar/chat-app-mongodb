@@ -29,6 +29,13 @@ const user3 = {
     chatroom: room2._id,
 };
 
+const user4 = {
+    sessionId: new mongoose.Types.ObjectId(),
+    email: 'catherine.par@gmail.com',
+    username: 'catherine',
+    chatroom: room3._id,
+};
+
 const configureDb = async () => {
     await RoomModel.deleteMany();
     await UserModel.deleteMany();
@@ -40,6 +47,7 @@ const configureDb = async () => {
     await new UserModel(user1).save();
     await new UserModel(user2).save();
     await new UserModel(user3).save();
+    await new UserModel(user4).save();
 };
 
 module.exports = { configureDb, room1, room2, room3, user1, user2, user3 };
