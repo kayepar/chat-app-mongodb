@@ -183,6 +183,26 @@ describe('integration tests for app - sockets', () => {
                     done();
                 });
             });
+
+            test('if email is missing, should return error', (done) => {
+                const testUser = { username: 'kaye.cenizal', room: 'javascript' };
+
+                socketA.emit('join', testUser, (callback) => {
+                    expect(callback).toHaveProperty('cause', 'Incomplete user details');
+
+                    done();
+                });
+            });
+
+            test('if username is missing, should return error', (done) => {
+                const testUser = { email: 'kaye.cenizal!live.com', username: '', room: 'javascript' };
+
+                socketA.emit('join', testUser, (callback) => {
+                    expect(callback).toHaveProperty('cause', 'Incomplete user details');
+
+                    done();
+                });
+            });
         });
     });
 
@@ -359,8 +379,6 @@ describe('integration tests for app - sockets', () => {
 
                     // only gets welcome message and not testUser1's
                     expect(socketB_msgCount).toBe(1);
-
-                    // todo: check db, message should not be in socketB's room
                 });
 
                 let socketA_msgCount = 0;
@@ -420,6 +438,27 @@ describe('integration tests for app - sockets', () => {
 
                     done();
                 });
+            });
+
+            test('if message has no text, should return a null message', (done) => {
+                const testUser = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
+
+                socketA.emit('join', testUser, () => {});
+
+                let msgCount = 0;
+                socketA.on('message', (message) => {
+                    msgCount = msgCount += 1;
+
+                    if (msgCount === 2) {
+                        expect(message).toBeNull();
+
+                        done();
+                    }
+                });
+
+                setTimeout(() => {
+                    socketA.emit('sendMessage', '', () => {});
+                }, 100);
             });
         });
     });
