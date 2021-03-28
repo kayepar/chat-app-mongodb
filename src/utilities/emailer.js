@@ -15,7 +15,7 @@ const sendEmail = async ({ cause, stack }) => {
     const emailDetails = getEmailDetails(cause, stack);
 
     try {
-        // return transporter.sendMail(emailDetails);
+        return transporter.sendMail(emailDetails);
     } catch (error) {
         return new CustomError('Failed to send email', error.stack, 500);
     }
