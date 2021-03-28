@@ -62,8 +62,7 @@ const chatSocket = (io) => {
                 if (error instanceof CustomError) {
                     return callback(error);
                 } else {
-                    console.log('500 error, will email');
-                    new CustomError(`Socket 'join' error`, error.stack, 500, false);
+                    new CustomError(`Socket 'join' error`, error.stack, 500, true);
                 }
             }
         });
