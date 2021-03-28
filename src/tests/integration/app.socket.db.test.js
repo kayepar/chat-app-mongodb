@@ -477,11 +477,9 @@ describe('integration tests for app - sockets and db', () => {
 
                 socketA.emit('join', testUser, (callback) => {
                     expect(callback).toBeUndefined();
-                });
 
-                setTimeout(() => {
                     socketA.disconnect();
-                }, 200);
+                });
 
                 setTimeout(async () => {
                     const room = await RoomModel.findOne({ name: testUser.room });
