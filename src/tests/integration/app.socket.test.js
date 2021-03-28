@@ -506,12 +506,10 @@ describe('integration tests for app - sockets', () => {
 
         test(`if user leaves, existing user in the same room should get 'usersInRoomUpdate' event`, (done) => {
             const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'bootstrap' };
-            const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'bootstrap' };
-            const testUser3 = { email: 'john.par@gmail.com', username: 'john', room: 'bootstrap' };
+            const testUser2 = { email: 'john.par@gmail.com', username: 'john', room: 'bootstrap' };
+            const testUser3 = { email: 'callie.par@gmail.com', username: 'callie', room: 'bootstrap' };
 
             socketA.emit('join', testUser1, () => {});
-            socketB.emit('join', testUser2, () => {});
-            socketC.emit('join', testUser3, () => {});
 
             const testResult = { users: [{ username: 'kaye' }, { username: 'john' }] };
 
@@ -528,9 +526,14 @@ describe('integration tests for app - sockets', () => {
             });
 
             setTimeout(() => {
-                socketB.disconnect();
+                socketB.emit('join', testUser2, () => {});
+                socketC.emit('join', testUser3, (callback) => {
+                    expect(callback).toBeUndefined();
 
-                expect(socketB.connected).toBe(false);
+                    socketC.disconnect();
+
+                    expect(socketC.connected).toBe(false);
+                });
             }, 300);
         });
     });
