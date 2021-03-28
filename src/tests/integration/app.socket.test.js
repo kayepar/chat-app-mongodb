@@ -5,7 +5,6 @@ const server = require('../../app');
 const mongoose = require('mongoose');
 
 const { configureDb } = require('./fixtures/db');
-// require('log-timestamp');
 
 let socketA;
 let socketB;

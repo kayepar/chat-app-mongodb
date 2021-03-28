@@ -7,7 +7,6 @@ const mongoose = require('mongoose');
 const { configureDb } = require('./fixtures/db');
 const RoomModel = require('../../models/room');
 const UserModel = require('../../models/user');
-// require('log-timestamp');
 
 let socketA;
 let socketB;
