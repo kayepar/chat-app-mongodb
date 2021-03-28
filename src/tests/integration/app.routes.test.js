@@ -1,9 +1,16 @@
 const request = require('supertest');
 const app = require('../../app');
+
+const mongoose = require('mongoose');
+
 const { configureDb } = require('./fixtures/db');
 const RoomModel = require('../../models/room');
 
 beforeEach(configureDb);
+
+afterAll(async () => {
+    await mongoose.connection.close();
+});
 
 describe('integration tests for app routes', () => {
     describe('/validateUser route', () => {
