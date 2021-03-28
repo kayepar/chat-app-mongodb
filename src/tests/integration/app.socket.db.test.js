@@ -303,6 +303,33 @@ describe('integration tests for app - sockets and db', () => {
         });
     });
 
+    describe('activeRoomsUpdate event', () => {
+        test(`if user joins, the room should be added to active rooms list`, async (done) => {
+            const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
+            const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'python' };
+
+            socketA.emit('join', testUser1, async (callback) => {
+                expect(callback).toBeUndefined();
+
+                const activeRooms = await RoomModel.getActiveRooms();
+
+                expect(activeRooms).toStrictEqual(['javascript', 'css', 'html']);
+            });
+
+            await new Promise((res) => setTimeout(res, 300));
+
+            socketB.emit('join', testUser2, async (callback) => {
+                expect(callback).toBeUndefined();
+
+                const activeRooms = await RoomModel.getActiveRooms();
+
+                expect(activeRooms).toStrictEqual(['javascript', 'css', 'html', 'python']);
+
+                done();
+            });
+        });
+    });
+
     // todo: create room should be added to socket test
     // todo: if room has no users and no messages...should be deleted (on disconnect)
     // todo: if room has existing user ... should not be deleted
