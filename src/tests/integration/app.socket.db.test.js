@@ -74,10 +74,10 @@ afterEach(async (done) => {
     await disconnectSocket(socketB);
     await disconnectSocket(socketC);
 
-    // 1sec delay to let disconnection to finish
-    await new Promise((res) => setTimeout(res, 1000));
-
-    done();
+    // 1 sec delay to let disconnection to finish
+    setTimeout(() => {
+        done();
+    }, 1000);
 });
 
 describe('integration tests for app - sockets and db', () => {
@@ -92,7 +92,7 @@ describe('integration tests for app - sockets and db', () => {
     });
 
     describe('create room', () => {
-        test('if room is not yet existing, it should created and saved to db', async (done) => {
+        test('if room is not yet existing, it should be created and saved to db', async (done) => {
             // note: room will be automatically created once a user joins in
             const testUser = { email: 'catherine.par@gmail.com', username: 'catherine', room: 'node.js' };
 
@@ -113,7 +113,7 @@ describe('integration tests for app - sockets and db', () => {
             });
         });
 
-        test('if room is existing, it should used instead of creating a duplicate', async (done) => {
+        test('if room is existing, it should be reused instead of creating a duplicate', async (done) => {
             // note: room will be automatically created once a user joins in
             const testUser = { email: 'catherine.par@gmail.com', username: 'catherine', room: 'javascript' };
 
@@ -179,18 +179,18 @@ describe('integration tests for app - sockets and db', () => {
                     expect(socketA.connected).toBe(false);
                 });
 
-                await new Promise((res) => setTimeout(res, 300));
+                setTimeout(() => {
+                    socketB.emit('join', testUser, async (callback) => {
+                        expect(callback).toBeUndefined();
 
-                socketB.emit('join', testUser, async (callback) => {
-                    expect(callback).toBeUndefined();
+                        const user = await UserModel.findOne({ sessionId: socketB.id });
 
-                    const user = await UserModel.findOne({ sessionId: socketB.id });
+                        expect(user).not.toBeNull();
+                        expect(user.chatroom.name).toBe(testUser.room);
 
-                    expect(user).not.toBeNull();
-                    expect(user.chatroom.name).toBe(testUser.room);
-
-                    done();
-                });
+                        done();
+                    });
+                }, 300);
             });
         });
     });
@@ -229,16 +229,16 @@ describe('integration tests for app - sockets and db', () => {
                 expect(callback).toBeUndefined();
             });
 
-            await new Promise((res) => setTimeout(res, 100));
+            setTimeout(() => {
+                socketB.emit('join', testUser, async () => {
+                    const room = await RoomModel.findOne({ name: testUser.room });
+                    const user = room.users.find((user) => user.email === testUser.email);
 
-            socketB.emit('join', testUser, async () => {
-                const room = await RoomModel.findOne({ name: testUser.room });
-                const user = room.users.find((user) => user.email === testUser.email);
+                    expect(user.sessionId).not.toBe(socketB.id);
 
-                expect(user.sessionId).not.toBe(socketB.id);
-
-                done();
-            });
+                    done();
+                });
+            }, 100);
         });
 
         test('if email is invalid, user should NOT be saved to db', (done) => {
@@ -264,25 +264,25 @@ describe('integration tests for app - sockets and db', () => {
                 expect(callback).toBeUndefined();
             });
 
-            await new Promise((res) => setTimeout(res, 300));
+            setTimeout(() => {
+                socketA.emit('sendMessage', `Hello!`, async () => {
+                    const room = await RoomModel.findOne({ name: testUser.room });
+                    const allMessages = await room.getMessages();
 
-            socketA.emit('sendMessage', `Hello!`, async () => {
-                const room = await RoomModel.findOne({ name: testUser.room });
-                const allMessages = await room.getMessages();
+                    // get only messages from testUser
+                    const userMessages = allMessages.reduce((text, message) => {
+                        if (message.sender.email === testUser.email) {
+                            text.push(message.text);
+                        }
 
-                // get only messages from testUser
-                const userMessages = allMessages.reduce((text, message) => {
-                    if (message.sender.email === testUser.email) {
-                        text.push(message.text);
-                    }
+                        return text;
+                    }, []);
 
-                    return text;
-                }, []);
+                    expect(userMessages).toEqual(expect.arrayContaining(['Hello!']));
 
-                expect(userMessages).toEqual(expect.arrayContaining(['Hello!']));
-
-                done();
-            });
+                    done();
+                });
+            }, 300);
         });
 
         test('if message has profanity, it should NOT be saved to db', (done) => {
@@ -303,35 +303,217 @@ describe('integration tests for app - sockets and db', () => {
         });
     });
 
-    describe('activeRoomsUpdate event', () => {
-        test(`if user joins, the room should be added to active rooms list`, async (done) => {
-            const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
-            const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'python' };
+    describe('activeRooms event', () => {
+        describe('on join', () => {
+            test(`room should be added to active rooms list`, async (done) => {
+                const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
+                const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'python' };
 
-            socketA.emit('join', testUser1, async (callback) => {
-                expect(callback).toBeUndefined();
+                socketA.emit('join', testUser1, async (callback) => {
+                    expect(callback).toBeUndefined();
 
-                const activeRooms = await RoomModel.getActiveRooms();
+                    const activeRooms = await RoomModel.getActiveRooms();
 
-                expect(activeRooms).toStrictEqual(['javascript', 'css', 'html']);
+                    expect(activeRooms).toStrictEqual(['javascript', 'css', 'html']);
+                });
+
+                setTimeout(() => {
+                    socketB.emit('join', testUser2, async (callback) => {
+                        expect(callback).toBeUndefined();
+
+                        const activeRooms = await RoomModel.getActiveRooms();
+
+                        expect(activeRooms).toStrictEqual(['javascript', 'css', 'html', 'python']);
+
+                        done();
+                    });
+                }, 300);
+            });
+        });
+
+        describe('on disconnect', () => {
+            test(`if room still has other active users, it should remain on activeRooms list`, async (done) => {
+                const testUser = { email: 'catherine.par@gmail.com', username: 'catherine', room: 'javascript' };
+
+                socketA.emit('join', testUser, async (callback) => {
+                    expect(callback).toBeUndefined();
+
+                    socketA.disconnect();
+                });
+
+                setTimeout(async () => {
+                    const activeRooms = await RoomModel.getActiveRooms();
+
+                    expect(activeRooms).toEqual(expect.arrayContaining([testUser.room]));
+
+                    done();
+                }, 200);
             });
 
-            await new Promise((res) => setTimeout(res, 300));
+            test(`if room has no active users left, it should be removed from activeRooms list`, async (done) => {
+                const testUser = { email: 'catherine.par@gmail.com', username: 'catherine', room: 'java' };
 
-            socketB.emit('join', testUser2, async (callback) => {
-                expect(callback).toBeUndefined();
+                socketA.emit('join', testUser, async (callback) => {
+                    expect(callback).toBeUndefined();
 
-                const activeRooms = await RoomModel.getActiveRooms();
+                    socketA.disconnect();
+                });
 
-                expect(activeRooms).toStrictEqual(['javascript', 'css', 'html', 'python']);
+                setTimeout(async () => {
+                    const activeRooms = await RoomModel.getActiveRooms();
 
-                done();
+                    expect(activeRooms).toEqual(expect.not.arrayContaining([testUser.room]));
+
+                    done();
+                }, 200);
+            });
+        });
+    });
+
+    describe('usersInRoom event', () => {
+        describe('on join', () => {
+            test(`user should be included in activeUsers list`, async (done) => {
+                const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'bootstrap' };
+                const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'bootstrap' };
+                const testUser3 = { email: 'john.par@gmail.com', username: 'john', room: 'bootstrap' };
+
+                socketA.emit('join', testUser1, () => {});
+                socketB.emit('join', testUser2, () => {});
+                socketC.emit('join', testUser3, () => {});
+
+                const testUsers = [{ username: 'kaye' }, { username: 'callie' }, { username: 'john' }];
+
+                setTimeout(async () => {
+                    const room = await RoomModel.findOne({ name: testUser1.room });
+                    const users = await room.getActiveUsers();
+
+                    expect(users).toHaveLength(3);
+                    expect(users).toMatchObject(testUsers);
+
+                    done();
+                }, 200);
+            });
+        });
+
+        describe('on disconnect', () => {
+            test(`disconnected user should be removed from activeUsers list`, (done) => {
+                const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'bootstrap' };
+                const testUser2 = { email: 'john.par@gmail.com', username: 'john', room: 'bootstrap' };
+                const testUser3 = { email: 'callie.par@gmail.com', username: 'callie', room: 'bootstrap' };
+
+                socketA.emit('join', testUser1, () => {});
+                socketB.emit('join', testUser2, () => {});
+
+                const testUsers = [{ username: 'kaye' }, { username: 'john' }];
+
+                setTimeout(() => {
+                    socketC.emit('join', testUser3, (callback) => {
+                        expect(callback).toBeUndefined();
+
+                        socketC.disconnect();
+
+                        expect(socketC.connected).toBe(false);
+                    });
+                }, 300);
+
+                setTimeout(async () => {
+                    const room = await RoomModel.findOne({ name: testUser1.room });
+                    const users = await room.getActiveUsers();
+
+                    expect(users).toHaveLength(2);
+                    expect(users).toMatchObject(testUsers);
+
+                    done();
+                }, 200);
+            });
+        });
+    });
+
+    describe('disconnect from room', () => {
+        describe('user cleanup', () => {
+            test('user be deleted from db', (done) => {
+                const testUser = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
+
+                socketA.emit('join', testUser, async () => {
+                    socketA.disconnect();
+
+                    const user = await UserModel.findOne({ sessionId: socketA.id });
+
+                    expect(user).toBeNull();
+
+                    done();
+                });
+            });
+        });
+
+        describe('room cleanup', () => {
+            test(`if room has users, it should NOT be deleted from db`, async (done) => {
+                const testUser1 = { email: 'catherine.par@gmail.com', username: 'catherine', room: 'java' };
+                const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'java' };
+
+                socketA.emit('join', testUser1, (callback) => {
+                    expect(callback).toBeUndefined();
+                });
+
+                setTimeout(() => {
+                    socketB.emit('join', testUser2, (callback) => {
+                        expect(callback).toBeUndefined();
+
+                        socketB.disconnect();
+                    });
+                }, 200);
+
+                setTimeout(async () => {
+                    const room = await RoomModel.findOne({ name: testUser1.room });
+
+                    expect(room).not.toBeNull();
+
+                    done();
+                }, 400);
+            });
+
+            test(`if room has no users, it should be deleted from db`, async (done) => {
+                const testUser = { email: 'catherine.par@gmail.com', username: 'catherine', room: 'java' };
+
+                socketA.emit('join', testUser, (callback) => {
+                    expect(callback).toBeUndefined();
+                });
+
+                setTimeout(() => {
+                    socketA.disconnect();
+                }, 200);
+
+                setTimeout(async () => {
+                    const room = await RoomModel.findOne({ name: testUser.room });
+
+                    expect(room).toBeNull();
+
+                    done();
+                }, 300);
+            });
+
+            test(`if room has no users but has saved messages, it should NOT be deleted from db`, async (done) => {
+                const testUser = { email: 'catherine.par@gmail.com', username: 'catherine', room: 'java' };
+
+                socketA.emit('join', testUser, (callback) => {
+                    expect(callback).toBeUndefined();
+                });
+
+                setTimeout(() => {
+                    socketA.emit('sendMessage', 'hello!', () => {});
+                    socketA.disconnect();
+                }, 200);
+
+                setTimeout(async () => {
+                    const room = await RoomModel.findOne({ name: testUser.room });
+
+                    expect(room).not.toBeNull();
+
+                    done();
+                }, 300);
             });
         });
     });
 
     // todo: create room should be added to socket test
-    // todo: if room has no users and no messages...should be deleted (on disconnect)
-    // todo: if room has existing user ... should not be deleted
-    // todo: if room has saved messages ....should not be deleted
 });
