@@ -391,7 +391,7 @@ describe('integration tests for app - sockets and db', () => {
                     expect(users).toMatchObject(testUsers);
 
                     done();
-                }, 200);
+                }, 1000);
             });
         });
 
