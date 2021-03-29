@@ -7,7 +7,7 @@ module.exports = {
         dumpio: true,
     },
     server: {
-        command: 'node src/index.js',
+        command: 'node src/server.js',
         port: 80,
     },
 };
