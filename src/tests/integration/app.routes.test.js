@@ -44,7 +44,7 @@ describe('integration tests for app routes', () => {
             test('if any other issue is encountered, should send HTTP 500 error', async () => {
                 const findOneMock = jest.spyOn(RoomModel, 'findOne');
                 findOneMock.mockImplementationOnce(() => {
-                    throw new Error('Something went wrong');
+                    throw new Error('Integration test: Something went wrong');
                 });
 
                 const response = await request(app).get(
@@ -122,7 +122,7 @@ describe('integration tests for app routes', () => {
             test('if error is encountered, should return HTTP 500', async () => {
                 const getActiveRoomsMock = jest.spyOn(RoomModel, 'getActiveRooms');
                 getActiveRoomsMock.mockImplementationOnce(() => {
-                    throw new Error('Something went wrong');
+                    throw new Error('Integration test: Something went wrong');
                 });
 
                 const response = await request(app).get(`/getActiveRooms`);
