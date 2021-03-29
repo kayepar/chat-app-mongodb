@@ -7,12 +7,6 @@ const Message = require('./models/message');
 const CustomError = require('./error/CustomError');
 const logger = require('./utilities/logger');
 
-// test todos:
-// todo: change focus on e2e test - should be email
-// todo: feedback error messages for email
-// todo: re-login to show saved messages
-// todo: customerror - accept object instead?
-
 const chatSocket = (io) => {
     io.on('connection', (socket) => {
         socket.on('join', async ({ email, username, room }, callback) => {
