@@ -1,11 +1,17 @@
-const nodemon = require('nodemon');
-const jestPuppeteerConfig = require('../../../jest-puppeteer.config');
+require('../../jest-puppeteer.config');
 
 const timeout = 40000;
+let page;
 
 beforeAll(async () => {
+    // page = await global.__BROWSER__.newPage();
+    page = await browser.newPage();
     await page.goto(URL, { waitUntil: 'domcontentloaded' });
 });
+
+// afterAll(async () => {
+//     await server.close();
+// });
 
 // await jestPuppeteer.debug();
 
@@ -189,18 +195,18 @@ describe('end-to-end tests for chat app', () => {
                 await page.click('#email-text');
                 await page.type('#email-text', 'kaye!gmail.com');
 
-                await page.click('#start-button').catch((e) => console.log('hello'));
+                await page.click('#start-button');
 
-                await page.waitForSelector('#email-feedback', { visible: true });
+                // await page.waitForSelector('#email-feedback', { visible: true });
 
-                const is_email_feedback_shown = await page.$eval(
-                    '[id="email-feedback"]',
+                const is_email_feedback1_shown = await page.$eval(
+                    '[data-testid="email-feedback1"]',
                     (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
                 );
 
-                console.log(is_email_feedback_shown);
+                // console.log(is_email_feedback_shown);
 
-                expect(is_email_feedback_shown).toBe(true);
+                expect(is_email_feedback1_shown).toBe(true);
             },
             timeout
         );
