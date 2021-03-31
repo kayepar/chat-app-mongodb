@@ -517,10 +517,10 @@ describe('end-to-end tests for chat app', () => {
             describe('modal window (room existing)', () => {
                 beforeAll(async () => {
                     await page2.click('#email-text');
-                    await page2.type('#email-text', 'callie.par@gmail.com');
+                    await page2.type('#email-text', 'kaye.cenizal@gmail.com');
 
                     await page2.click('#username-text');
-                    await page2.type('#username-text', 'callie');
+                    await page2.type('#username-text', 'kaye');
 
                     await page2.click('#room-text');
                     await page2.type('#room-text', 'html');
@@ -607,9 +607,24 @@ describe('end-to-end tests for chat app', () => {
             });
 
             describe.only('input validation (duplicate credentials)', () => {
-                // todo: both email and username
+                beforeAll(async () => {
+                    const emailInput = await page2.$('#email-text');
+                    await emailInput.click({ clickCount: 3 });
+                    await page2.keyboard.press('Backspace');
+
+                    await page2.click('#email-text');
+                    await page2.type('#email-text', 'callie.par@gmail.com');
+
+                    const usernameInput = await page2.$('#username-text');
+                    await usernameInput.click({ clickCount: 3 });
+                    await page2.keyboard.press('Backspace');
+
+                    await page2.click('#username-text');
+                    await page2.type('#username-text', 'callie');
+                });
+
                 test(
-                    'if duplicate email, should display error message',
+                    'if email and username are already in use, should display error message on both fields',
                     async () => {
                         await page2.keyboard.press('Enter');
 
@@ -619,12 +634,19 @@ describe('end-to-end tests for chat app', () => {
                         );
 
                         expect(is_duplicate_email_error_shown).toBe(true);
+
+                        const is_duplicate_username_error_shown = await page2.$eval(
+                            '#username-feedback',
+                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
+                        );
+
+                        expect(is_duplicate_username_error_shown).toBe(true);
                     },
                     timeout
                 );
 
                 test(
-                    'if email is changed, should hide error message',
+                    'if email is changed, should hide error message on email field',
                     async () => {
                         const emailInput = await page2.$('#email-text');
                         await emailInput.click({ clickCount: 3 });
@@ -640,37 +662,18 @@ describe('end-to-end tests for chat app', () => {
 
                         expect(is_duplicate_email_error_shown).toBe(false);
 
-                        // await jestPuppeteer.debug();
-                    },
-                    timeout
-                );
-
-                test(
-                    'if duplicate username, should display error message',
-                    async () => {
-                        // const usernameInput = await page2.$('#username-text');
-                        // await usernameInput.click({ clickCount: 3 });
-                        // await page2.keyboard.press('Backspace');
-
-                        // await page2.click('#username-text');
-                        // await page2.type('#username-text', 'callie');
-
-                        await page2.keyboard.press('Enter');
-
                         const is_duplicate_username_error_shown = await page2.$eval(
                             '#username-feedback',
                             (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
                         );
 
                         expect(is_duplicate_username_error_shown).toBe(true);
-
-                        // await jestPuppeteer.debug();
                     },
                     timeout
                 );
 
-                test.skip(
-                    'if username is changed, should hide error message',
+                test(
+                    'if username is changed, should hide error message on username field',
                     async () => {
                         const usernameInput = await page2.$('#username-text');
                         await usernameInput.click({ clickCount: 3 });
@@ -685,8 +688,86 @@ describe('end-to-end tests for chat app', () => {
                         );
 
                         expect(is_duplicate_username_error_shown).toBe(false);
+                    },
+                    timeout
+                );
 
-                        // await jestPuppeteer.debug();
+                test(
+                    'if only email is in use, should display error message on email field',
+                    async () => {
+                        const emailInput = await page2.$('#email-text');
+                        await emailInput.click({ clickCount: 3 });
+                        await page2.keyboard.press('Backspace');
+
+                        await page2.click('#email-text');
+                        await page2.type('#email-text', 'callie.par@gmail.com');
+
+                        await page2.keyboard.press('Enter');
+
+                        const is_duplicate_email_error_shown = await page2.$eval(
+                            '#email-feedback',
+                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
+                        );
+
+                        expect(is_duplicate_email_error_shown).toBe(true);
+                    },
+                    timeout
+                );
+
+                test(
+                    'if only username is in use, should display error message on username field',
+                    async () => {
+                        const emailInput = await page2.$('#email-text');
+                        await emailInput.click({ clickCount: 3 });
+                        await page2.keyboard.press('Backspace');
+
+                        await page2.click('#email-text');
+                        await page2.type('#email-text', 'kaye.cenizal@gmail.com');
+
+                        const usernameInput = await page2.$('#username-text');
+                        await usernameInput.click({ clickCount: 3 });
+                        await page2.keyboard.press('Backspace');
+
+                        await page2.click('#username-text');
+                        await page2.type('#username-text', 'callie');
+
+                        await page2.keyboard.press('Enter');
+
+                        const is_duplicate_username_error_shown = await page2.$eval(
+                            '#username-feedback',
+                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
+                        );
+
+                        expect(is_duplicate_username_error_shown).toBe(true);
+                    },
+                    timeout
+                );
+            });
+
+            describe.only('submit form', () => {
+                beforeAll(async () => {
+                    const emailInput = await page2.$('#email-text');
+                    await emailInput.click({ clickCount: 3 });
+                    await page2.keyboard.press('Backspace');
+
+                    await page2.click('#email-text');
+                    await page2.type('#email-text', 'kaye.cenizal@gmail.com');
+
+                    const usernameInput = await page2.$('#username-text');
+                    await usernameInput.click({ clickCount: 3 });
+                    await page2.keyboard.press('Backspace');
+
+                    await page2.click('#username-text');
+                    await page2.type('#username-text', 'kaye');
+                });
+
+                test(
+                    'if all fields are valid, should submit form when enter is pressed',
+                    async () => {
+                        await page2.keyboard.press('Enter');
+                        await page2.waitForSelector('#messages-div', { visible: true });
+
+                        expect(page2.url()).toContain('chat.html');
                     },
                     timeout
                 );
