@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
-const RoomModel = require('../../../models/room');
-const UserModel = require('../../../models/user');
-const MessageModel = require('../../../models/message');
+const RoomModel = require('../../src/models/room');
+const UserModel = require('../../src/models/user');
+const MessageModel = require('../../src/models/message');
 
 const room1 = { _id: new mongoose.Types.ObjectId(), name: 'javascript' };
 const room2 = { _id: new mongoose.Types.ObjectId(), name: 'css' };
@@ -37,9 +37,7 @@ const user4 = {
 };
 
 const configureDb = async () => {
-    await RoomModel.deleteMany();
-    await UserModel.deleteMany();
-    await MessageModel.deleteMany();
+    await resetDb();
     await new RoomModel(room1).save();
     await new RoomModel(room2).save();
     await new RoomModel(room3).save();
@@ -50,4 +48,10 @@ const configureDb = async () => {
     await new UserModel(user4).save();
 };
 
-module.exports = { configureDb, room1, room2, room3, user1, user2, user3 };
+const resetDb = async () => {
+    await RoomModel.deleteMany();
+    await UserModel.deleteMany();
+    await MessageModel.deleteMany();
+};
+
+module.exports = { configureDb, resetDb };
