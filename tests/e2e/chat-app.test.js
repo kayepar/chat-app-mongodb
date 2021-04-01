@@ -1,11 +1,14 @@
 /* eslint-disable no-undef */
 require('../../jest-puppeteer.config');
+const { resetDb } = require('../fixtures/db');
 
 const timeout = 40000;
 
 let page2;
 
 beforeAll(async () => {
+    await resetDb();
+
     await page.goto(URL, { waitUntil: 'domcontentloaded' });
 });
 
@@ -273,7 +276,7 @@ describe('end-to-end tests for chat app', () => {
             });
 
             // has only
-            describe('submit form', () => {
+            describe.only('submit form', () => {
                 test(
                     'if all fields are valid, should submit form when button is clicked',
                     async () => {
@@ -327,7 +330,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             test(
-                `sidebar, should show name in 'users' section)`,
+                `sidebar, should show name in 'users' section`,
                 async () => {
                     await page.waitForSelector('#users-section', { visible: true });
 
@@ -343,7 +346,7 @@ describe('end-to-end tests for chat app', () => {
     });
 
     // has only
-    describe('second user', () => {
+    describe.only('second user', () => {
         beforeAll(async () => {
             page2 = await browser.newPage();
             await page2.goto(URL, { waitUntil: 'domcontentloaded' });
@@ -353,7 +356,7 @@ describe('end-to-end tests for chat app', () => {
 
         describe('index page', () => {
             // has skip
-            describe('available rooms button', () => {
+            describe.skip('available rooms button', () => {
                 test(
                     'should show button (with options hidden)',
                     async () => {
@@ -521,7 +524,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 // has only
-                test(
+                test.only(
                     `if open and 'Yes' is clicked, should auto-select room in active rooms dropdown`,
                     async () => {
                         await page2.waitForSelector('#duplicate-room-modal', { hidden: true });
@@ -639,7 +642,7 @@ describe('end-to-end tests for chat app', () => {
             });
 
             // has only
-            describe('submit form', () => {
+            describe.only('submit form', () => {
                 test(
                     'if all fields are valid, should submit form when enter is pressed',
                     async () => {
@@ -659,6 +662,123 @@ describe('end-to-end tests for chat app', () => {
                     timeout
                 );
             });
+
+            describe.only('chat page', () => {
+                test(
+                    'message section, focus should be on the message textbox',
+                    async () => {
+                        const is_message_text_focused = await page2.$eval(
+                            '#message-textbox',
+                            (element) => document.activeElement === element
+                        );
+
+                        expect(is_message_text_focused).toBe(true);
+                    },
+                    timeout
+                );
+            });
+        });
+    });
+
+    describe.only('first and second user - shared tests', () => {
+        describe('sidebar', () => {
+            test(
+                `first user: should show 2 names in the 'users' section`,
+                async () => {
+                    await page2.waitForSelector('#users-section', { visible: true });
+                    const page2_names = await page2.$$eval('#users div', (options) => {
+                        return options.map((item) => item);
+                    });
+
+                    expect(page2_names).toHaveLength(2);
+                },
+                timeout
+            );
+
+            test(
+                `second user: should show 2 names in the 'users' section`,
+                async () => {
+                    await page.waitForSelector('#users-section', { visible: true });
+                    const page1_names = await page.$$eval('#users div', (options) => {
+                        return options.map((item) => item);
+                    });
+
+                    expect(page1_names).toHaveLength(2);
+                },
+                timeout
+            );
+        });
+
+        describe('admin message', () => {
+            test(
+                'first user: if another user joined in, should get notification message from admin',
+                async () => {
+                    await page.bringToFront();
+
+                    const messages = await page.$$eval('div[id*=Admin] p', (options) => {
+                        return options.map((item) => item.innerHTML);
+                    });
+
+                    expect(messages[1]).toContain('has joined!');
+                },
+                timeout
+            );
+        });
+
+        describe('messaging', () => {
+            test(
+                'second user: should send message by pressing enter',
+                async () => {
+                    await page2.bringToFront();
+
+                    await page2.click('#message-textbox');
+                    await page2.type('#message-textbox', 'Hi, this is a test.');
+
+                    await page2.keyboard.press('Enter');
+
+                    await page2.waitForTimeout(2000);
+
+                    const message_value = await page2.$eval('#messages-div div.row.sent p', (p) => p.innerHTML);
+
+                    expect(message_value).toBe('Hi, this is a test.');
+                },
+                timeout
+            );
+
+            test(
+                'first user: should be able to receive message',
+                async () => {
+                    await page.bringToFront();
+
+                    await page.waitForTimeout(2000);
+
+                    const received_messages = await page.$$eval('#messages-div div.row.received p', (messages) => {
+                        return messages.map((message) => message.innerHTML);
+                    });
+
+                    console.log(received_messages);
+
+                    expect(received_messages[3]).toBe('Hi, this is a test.');
+                },
+                timeout
+            );
+
+            test(
+                'first user: should send message by clicking on send button',
+                async () => {
+                    await page.click('#message-textbox');
+                    await page.type('#message-textbox', 'Test 1, 2, 3.');
+
+                    await page.click('button[type=submit]');
+
+                    await page.waitForTimeout(2000);
+
+                    const message_value = await page.$eval('#messages-div div.row.sent p', (p) => p.innerHTML);
+
+                    expect(message_value).toBe('Test 1, 2, 3.');
+                },
+                timeout
+            );
         });
     });
 });
