@@ -4,7 +4,7 @@ const io = require('socket.io-client');
 const server = require('../../app');
 const mongoose = require('mongoose');
 
-const { configureDb } = require('./fixtures/db');
+const { configureDb } = require('../fixtures/db');
 const RoomModel = require('../../models/room');
 const UserModel = require('../../models/user');
 

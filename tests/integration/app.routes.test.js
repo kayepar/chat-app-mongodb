@@ -3,7 +3,7 @@ const app = require('../../app');
 
 const mongoose = require('mongoose');
 
-const { configureDb } = require('./fixtures/db');
+const { configureDb } = require('../fixtures/db');
 const RoomModel = require('../../models/room');
 
 beforeEach(configureDb);
