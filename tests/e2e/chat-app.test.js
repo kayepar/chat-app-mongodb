@@ -3,11 +3,30 @@ require('../../jest-puppeteer.config');
 
 const timeout = 40000;
 
+let page2;
+
 beforeAll(async () => {
     await page.goto(URL, { waitUntil: 'domcontentloaded' });
 });
 
 // await jestPuppeteer.debug();
+
+const clearField = async (activePage, id) => {
+    const element = await activePage.$(id);
+    await element.click({ clickCount: 3 });
+    await activePage.keyboard.press('Backspace');
+};
+
+const getDisplayValue = async (activePage, id) => {
+    return await activePage.$eval(
+        id,
+        (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
+    );
+};
+
+const getClassName = async (activePage, targetElement) => {
+    return await activePage.evaluate((element) => element.className, targetElement);
+};
 
 // todo: error redirects
 // todo: re-login to show saved messages
@@ -46,24 +65,18 @@ describe('end-to-end tests for chat app', () => {
                     async () => {
                         await page.click('#start-button');
 
-                        const is_email_feedback1_shown = await page.$eval(
-                            '[data-testid="email-feedback1"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_email_feedback1_shown = await getDisplayValue(page, '[data-testid="email-feedback1"]');
 
                         expect(is_email_feedback1_shown).toBe(true);
 
-                        const is_username_feedback1_shown = await page.$eval(
-                            '[data-testid="username-feedback1"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
+                        const is_username_feedback1_shown = await getDisplayValue(
+                            page,
+                            '[data-testid="room-feedback"]'
                         );
 
                         expect(is_username_feedback1_shown).toBe(true);
 
-                        const is_room_feedback_shown = await page.$eval(
-                            '[data-testid="room-feedback"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_room_feedback_shown = await getDisplayValue(page, '[data-testid="room-feedback"]');
 
                         expect(is_room_feedback_shown).toBe(true);
                     },
@@ -78,24 +91,18 @@ describe('end-to-end tests for chat app', () => {
 
                         await page.click('#start-button');
 
-                        const is_email_feedback1_shown = await page.$eval(
-                            '[data-testid="email-feedback1"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_email_feedback1_shown = await getDisplayValue(page, '[data-testid="email-feedback1"]');
 
                         expect(is_email_feedback1_shown).toBe(true);
 
-                        const is_username_feedback1_shown = await page.$eval(
-                            '[data-testid="username-feedback1"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
+                        const is_username_feedback1_shown = await getDisplayValue(
+                            page,
+                            '[data-testid="username-feedback1"]'
                         );
 
                         expect(is_username_feedback1_shown).toBe(true);
 
-                        const is_room_feedback_shown = await page.$eval(
-                            '[data-testid="room-feedback"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_room_feedback_shown = await getDisplayValue(page, '[data-testid="room-feedback"]');
 
                         expect(is_room_feedback_shown).toBe(false);
                     },
@@ -105,33 +112,25 @@ describe('end-to-end tests for chat app', () => {
                 test(
                     'if email and room are missing, should show validation errors on both fields',
                     async () => {
-                        const roomInput = await page.$('#room-text');
-                        await roomInput.click({ clickCount: 3 });
-                        await page.keyboard.press('Backspace');
+                        await clearField(page, '#room-text');
 
                         await page.click('#username-text');
                         await page.type('#username-text', 'kaye');
 
                         await page.click('#start-button');
 
-                        const is_email_feedback1_shown = await page.$eval(
-                            '[data-testid="email-feedback1"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_email_feedback1_shown = await getDisplayValue(page, '[data-testid="email-feedback1"]');
 
                         expect(is_email_feedback1_shown).toBe(true);
 
-                        const is_username_feedback1_shown = await page.$eval(
-                            '[data-testid="username-feedback1"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
+                        const is_username_feedback1_shown = await getDisplayValue(
+                            page,
+                            '[data-testid="username-feedback1"]'
                         );
 
                         expect(is_username_feedback1_shown).toBe(false);
 
-                        const is_room_feedback_shown = await page.$eval(
-                            '[data-testid="room-feedback"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_room_feedback_shown = await getDisplayValue(page, '[data-testid="room-feedback"]');
 
                         expect(is_room_feedback_shown).toBe(true);
                     },
@@ -141,33 +140,25 @@ describe('end-to-end tests for chat app', () => {
                 test(
                     'if username and room are missing, should show validation errors on both fields',
                     async () => {
-                        const usernameInput = await page.$('#username-text');
-                        await usernameInput.click({ clickCount: 3 });
-                        await page.keyboard.press('Backspace');
+                        await clearField(page, '#username-text');
 
                         await page.click('#email-text');
                         await page.type('#email-text', 'kaye@gmail.com');
 
                         await page.click('#start-button');
 
-                        const is_email_feedback1_shown = await page.$eval(
-                            '[data-testid="email-feedback1"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_email_feedback1_shown = await getDisplayValue(page, '[data-testid="email-feedback1"]');
 
                         expect(is_email_feedback1_shown).toBe(false);
 
-                        const is_username_feedback1_shown = await page.$eval(
-                            '[data-testid="username-feedback1"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
+                        const is_username_feedback1_shown = await getDisplayValue(
+                            page,
+                            '[data-testid="username-feedback1"]'
                         );
 
                         expect(is_username_feedback1_shown).toBe(true);
 
-                        const is_room_feedback_shown = await page.$eval(
-                            '[data-testid="room-feedback"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_room_feedback_shown = await getDisplayValue(page, '[data-testid="room-feedback"]');
 
                         expect(is_room_feedback_shown).toBe(true);
                     },
@@ -177,9 +168,7 @@ describe('end-to-end tests for chat app', () => {
                 test(
                     'if only email is missing, should show validation error',
                     async () => {
-                        const emailInput = await page.$('#email-text');
-                        await emailInput.click({ clickCount: 3 });
-                        await page.keyboard.press('Backspace');
+                        await clearField(page, '#email-text');
 
                         await page.click('#username-text');
                         await page.type('#username-text', 'kaye');
@@ -189,24 +178,18 @@ describe('end-to-end tests for chat app', () => {
 
                         await page.click('#start-button');
 
-                        const is_email_feedback1_shown = await page.$eval(
-                            '[data-testid="email-feedback1"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_email_feedback1_shown = await getDisplayValue(page, '[data-testid="email-feedback1"]');
 
                         expect(is_email_feedback1_shown).toBe(true);
 
-                        const is_username_feedback1_shown = await page.$eval(
-                            '[data-testid="username-feedback1"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
+                        const is_username_feedback1_shown = await getDisplayValue(
+                            page,
+                            '[data-testid="username-feedback1"]'
                         );
 
                         expect(is_username_feedback1_shown).toBe(false);
 
-                        const is_room_feedback_shown = await page.$eval(
-                            '[data-testid="room-feedback"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_room_feedback_shown = await getDisplayValue(page, '[data-testid="room-feedback"]');
 
                         expect(is_room_feedback_shown).toBe(false);
                     },
@@ -216,33 +199,25 @@ describe('end-to-end tests for chat app', () => {
                 test(
                     'if only username is missing, should show validation error',
                     async () => {
-                        const usernameInput = await page.$('#username-text');
-                        await usernameInput.click({ clickCount: 3 });
-                        await page.keyboard.press('Backspace');
+                        await clearField(page, '#username-text');
 
                         await page.click('#email-text');
                         await page.type('#email-text', 'kaye@gmail.com');
 
                         await page.click('#start-button');
 
-                        const is_email_feedback1_shown = await page.$eval(
-                            '[data-testid="email-feedback1"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_email_feedback1_shown = await getDisplayValue(page, '[data-testid="email-feedback1"]');
 
                         expect(is_email_feedback1_shown).toBe(false);
 
-                        const is_username_feedback1_shown = await page.$eval(
-                            '[data-testid="username-feedback1"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
+                        const is_username_feedback1_shown = await getDisplayValue(
+                            page,
+                            '[data-testid="username-feedback1"]'
                         );
 
                         expect(is_username_feedback1_shown).toBe(true);
 
-                        const is_room_feedback_shown = await page.$eval(
-                            '[data-testid="room-feedback"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_room_feedback_shown = await getDisplayValue(page, '[data-testid="room-feedback"]');
 
                         expect(is_room_feedback_shown).toBe(false);
                     },
@@ -255,30 +230,22 @@ describe('end-to-end tests for chat app', () => {
                         await page.click('#username-text');
                         await page.type('#username-text', 'kaye');
 
-                        const roomInput = await page.$('#room-text');
-                        await roomInput.click({ clickCount: 3 });
-                        await page.keyboard.press('Backspace');
+                        await clearField(page, '#room-text');
 
                         await page.click('#start-button');
 
-                        const is_email_feedback1_shown = await page.$eval(
-                            '[data-testid="email-feedback1"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_email_feedback1_shown = await getDisplayValue(page, '[data-testid="email-feedback1"]');
 
                         expect(is_email_feedback1_shown).toBe(false);
 
-                        const is_username_feedback1_shown = await page.$eval(
-                            '[data-testid="username-feedback1"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
+                        const is_username_feedback1_shown = await getDisplayValue(
+                            page,
+                            '[data-testid="username-feedback1"]'
                         );
 
                         expect(is_username_feedback1_shown).toBe(false);
 
-                        const is_room_feedback_shown = await page.$eval(
-                            '[data-testid="room-feedback"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_room_feedback_shown = await getDisplayValue(page, '[data-testid="room-feedback"]');
 
                         expect(is_room_feedback_shown).toBe(true);
                     },
@@ -291,19 +258,13 @@ describe('end-to-end tests for chat app', () => {
                         await page.click('#room-text');
                         await page.type('#room-text', 'javascript');
 
-                        const emailInput = await page.$('#email-text');
-                        await emailInput.click({ clickCount: 3 });
-                        await page.keyboard.press('Backspace');
-
+                        await clearField(page, '#email-text');
                         await page.click('#email-text');
                         await page.type('#email-text', 'kaye!gmail.com');
 
                         await page.click('#start-button');
 
-                        const is_email_feedback1_shown = await page.$eval(
-                            '[data-testid="email-feedback1"]',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_email_feedback1_shown = await getDisplayValue(page, '[data-testid="email-feedback1"]');
 
                         expect(is_email_feedback1_shown).toBe(true);
                     },
@@ -311,28 +272,20 @@ describe('end-to-end tests for chat app', () => {
                 );
             });
 
-            describe.only('submit form', () => {
+            // has only
+            describe('submit form', () => {
                 test(
                     'if all fields are valid, should submit form when button is clicked',
                     async () => {
-                        const emailInput = await page.$('#email-text');
-                        await emailInput.click({ clickCount: 3 });
-                        await page.keyboard.press('Backspace');
-
+                        await clearField(page, '#email-text');
                         await page.click('#email-text');
                         await page.type('#email-text', 'callie.par@gmail.com');
 
-                        const usernameInput = await page.$('#username-text');
-                        await usernameInput.click({ clickCount: 3 });
-                        await page.keyboard.press('Backspace');
-
+                        await clearField(page, '#username-text');
                         await page.click('#username-text');
                         await page.type('#username-text', 'callie');
 
-                        const roomInput = await page.$('#room-text');
-                        await roomInput.click({ clickCount: 3 });
-                        await page.keyboard.press('Backspace');
-
+                        await clearField(page, '#room-text');
                         await page.click('#room-text');
                         await page.type('#room-text', 'html');
 
@@ -389,9 +342,8 @@ describe('end-to-end tests for chat app', () => {
         });
     });
 
-    describe.only('second user', () => {
-        let page2;
-
+    // has only
+    describe('second user', () => {
         beforeAll(async () => {
             page2 = await browser.newPage();
             await page2.goto(URL, { waitUntil: 'domcontentloaded' });
@@ -400,22 +352,17 @@ describe('end-to-end tests for chat app', () => {
         });
 
         describe('index page', () => {
-            describe.skip('available rooms button', () => {
+            // has skip
+            describe('available rooms button', () => {
                 test(
                     'should show button (with options hidden)',
                     async () => {
-                        const is_available_rooms_shown = await page2.$eval(
-                            '#active-rooms',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_available_rooms_shown = await getDisplayValue(page2, '#active-rooms');
 
                         expect(is_available_rooms_shown).toBe(true);
 
                         const active_rooms_menu = await page2.$('#active-rooms-menu');
-                        const active_rooms_menu_className = await page2.evaluate(
-                            (element) => element.className,
-                            active_rooms_menu
-                        );
+                        const active_rooms_menu_className = await getClassName(page2, active_rooms_menu);
 
                         expect(active_rooms_menu_className).not.toContain('show');
                     },
@@ -429,10 +376,7 @@ describe('end-to-end tests for chat app', () => {
                         await page.waitForTimeout(2000);
 
                         const active_rooms_menu = await page2.$('#active-rooms-menu');
-                        const active_rooms_menu_className = await page2.evaluate(
-                            (element) => element.className,
-                            active_rooms_menu
-                        );
+                        const active_rooms_menu_className = await getClassName(page2, active_rooms_menu);
 
                         expect(active_rooms_menu_className).toContain('show');
                     },
@@ -534,10 +478,7 @@ describe('end-to-end tests for chat app', () => {
                         await page2.waitForSelector('#duplicate-room-modal', { visible: true });
 
                         const duplicate_room_modal = await page2.$('#duplicate-room-modal');
-                        const duplicate_room_modal_className = await page2.evaluate(
-                            (element) => element.className,
-                            duplicate_room_modal
-                        );
+                        const duplicate_room_modal_className = await getClassName(page2, duplicate_room_modal);
 
                         expect(duplicate_room_modal_className).toContain('show');
                     },
@@ -552,10 +493,7 @@ describe('end-to-end tests for chat app', () => {
                         await page2.click('#duplicate-room-modal-no-button');
 
                         const duplicate_room_modal = await page2.$('#duplicate-room-modal-no-button');
-                        const duplicate_room_modal_className = await page2.evaluate(
-                            (element) => element.className,
-                            duplicate_room_modal
-                        );
+                        const duplicate_room_modal_className = await getClassName(page2, duplicate_room_modal);
 
                         expect(duplicate_room_modal_className).not.toContain('show');
                     },
@@ -575,17 +513,15 @@ describe('end-to-end tests for chat app', () => {
                         await page2.click('#duplicate-room-modal-x-button');
 
                         const duplicate_room_modal = await page2.$('#duplicate-room-modal-x-button');
-                        const duplicate_room_modal_className = await page2.evaluate(
-                            (element) => element.className,
-                            duplicate_room_modal
-                        );
+                        const duplicate_room_modal_className = await getClassName(page2, duplicate_room_modal);
 
                         expect(duplicate_room_modal_className).not.toContain('show');
                     },
                     timeout
                 );
 
-                test.only(
+                // has only
+                test(
                     `if open and 'Yes' is clicked, should auto-select room in active rooms dropdown`,
                     async () => {
                         await page2.waitForSelector('#duplicate-room-modal', { hidden: true });
@@ -606,19 +542,13 @@ describe('end-to-end tests for chat app', () => {
                 );
             });
 
-            describe.only('input validation (duplicate credentials)', () => {
+            describe('input validation (duplicate credentials)', () => {
                 beforeAll(async () => {
-                    const emailInput = await page2.$('#email-text');
-                    await emailInput.click({ clickCount: 3 });
-                    await page2.keyboard.press('Backspace');
-
+                    await clearField(page2, '#email-text');
                     await page2.click('#email-text');
                     await page2.type('#email-text', 'callie.par@gmail.com');
 
-                    const usernameInput = await page2.$('#username-text');
-                    await usernameInput.click({ clickCount: 3 });
-                    await page2.keyboard.press('Backspace');
-
+                    await clearField(page2, '#username-text');
                     await page2.click('#username-text');
                     await page2.type('#username-text', 'callie');
                 });
@@ -628,17 +558,11 @@ describe('end-to-end tests for chat app', () => {
                     async () => {
                         await page2.keyboard.press('Enter');
 
-                        const is_duplicate_email_error_shown = await page2.$eval(
-                            '#email-feedback',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_duplicate_email_error_shown = await getDisplayValue(page2, '#email-feedback');
 
                         expect(is_duplicate_email_error_shown).toBe(true);
 
-                        const is_duplicate_username_error_shown = await page2.$eval(
-                            '#username-feedback',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_duplicate_username_error_shown = await getDisplayValue(page2, '#username-feedback');
 
                         expect(is_duplicate_username_error_shown).toBe(true);
                     },
@@ -648,24 +572,15 @@ describe('end-to-end tests for chat app', () => {
                 test(
                     'if email is changed, should hide error message on email field',
                     async () => {
-                        const emailInput = await page2.$('#email-text');
-                        await emailInput.click({ clickCount: 3 });
-                        await page2.keyboard.press('Backspace');
-
+                        await clearField(page2, '#email-text');
                         await page2.click('#email-text');
                         await page2.type('#email-text', 'kaye.cenizal@gmail.com');
 
-                        const is_duplicate_email_error_shown = await page2.$eval(
-                            '#email-feedback',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_duplicate_email_error_shown = await getDisplayValue(page2, '#email-feedback');
 
                         expect(is_duplicate_email_error_shown).toBe(false);
 
-                        const is_duplicate_username_error_shown = await page2.$eval(
-                            '#username-feedback',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_duplicate_username_error_shown = await getDisplayValue(page2, '#username-feedback');
 
                         expect(is_duplicate_username_error_shown).toBe(true);
                     },
@@ -675,17 +590,11 @@ describe('end-to-end tests for chat app', () => {
                 test(
                     'if username is changed, should hide error message on username field',
                     async () => {
-                        const usernameInput = await page2.$('#username-text');
-                        await usernameInput.click({ clickCount: 3 });
-                        await page2.keyboard.press('Backspace');
-
+                        await clearField(page2, '#username-text');
                         await page2.click('#username-text');
                         await page2.type('#username-text', 'kaye');
 
-                        const is_duplicate_username_error_shown = await page2.$eval(
-                            '#username-feedback',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_duplicate_username_error_shown = await getDisplayValue(page2, '#username-feedback');
 
                         expect(is_duplicate_username_error_shown).toBe(false);
                     },
@@ -695,19 +604,13 @@ describe('end-to-end tests for chat app', () => {
                 test(
                     'if only email is in use, should display error message on email field',
                     async () => {
-                        const emailInput = await page2.$('#email-text');
-                        await emailInput.click({ clickCount: 3 });
-                        await page2.keyboard.press('Backspace');
-
+                        await clearField(page2, '#email-text');
                         await page2.click('#email-text');
                         await page2.type('#email-text', 'callie.par@gmail.com');
 
                         await page2.keyboard.press('Enter');
 
-                        const is_duplicate_email_error_shown = await page2.$eval(
-                            '#email-feedback',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_duplicate_email_error_shown = await getDisplayValue(page2, '#email-feedback');
 
                         expect(is_duplicate_email_error_shown).toBe(true);
                     },
@@ -717,26 +620,17 @@ describe('end-to-end tests for chat app', () => {
                 test(
                     'if only username is in use, should display error message on username field',
                     async () => {
-                        const emailInput = await page2.$('#email-text');
-                        await emailInput.click({ clickCount: 3 });
-                        await page2.keyboard.press('Backspace');
-
+                        await clearField(page2, '#email-text');
                         await page2.click('#email-text');
                         await page2.type('#email-text', 'kaye.cenizal@gmail.com');
 
-                        const usernameInput = await page2.$('#username-text');
-                        await usernameInput.click({ clickCount: 3 });
-                        await page2.keyboard.press('Backspace');
-
+                        await clearField(page2, '#username-text');
                         await page2.click('#username-text');
                         await page2.type('#username-text', 'callie');
 
                         await page2.keyboard.press('Enter');
 
-                        const is_duplicate_username_error_shown = await page2.$eval(
-                            '#username-feedback',
-                            (element) => window.getComputedStyle(element).getPropertyValue('display') !== 'none'
-                        );
+                        const is_duplicate_username_error_shown = await getDisplayValue(page2, '#username-feedback');
 
                         expect(is_duplicate_username_error_shown).toBe(true);
                     },
@@ -744,26 +638,19 @@ describe('end-to-end tests for chat app', () => {
                 );
             });
 
-            describe.only('submit form', () => {
-                beforeAll(async () => {
-                    const emailInput = await page2.$('#email-text');
-                    await emailInput.click({ clickCount: 3 });
-                    await page2.keyboard.press('Backspace');
-
-                    await page2.click('#email-text');
-                    await page2.type('#email-text', 'kaye.cenizal@gmail.com');
-
-                    const usernameInput = await page2.$('#username-text');
-                    await usernameInput.click({ clickCount: 3 });
-                    await page2.keyboard.press('Backspace');
-
-                    await page2.click('#username-text');
-                    await page2.type('#username-text', 'kaye');
-                });
-
+            // has only
+            describe('submit form', () => {
                 test(
                     'if all fields are valid, should submit form when enter is pressed',
                     async () => {
+                        await clearField(page2, '#email-text');
+                        await page2.click('#email-text');
+                        await page2.type('#email-text', 'kaye.cenizal@gmail.com');
+
+                        await clearField(page2, '#username-text');
+                        await page2.click('#username-text');
+                        await page2.type('#username-text', 'kaye');
+
                         await page2.keyboard.press('Enter');
                         await page2.waitForSelector('#messages-div', { visible: true });
 
