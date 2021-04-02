@@ -1,9 +1,9 @@
 /* eslint-disable jest/no-conditional-expect */
 /* eslint-disable jest/no-done-callback */
 const io = require('socket.io-client');
-const server = require('../../app');
 const mongoose = require('mongoose');
 
+const server = require('../../src/app');
 const { configureDb } = require('../fixtures/db');
 
 let socketA;
@@ -47,7 +47,12 @@ jest.setTimeout(20000);
 
 beforeAll((done) => {
     server.listen(80, () => {
-        done();
+        console.log('up');
+        // done();
+
+        setTimeout(() => {
+            done();
+        }, 1000);
     });
 });
 

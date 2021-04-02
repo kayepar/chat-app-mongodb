@@ -1,7 +1,7 @@
-const RoomModel = require('../../../../models/room');
-const room_controller = require('../../../../controller/room-controller');
-const CustomError = require('../../../../error/CustomError');
-jest.mock('../../../../error/CustomError');
+const RoomModel = require('../../../../src/models/room');
+const room_controller = require('../../../../src/controller/room-controller');
+const CustomError = require('../../../../src/error/CustomError');
+jest.mock('../../../../src/error/CustomError');
 
 const mockRequest = (queryData) => ({
     query: queryData,
