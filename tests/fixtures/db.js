@@ -37,7 +37,10 @@ const user4 = {
 };
 
 const configureDb = async () => {
-    await resetDb();
+    await RoomModel.deleteMany();
+    await UserModel.deleteMany();
+    await MessageModel.deleteMany();
+
     await new RoomModel(room1).save();
     await new RoomModel(room2).save();
     await new RoomModel(room3).save();
@@ -48,10 +51,4 @@ const configureDb = async () => {
     await new UserModel(user4).save();
 };
 
-const resetDb = async () => {
-    await RoomModel.deleteMany();
-    await UserModel.deleteMany();
-    await MessageModel.deleteMany();
-};
-
-module.exports = { configureDb, resetDb };
+module.exports = { configureDb };
