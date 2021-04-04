@@ -1,14 +1,12 @@
 /* eslint-disable no-undef */
 require('../../jest-puppeteer.config');
-const { resetDb } = require('../fixtures/db');
 
 const timeout = 40000;
 
 let page2;
+// jest.setTimeout(20000);
 
 beforeAll(async () => {
-    await resetDb();
-
     await page.goto(URL, { waitUntil: 'domcontentloaded' });
 });
 
@@ -355,8 +353,7 @@ describe('end-to-end tests for chat app', () => {
         });
 
         describe('index page', () => {
-            // has skip
-            describe.skip('available rooms button', () => {
+            describe('available rooms button', () => {
                 test(
                     'should show button (with options hidden)',
                     async () => {
@@ -663,7 +660,7 @@ describe('end-to-end tests for chat app', () => {
                 );
             });
 
-            describe.only('chat page', () => {
+            describe('chat page', () => {
                 test(
                     'message section, focus should be on the message textbox',
                     async () => {
@@ -680,7 +677,7 @@ describe('end-to-end tests for chat app', () => {
         });
     });
 
-    describe.only('first and second user - shared tests', () => {
+    describe('first and second user - shared tests', () => {
         describe('sidebar', () => {
             test(
                 `first user: should show 2 names in the 'users' section`,
@@ -725,7 +722,8 @@ describe('end-to-end tests for chat app', () => {
             );
         });
 
-        describe('messaging', () => {
+        // has only
+        describe.only('messaging', () => {
             test(
                 'second user: should send message by pressing enter',
                 async () => {
@@ -758,7 +756,7 @@ describe('end-to-end tests for chat app', () => {
 
                     console.log(received_messages);
 
-                    expect(received_messages[3]).toBe('Hi, this is a test.');
+                    expect(received_messages[2]).toBe('Hi, this is a test.');
                 },
                 timeout
             );
