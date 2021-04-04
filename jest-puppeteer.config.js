@@ -7,10 +7,10 @@ module.exports = {
         dumpio: true,
     },
     server: {
-        // command: 'node src/server.js',
+        // command: 'env-cmd -f ./config/test.env nodemon src/server.js',
         command: 'npm run dev-test',
         port: 80,
-        launchTimeout: 50000,
+        launchTimeout: 20000,
         usedPortAction: 'kill',
         debug: true,
     },
