@@ -31,6 +31,8 @@ const getClassName = async (activePage, targetElement) => {
 
 // todo: error redirects
 // todo: re-login to show saved messages
+// todo: very long message
+// todo: message color?
 
 describe('end-to-end tests for chat app', () => {
     describe('first user', () => {
@@ -652,6 +654,7 @@ describe('end-to-end tests for chat app', () => {
                         await page2.type('#username-text', 'kaye');
 
                         await page2.keyboard.press('Enter');
+
                         await page2.waitForSelector('#messages-div', { visible: true });
 
                         expect(page2.url()).toContain('chat.html');
@@ -683,6 +686,7 @@ describe('end-to-end tests for chat app', () => {
                 `first user: should show 2 names in the 'users' section`,
                 async () => {
                     await page2.waitForSelector('#users-section', { visible: true });
+
                     const page2_names = await page2.$$eval('#users div', (options) => {
                         return options.map((item) => item);
                     });
@@ -696,6 +700,7 @@ describe('end-to-end tests for chat app', () => {
                 `second user: should show 2 names in the 'users' section`,
                 async () => {
                     await page.waitForSelector('#users-section', { visible: true });
+
                     const page1_names = await page.$$eval('#users div', (options) => {
                         return options.map((item) => item);
                     });
@@ -712,11 +717,11 @@ describe('end-to-end tests for chat app', () => {
                 async () => {
                     await page.bringToFront();
 
-                    const messages = await page.$$eval('div[id*=Admin] p', (options) => {
+                    const admin_messages = await page.$$eval('div[id*=Admin] p', (options) => {
                         return options.map((item) => item.innerHTML);
                     });
 
-                    expect(messages[1]).toContain('has joined!');
+                    expect(admin_messages[1]).toContain('has joined!');
                 },
                 timeout
             );
@@ -725,7 +730,7 @@ describe('end-to-end tests for chat app', () => {
         // has only
         describe.only('messaging', () => {
             test(
-                'second user: should send message by pressing enter',
+                'second user: if Enter key is pressed after typing, should send message',
                 async () => {
                     await page2.bringToFront();
 
@@ -762,7 +767,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             test(
-                'first user: should send message by clicking on send button',
+                'first user: if Send button is clicked, should send message',
                 async () => {
                     await page.click('#message-textbox');
                     await page.type('#message-textbox', 'Test 1, 2, 3.');
@@ -774,6 +779,169 @@ describe('end-to-end tests for chat app', () => {
                     const message_value = await page.$eval('#messages-div div.row.sent p', (p) => p.innerHTML);
 
                     expect(message_value).toBe('Test 1, 2, 3.');
+                },
+                timeout
+            );
+
+            test(
+                'first user: if Enter key is pressed, should clear message text box',
+                async () => {
+                    await page.click('#message-textbox');
+                    await page.type('#message-textbox', 'Hello');
+
+                    await page.keyboard.press('Enter');
+
+                    await page.waitForTimeout(2000);
+
+                    const message_text_value = await page.$eval('#message-textbox', (input) => input.value);
+
+                    expect(message_text_value).toBe('');
+                },
+                timeout
+            );
+
+            test(
+                'second user: if Send button is clicked, should clear message text box',
+                async () => {
+                    await page2.bringToFront();
+                    await page2.click('#message-textbox');
+                    await page2.type('#message-textbox', 'Hi!');
+
+                    await page2.keyboard.press('Enter');
+
+                    await page2.waitForTimeout(2000);
+
+                    const message_text_value = await page2.$eval('#message-textbox', (input) => input.value);
+
+                    expect(message_text_value).toBe('');
+                },
+                timeout
+            );
+
+            test(
+                'second user, if textbox is empty, should not send message',
+                async () => {
+                    await page2.click('#message-textbox');
+                    await page2.keyboard.press('Enter');
+
+                    await page2.waitForTimeout(2000);
+
+                    const sent_messages = await page2.$$eval('#messages-div div.row.sent p', (messages) => {
+                        return messages.map((message) => message);
+                    });
+
+                    expect(sent_messages).toHaveLength(2);
+                },
+                timeout
+            );
+
+            test(
+                'second user: if message contains offensive words, should not send message',
+                async () => {
+                    await page2.click('#message-textbox');
+                    await page2.type('#message-textbox', 'Damn!');
+                    await page2.keyboard.press('Enter');
+
+                    await page2.waitForTimeout(1000);
+
+                    const sent_messages = await page2.$$eval('#messages-div div.row.sent p', (messages) => {
+                        return messages.map((message) => message);
+                    });
+
+                    expect(sent_messages).toHaveLength(2);
+                },
+                timeout
+            );
+        });
+
+        describe('typing indicator', () => {
+            test(
+                `first/second users: if one user started typing, should display indicator on other user's screen`,
+                async () => {
+                    await page2.click('#message-textbox');
+                    await page2.type('#message-textbox', 'Typing test...');
+
+                    await page2.waitForTimeout(1000);
+
+                    await page.bringToFront();
+
+                    await page.waitForTimeout(1000);
+
+                    const received_messages = await page.$$eval('#messages-div div.row.received p', (messages) => {
+                        return messages.map((message) => message.innerHTML);
+                    });
+
+                    expect(received_messages[4]).toBe('...');
+                },
+                timeout
+            );
+
+            test(
+                `first/second users: if textbox is cleared, should remove typing indicator from other user's screen`,
+                async () => {
+                    await page2.bringToFront();
+
+                    await clearField(page2, '#message-textbox');
+
+                    await page2.waitForTimeout(1000);
+
+                    await page.bringToFront();
+
+                    await page.waitForTimeout(1000);
+
+                    const received_messages = await page.$$eval('#messages-div div.row.received p', (messages) => {
+                        return messages.map((message) => message.innerHTML);
+                    });
+
+                    expect(received_messages).toHaveLength(4);
+                },
+                timeout
+            );
+        });
+
+        describe.only('emoji picker', () => {
+            test(
+                `first user: if emoji button is clicked, should display emoji picker`,
+                async () => {
+                    await page.bringToFront();
+
+                    await page.click('.emoji-button');
+
+                    const is_emoji_picker_shown = await getDisplayValue(page, '.emoji-picker__wrapper');
+
+                    expect(is_emoji_picker_shown).toBe(true);
+                },
+                timeout
+            );
+
+            test(
+                `first user: if other element gets focus, should hide emoji picker`,
+                async () => {
+                    await page.click('#messages-div');
+
+                    const is_emoji_picker_shown = await getDisplayValue(page, '.emoji-picker__wrapper');
+
+                    expect(is_emoji_picker_shown).toBe(false);
+                },
+                timeout
+            );
+
+            test(
+                `first user: if emoji is clicked, should add to message textbox`,
+                async () => {
+                    await page.click('.emoji-button');
+
+                    await page.waitForSelector('.emoji-picker__wrapper', { visible: true });
+
+                    await page.click('button[title="smiling face with heart-eyes"]');
+
+                    await page.waitForTimeout(1000);
+
+                    const message_text_value = await page.$eval('#message-textbox', (input) => input.value);
+
+                    expect(message_text_value).toBe('😍');
+
+                    await page.keyboard.press('Enter');
                 },
                 timeout
             );
