@@ -707,7 +707,7 @@ describe('end-to-end tests for chat app', () => {
         });
     });
 
-    describe('first and second user  (interaction tests)', () => {
+    describe('first and second user  (same chatroom interaction tests)', () => {
         describe('sidebar', () => {
             test(
                 `first user: should show 2 names in the 'users' section`,
@@ -1049,7 +1049,6 @@ describe('end-to-end tests for chat app', () => {
                 test(
                     'if Send button is pressed, should send message with emoji',
                     async () => {
-                        // await page.keyboard.press('Enter');
                         await page.click('button[type=submit]');
 
                         await page.waitForTimeout(2000);
@@ -1079,6 +1078,7 @@ describe('end-to-end tests for chat app', () => {
             });
         });
 
+        // has only
         describe.only('on user disconnect', () => {
             test(
                 'first user: if second user leaves the chatroom, should get admin notification',
@@ -1097,6 +1097,64 @@ describe('end-to-end tests for chat app', () => {
             );
         });
 
-        // todo: load messages
+        describe.only('on user join - load chatroom messages', () => {
+            test('if user has sent messages, should get both sent and received messages', async () => {
+                page2 = await browser.newPage();
+                await page2.goto(URL, { waitUntil: 'domcontentloaded' });
+
+                await page2.waitForTimeout(1000);
+
+                await page2.click('#email-text');
+                await page2.type('#email-text', 'kaye.cenizal@gmail.com');
+
+                await page2.click('#username-text');
+                await page2.type('#username-text', 'kaye');
+
+                await page2.click('#room-text');
+                await page2.type('#room-text', 'html');
+
+                await page2.keyboard.press('Enter');
+
+                await page2.waitForTimeout(1000);
+
+                const received_messages = await getReceivedMessages(page2);
+
+                expect(received_messages.length).tobeGreaterThan(0);
+
+                const sent_messages = await getSentMessages(page2);
+
+                expect(sent_messages.length).tobeGreaterThan(0);
+
+                await page2.close();
+            });
+
+            test('if user has no sent messages, should get received messages', async () => {
+                page2 = await browser.newPage();
+                await page2.goto(URL, { waitUntil: 'domcontentloaded' });
+
+                await page2.waitForTimeout(1000);
+
+                await page2.click('#email-text');
+                await page2.type('#email-text', 'john.par@gmail.com');
+
+                await page2.click('#username-text');
+                await page2.type('#username-text', 'john');
+
+                await page2.click('#room-text');
+                await page2.type('#room-text', 'html');
+
+                await page2.keyboard.press('Enter');
+
+                await page2.waitForTimeout(1000);
+
+                const received_messages = await getReceivedMessages(page2);
+
+                expect(received_messages.length).tobeGreaterThan(0);
+
+                const sent_messages = await getSentMessages(page2);
+
+                expect(sent_messages).toHaveLength(0);
+            });
+        });
     });
 });
