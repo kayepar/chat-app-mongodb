@@ -29,6 +29,18 @@ const getClassName = async (activePage, targetElement) => {
     return await activePage.evaluate((element) => element.className, targetElement);
 };
 
+const getSentMessages = async (activePage) => {
+    return await activePage.$$eval('#messages-div div.row.sent p', (messages) => {
+        return messages.map((message) => message.innerHTML);
+    });
+};
+
+const getReceivedMessages = async (activePage) => {
+    return await activePage.$$eval('#messages-div div.row.received p', (messages) => {
+        return messages.map((message) => message.innerHTML);
+    });
+};
+
 // todo: error redirects
 // todo: re-login to show saved messages
 // todo: very long message
@@ -755,9 +767,7 @@ describe('end-to-end tests for chat app', () => {
 
                     await page.waitForTimeout(2000);
 
-                    const received_messages = await page.$$eval('#messages-div div.row.received p', (messages) => {
-                        return messages.map((message) => message.innerHTML);
-                    });
+                    const received_messages = await getReceivedMessages(page);
 
                     expect(received_messages[received_messages.length - 1]).toBe('Hi, this is a test.');
                 },
@@ -774,9 +784,7 @@ describe('end-to-end tests for chat app', () => {
 
                     await page.waitForTimeout(2000);
 
-                    const sent_messages = await page.$$eval('#messages-div div.row.sent p', (messages) => {
-                        return messages.map((message) => message.innerHTML);
-                    });
+                    const sent_messages = await getSentMessages(page);
 
                     expect(sent_messages[sent_messages.length - 1]).toBe('Test 1, 2, 3.');
                 },
@@ -830,9 +838,7 @@ describe('end-to-end tests for chat app', () => {
 
                     await page2.waitForTimeout(2000);
 
-                    const sent_messages = await page2.$$eval('#messages-div div.row.sent p', (messages) => {
-                        return messages.map((message) => message);
-                    });
+                    const sent_messages = await getSentMessages(page2);
 
                     expect(sent_messages).toHaveLength(2);
                 },
@@ -848,9 +854,7 @@ describe('end-to-end tests for chat app', () => {
 
                     await page2.waitForTimeout(1000);
 
-                    const sent_messages = await page2.$$eval('#messages-div div.row.sent p', (messages) => {
-                        return messages.map((message) => message);
-                    });
+                    const sent_messages = await getSentMessages(page2);
 
                     expect(sent_messages).toHaveLength(2);
                 },
@@ -871,9 +875,7 @@ describe('end-to-end tests for chat app', () => {
 
                     await page.waitForTimeout(1000);
 
-                    const received_messages = await page.$$eval('#messages-div div.row.received p', (messages) => {
-                        return messages.map((message) => message.innerHTML);
-                    });
+                    const received_messages = await getReceivedMessages(page);
 
                     expect(received_messages[received_messages.length - 1]).toBe('...');
                 },
@@ -893,9 +895,7 @@ describe('end-to-end tests for chat app', () => {
 
                     await page.waitForTimeout(1000);
 
-                    const received_messages = await page.$$eval('#messages-div div.row.received p', (messages) => {
-                        return messages.map((message) => message.innerHTML);
-                    });
+                    const received_messages = await getReceivedMessages(page);
 
                     expect(received_messages).toHaveLength(4);
                 },
@@ -955,9 +955,7 @@ describe('end-to-end tests for chat app', () => {
 
                     await page.waitForTimeout(2000);
 
-                    const sent_messages = await page.$$eval('#messages-div div.row.sent p', (messages) => {
-                        return messages.map((message) => message.innerHTML);
-                    });
+                    const sent_messages = await getSentMessages(page);
 
                     expect(sent_messages[sent_messages.length - 1]).toBe('😍');
                 },
@@ -999,9 +997,7 @@ describe('end-to-end tests for chat app', () => {
 
                     await page.waitForTimeout(2000);
 
-                    const sent_messages = await page.$$eval('#messages-div div.row.sent p', (messages) => {
-                        return messages.map((message) => message.innerHTML);
-                    });
+                    const sent_messages = await getSentMessages(page);
 
                     expect(sent_messages[sent_messages.length - 1]).toBe('Emoji🥰 test');
 
@@ -1009,9 +1005,7 @@ describe('end-to-end tests for chat app', () => {
 
                     await page2.waitForTimeout(1000);
 
-                    const received_messages = await page2.$$eval('#messages-div div.row.received p', (messages) => {
-                        return messages.map((message) => message.innerHTML);
-                    });
+                    const received_messages = await getReceivedMessages(page);
 
                     expect(received_messages[received_messages.length - 1]).toBe('Emoji🥰 test');
                 },
