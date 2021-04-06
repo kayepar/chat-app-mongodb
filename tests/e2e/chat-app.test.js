@@ -386,7 +386,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'should have two options available',
+                    'should have options available (the same number as current active rooms)',
                     async () => {
                         const options_count = await page2.$$eval('#active-rooms-menu a', (options) => options.length);
 
@@ -445,7 +445,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    `clear selection option, should reset button`,
+                    `clear selection option, should reset button to default`,
                     async () => {
                         await page2.click('#active-rooms');
                         await page2.waitForSelector('#active-rooms-menu', { visible: true });
@@ -680,7 +680,7 @@ describe('end-to-end tests for chat app', () => {
         });
     });
 
-    describe('first and second user - shared tests', () => {
+    describe('first and second user  (interaction tests)', () => {
         describe('sidebar', () => {
             test(
                 `first user: should show 2 names in the 'users' section`,
@@ -759,9 +759,7 @@ describe('end-to-end tests for chat app', () => {
                         return messages.map((message) => message.innerHTML);
                     });
 
-                    console.log(received_messages);
-
-                    expect(received_messages[2]).toBe('Hi, this is a test.');
+                    expect(received_messages[received_messages.length - 1]).toBe('Hi, this is a test.');
                 },
                 timeout
             );
@@ -776,9 +774,11 @@ describe('end-to-end tests for chat app', () => {
 
                     await page.waitForTimeout(2000);
 
-                    const message_value = await page.$eval('#messages-div div.row.sent p', (p) => p.innerHTML);
+                    const sent_messages = await page.$$eval('#messages-div div.row.sent p', (messages) => {
+                        return messages.map((message) => message.innerHTML);
+                    });
 
-                    expect(message_value).toBe('Test 1, 2, 3.');
+                    expect(sent_messages[sent_messages.length - 1]).toBe('Test 1, 2, 3.');
                 },
                 timeout
             );
@@ -804,6 +804,7 @@ describe('end-to-end tests for chat app', () => {
                 'second user: if Send button is clicked, should clear message text box',
                 async () => {
                     await page2.bringToFront();
+
                     await page2.click('#message-textbox');
                     await page2.type('#message-textbox', 'Hi!');
 
@@ -817,6 +818,9 @@ describe('end-to-end tests for chat app', () => {
                 },
                 timeout
             );
+
+            // todo: should add looong message here
+            // todo: one for sending and one for receiving
 
             test(
                 'second user, if textbox is empty, should not send message',
@@ -871,7 +875,7 @@ describe('end-to-end tests for chat app', () => {
                         return messages.map((message) => message.innerHTML);
                     });
 
-                    expect(received_messages[4]).toBe('...');
+                    expect(received_messages[received_messages.length - 1]).toBe('...');
                 },
                 timeout
             );
@@ -940,8 +944,76 @@ describe('end-to-end tests for chat app', () => {
                     const message_text_value = await page.$eval('#message-textbox', (input) => input.value);
 
                     expect(message_text_value).toBe('😍');
+                },
+                timeout
+            );
 
+            test(
+                'first user: if Enter key is pressed, should send message with emoji',
+                async () => {
                     await page.keyboard.press('Enter');
+
+                    await page.waitForTimeout(2000);
+
+                    const sent_messages = await page.$$eval('#messages-div div.row.sent p', (messages) => {
+                        return messages.map((message) => message.innerHTML);
+                    });
+
+                    expect(sent_messages[sent_messages.length - 1]).toBe('😍');
+                },
+                timeout
+            );
+
+            test(
+                `first user: if message textbox has text and an emoji is clicked, should insert emoji at cursor location`,
+                async () => {
+                    await page.click('#message-textbox');
+                    await page.type('#message-textbox', 'Emoji test');
+
+                    const message_textbox = await page.$('#message-textbox');
+                    await message_textbox.click({ clickCount: 1 });
+
+                    for (let i = 0; i < 5; ++i) {
+                        await page.keyboard.press('ArrowLeft');
+                    }
+
+                    await page.click('.emoji-button');
+
+                    await page.waitForSelector('.emoji-picker__wrapper', { visible: true });
+
+                    await page.click('button[title="smiling face with hearts"]');
+
+                    await page.waitForTimeout(1000);
+
+                    const message_text_value = await page.$eval('#message-textbox', (input) => input.value);
+
+                    expect(message_text_value).toBe('Emoji🥰 test');
+                },
+                timeout
+            );
+
+            test(
+                'first/second users: if Enter key is pressed, should send/receive message with emoji',
+                async () => {
+                    await page.keyboard.press('Enter');
+
+                    await page.waitForTimeout(2000);
+
+                    const sent_messages = await page.$$eval('#messages-div div.row.sent p', (messages) => {
+                        return messages.map((message) => message.innerHTML);
+                    });
+
+                    expect(sent_messages[sent_messages.length - 1]).toBe('Emoji🥰 test');
+
+                    await page2.bringToFront();
+
+                    await page2.waitForTimeout(1000);
+
+                    const received_messages = await page2.$$eval('#messages-div div.row.received p', (messages) => {
+                        return messages.map((message) => message.innerHTML);
+                    });
+
+                    expect(received_messages[received_messages.length - 1]).toBe('Emoji🥰 test');
                 },
                 timeout
             );
