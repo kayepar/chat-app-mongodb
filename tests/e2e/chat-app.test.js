@@ -1111,10 +1111,6 @@ describe('end-to-end tests for chat app', () => {
                 await page2.close();
             });
 
-            // beforeAll(async () => {
-
-            // });
-
             test('if user has sent messages, should get both sent and received messages', async () => {
                 await page2.click('#email-text');
                 await page2.type('#email-text', 'kaye.cenizal@gmail.com');
@@ -1133,6 +1129,7 @@ describe('end-to-end tests for chat app', () => {
                 await page2.click('#start-button');
 
                 await page2.waitForSelector('#messages-div', { visible: true });
+                await page2.waitForTimeout(1000);
 
                 const received_messages = await getReceivedMessages(page2);
 
@@ -1161,6 +1158,7 @@ describe('end-to-end tests for chat app', () => {
                 await page2.click('#start-button');
 
                 await page2.waitForSelector('#messages-div', { visible: true });
+                await page2.waitForTimeout(1000);
 
                 const received_messages = await getReceivedMessages(page2);
 
@@ -1168,7 +1166,89 @@ describe('end-to-end tests for chat app', () => {
 
                 const sent_messages = await getSentMessages(page2);
 
-                expect(sent_messages).toHaveLength(0);
+                expect(sent_messages).toEqual([]);
+            });
+        });
+    });
+
+    describe.only('first and second user  (different chatroom interaction tests)', () => {
+        beforeAll(async () => {
+            page2 = await browser.newPage();
+            await page2.goto(URL, { waitUntil: 'domcontentloaded' });
+
+            await page2.waitForTimeout(1000);
+        });
+
+        // todo: join othr room - need to test duplicate user
+        describe('messaging', () => {
+            test(
+                `first/second users: should not receive message sent from another room`,
+                async () => {
+                    await page2.click('#email-text');
+                    await page2.type('#email-text', 'michael.cenizal@gmail.com');
+
+                    await page2.click('#username-text');
+                    await page2.type('#username-text', 'renz');
+
+                    await page2.click('#room-text');
+                    await page2.type('#room-text', 'cobol');
+
+                    await page2.click('#start-button');
+
+                    await page2.waitForSelector('#messages-div', { visible: true });
+
+                    await page2.waitForTimeout(1000);
+
+                    await page2.click('#message-textbox');
+                    await page2.type('#message-textbox', 'Message from cobol room');
+
+                    await page2.click('button[type=submit]');
+
+                    await page.bringToFront();
+
+                    const received_messages = await getReceivedMessages(page);
+
+                    expect(received_messages).toEqual(expect.not.arrayContaining(['Message from cobol room']));
+                },
+                timeout
+            );
+        });
+
+        describe('sidebar', () => {
+            test(`first user: should display second user's room in 'other chat rooms' section`, async () => {
+                const page1_other_room = await getElementValue(page, '#rooms-section div a');
+
+                expect(page1_other_room).not.toBe('');
+            });
+
+            test(
+                `second user: should display first user's room in 'other chat rooms' section`,
+                async () => {
+                    await page2.bringToFront();
+
+                    await page2.waitForSelector('#rooms-section', { visible: true });
+
+                    await page2.waitForTimeout(1000);
+
+                    const page2_other_room = await getElementValue(page2, '#rooms-section div a');
+
+                    expect(page2_other_room).not.toBe('');
+
+                    await page2.close();
+                },
+                timeout
+            );
+
+            test(`first user: if other room becomes inactive, should remove from 'other chat rooms' section`, async () => {
+                await page.bringToFront();
+
+                await page.waitForSelector('#rooms-section', { visible: true });
+
+                await page.waitForTimeout(1000);
+
+                const page1_other_room = await getElementValue(page, '#rooms-section div');
+
+                expect(page1_other_room).toBe('');
             });
         });
     });
