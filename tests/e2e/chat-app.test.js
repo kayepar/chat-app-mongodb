@@ -4,7 +4,7 @@ require('../../jest-puppeteer.config');
 const timeout = 40000;
 
 let page2;
-// jest.setTimeout(20000);
+jest.setTimeout(20000);
 
 beforeAll(async () => {
     await page.goto(URL, { waitUntil: 'domcontentloaded' });
@@ -1098,58 +1098,73 @@ describe('end-to-end tests for chat app', () => {
         });
 
         describe.only('on user join - load chatroom messages', () => {
-            test('if user has sent messages, should get both sent and received messages', async () => {
+            beforeEach(async () => {
                 page2 = await browser.newPage();
                 await page2.goto(URL, { waitUntil: 'domcontentloaded' });
 
                 await page2.waitForTimeout(1000);
+            });
 
+            afterEach(async () => {
+                await page2.waitForTimeout(1000);
+
+                await page2.close();
+            });
+
+            // beforeAll(async () => {
+
+            // });
+
+            test('if user has sent messages, should get both sent and received messages', async () => {
                 await page2.click('#email-text');
                 await page2.type('#email-text', 'kaye.cenizal@gmail.com');
 
                 await page2.click('#username-text');
                 await page2.type('#username-text', 'kaye');
 
-                await page2.click('#room-text');
-                await page2.type('#room-text', 'html');
+                await page2.click('#active-rooms');
 
-                await page2.keyboard.press('Enter');
+                await page2.waitForSelector('#active-rooms-menu', { visible: true });
+
+                await page2.click('#active-rooms-menu > a');
 
                 await page2.waitForTimeout(1000);
+
+                await page2.click('#start-button');
+
+                await page2.waitForSelector('#messages-div', { visible: true });
 
                 const received_messages = await getReceivedMessages(page2);
 
-                expect(received_messages.length).tobeGreaterThan(0);
+                expect(received_messages.length).toBeGreaterThan(0);
 
                 const sent_messages = await getSentMessages(page2);
 
-                expect(sent_messages.length).tobeGreaterThan(0);
-
-                await page2.close();
+                expect(sent_messages.length).toBeGreaterThan(0);
             });
 
             test('if user has no sent messages, should get received messages', async () => {
-                page2 = await browser.newPage();
-                await page2.goto(URL, { waitUntil: 'domcontentloaded' });
-
-                await page2.waitForTimeout(1000);
-
                 await page2.click('#email-text');
                 await page2.type('#email-text', 'john.par@gmail.com');
 
                 await page2.click('#username-text');
                 await page2.type('#username-text', 'john');
 
-                await page2.click('#room-text');
-                await page2.type('#room-text', 'html');
+                await page2.click('#active-rooms');
 
-                await page2.keyboard.press('Enter');
+                await page2.waitForSelector('#active-rooms-menu', { visible: true });
+
+                await page2.click('#active-rooms-menu > a');
 
                 await page2.waitForTimeout(1000);
 
+                await page2.click('#start-button');
+
+                await page2.waitForSelector('#messages-div', { visible: true });
+
                 const received_messages = await getReceivedMessages(page2);
 
-                expect(received_messages.length).tobeGreaterThan(0);
+                expect(received_messages.length).toBeGreaterThan(0);
 
                 const sent_messages = await getSentMessages(page2);
 
