@@ -55,6 +55,45 @@ const getReceivedMessages = async (activePage) => {
     });
 };
 
+const joinExistingRooom = async (activePage, email, username) => {
+    await activePage.click('#email-text');
+    await activePage.type('#email-text', email);
+
+    await activePage.click('#username-text');
+    await activePage.type('#username-text', username);
+
+    await activePage.click('#active-rooms');
+
+    await activePage.waitForSelector('#active-rooms-menu', { visible: true });
+
+    await activePage.click('#active-rooms-menu > a');
+
+    await activePage.waitForTimeout(1000);
+
+    await activePage.click('#start-button');
+
+    await activePage.waitForSelector('#messages-div', { visible: true });
+
+    await activePage.waitForTimeout(1000);
+};
+
+const joinNewRoom = async (activePage, email, username, room) => {
+    await activePage.click('#email-text');
+    await activePage.type('#email-text', email);
+
+    await activePage.click('#username-text');
+    await activePage.type('#username-text', username);
+
+    await activePage.click('#room-text');
+    await activePage.type('#room-text', room);
+
+    await activePage.click('#start-button');
+
+    await activePage.waitForSelector('#messages-div', { visible: true });
+
+    await activePage.waitForTimeout(1000);
+};
+
 // todo: error redirects
 // todo: re-login to show saved messages
 // todo: very long message
@@ -1112,24 +1151,26 @@ describe('end-to-end tests for chat app', () => {
             });
 
             test('if user has sent messages, should get both sent and received messages', async () => {
-                await page2.click('#email-text');
-                await page2.type('#email-text', 'kaye.cenizal@gmail.com');
+                // await page2.click('#email-text');
+                // await page2.type('#email-text', 'kaye.cenizal@gmail.com');
 
-                await page2.click('#username-text');
-                await page2.type('#username-text', 'kaye');
+                // await page2.click('#username-text');
+                // await page2.type('#username-text', 'kaye');
 
-                await page2.click('#active-rooms');
+                // await page2.click('#active-rooms');
 
-                await page2.waitForSelector('#active-rooms-menu', { visible: true });
+                // await page2.waitForSelector('#active-rooms-menu', { visible: true });
 
-                await page2.click('#active-rooms-menu > a');
+                // await page2.click('#active-rooms-menu > a');
 
-                await page2.waitForTimeout(1000);
+                // await page2.waitForTimeout(1000);
 
-                await page2.click('#start-button');
+                // await page2.click('#start-button');
 
-                await page2.waitForSelector('#messages-div', { visible: true });
-                await page2.waitForTimeout(1000);
+                // await page2.waitForSelector('#messages-div', { visible: true });
+                // await page2.waitForTimeout(1000);
+
+                await joinExistingRooom(page2, 'kaye.cenizal@gmail.com', 'kaye');
 
                 const received_messages = await getReceivedMessages(page2);
 
@@ -1141,24 +1182,26 @@ describe('end-to-end tests for chat app', () => {
             });
 
             test('if user has no sent messages, should get received messages', async () => {
-                await page2.click('#email-text');
-                await page2.type('#email-text', 'john.par@gmail.com');
+                // await page2.click('#email-text');
+                // await page2.type('#email-text', 'john.par@gmail.com');
 
-                await page2.click('#username-text');
-                await page2.type('#username-text', 'john');
+                // await page2.click('#username-text');
+                // await page2.type('#username-text', 'john');
 
-                await page2.click('#active-rooms');
+                // await page2.click('#active-rooms');
 
-                await page2.waitForSelector('#active-rooms-menu', { visible: true });
+                // await page2.waitForSelector('#active-rooms-menu', { visible: true });
 
-                await page2.click('#active-rooms-menu > a');
+                // await page2.click('#active-rooms-menu > a');
 
-                await page2.waitForTimeout(1000);
+                // await page2.waitForTimeout(1000);
 
-                await page2.click('#start-button');
+                // await page2.click('#start-button');
 
-                await page2.waitForSelector('#messages-div', { visible: true });
-                await page2.waitForTimeout(1000);
+                // await page2.waitForSelector('#messages-div', { visible: true });
+                // await page2.waitForTimeout(1000);
+
+                await joinExistingRooom(page2, 'john.par@gmail.com', 'john');
 
                 const received_messages = await getReceivedMessages(page2);
 
@@ -1171,7 +1214,7 @@ describe('end-to-end tests for chat app', () => {
         });
     });
 
-    describe.only('first and second user  (different chatroom interaction tests)', () => {
+    describe.only('first and second user (different chatroom interaction tests)', () => {
         beforeAll(async () => {
             page2 = await browser.newPage();
             await page2.goto(URL, { waitUntil: 'domcontentloaded' });
@@ -1184,20 +1227,22 @@ describe('end-to-end tests for chat app', () => {
             test(
                 `first/second users: should not receive message sent from another room`,
                 async () => {
-                    await page2.click('#email-text');
-                    await page2.type('#email-text', 'michael.cenizal@gmail.com');
+                    // await page2.click('#email-text');
+                    // await page2.type('#email-text', 'michael.cenizal@gmail.com');
 
-                    await page2.click('#username-text');
-                    await page2.type('#username-text', 'renz');
+                    // await page2.click('#username-text');
+                    // await page2.type('#username-text', 'renz');
 
-                    await page2.click('#room-text');
-                    await page2.type('#room-text', 'cobol');
+                    // await page2.click('#room-text');
+                    // await page2.type('#room-text', 'cobol');
 
-                    await page2.click('#start-button');
+                    // await page2.click('#start-button');
 
-                    await page2.waitForSelector('#messages-div', { visible: true });
+                    // await page2.waitForSelector('#messages-div', { visible: true });
 
-                    await page2.waitForTimeout(1000);
+                    // await page2.waitForTimeout(1000);
+
+                    await joinNewRoom(page2, 'michael.cenizal@gmail.com', 'renz', 'cobol');
 
                     await page2.click('#message-textbox');
                     await page2.type('#message-textbox', 'Message from cobol room');
@@ -1215,41 +1260,81 @@ describe('end-to-end tests for chat app', () => {
         });
 
         describe('sidebar', () => {
-            test(`first user: should display second user's room in 'other chat rooms' section`, async () => {
-                const page1_other_room = await getElementValue(page, '#rooms-section div a');
+            describe('other chat rooms section', () => {
+                test(`first user: should display second user's room in the list`, async () => {
+                    const page1_other_room = await getElementValue(page, '#rooms-section div a');
 
-                expect(page1_other_room).not.toBe('');
+                    expect(page1_other_room).not.toBe('');
+                });
+
+                test(
+                    `second user: should display first user's room in the list`,
+                    async () => {
+                        await page2.bringToFront();
+
+                        await page2.waitForSelector('#rooms-section', { visible: true });
+
+                        await page2.waitForTimeout(1000);
+
+                        const page2_other_room = await getElementValue(page2, '#rooms-section div a');
+
+                        expect(page2_other_room).not.toBe('');
+                    },
+                    timeout
+                );
+
+                test(
+                    `first user: if other room becomes inactive, should remove name from list`,
+                    async () => {
+                        await page2.close();
+
+                        await page.bringToFront();
+
+                        await page.waitForSelector('#rooms-section', { visible: true });
+
+                        await page.waitForTimeout(1000);
+
+                        const page1_other_room = await getElementValue(page, '#rooms-section div');
+
+                        expect(page1_other_room).toBe('');
+                    },
+                    timeout
+                );
             });
+        });
+    });
 
-            test(
-                `second user: should display first user's room in 'other chat rooms' section`,
-                async () => {
-                    await page2.bringToFront();
+    describe('join another room (from sidebar)', () => {
+        beforeAll(async () => {
+            page2 = await browser.newPage();
+            await page2.goto(URL, { waitUntil: 'domcontentloaded' });
 
-                    await page2.waitForSelector('#rooms-section', { visible: true });
+            await page2.waitForTimeout(1000);
 
-                    await page2.waitForTimeout(1000);
+            await joinNewRoom(page2, 'kaye.cenizal@gmail.com', 'kaye', 'node.js');
+        });
 
-                    const page2_other_room = await getElementValue(page2, '#rooms-section div a');
-
-                    expect(page2_other_room).not.toBe('');
-
-                    await page2.close();
-                },
-                timeout
-            );
-
-            test(`first user: if other room becomes inactive, should remove from 'other chat rooms' section`, async () => {
+        test(
+            `should see 'join room' modal`,
+            async () => {
                 await page.bringToFront();
 
-                await page.waitForSelector('#rooms-section', { visible: true });
+                await page.evaluate(() => {
+                    localStorage.removeItem('join-room-modal-checked');
+                });
 
                 await page.waitForTimeout(1000);
 
-                const page1_other_room = await getElementValue(page, '#rooms-section div');
+                await page.click('#rooms-section div a');
 
-                expect(page1_other_room).toBe('');
-            });
-        });
+                await page.waitForSelector('#join-room-modal', { visible: true });
+
+                const join_room_modal = await page.$('#join-room-modal');
+                const join_room_modal_className = await getClassName(page, join_room_modal);
+
+                expect(join_room_modal_className).toContain('show');
+            },
+            timeout
+        );
     });
 });
