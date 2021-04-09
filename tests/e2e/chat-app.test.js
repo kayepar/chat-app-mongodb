@@ -1253,7 +1253,7 @@ describe('end-to-end tests for chat app', () => {
         });
     });
 
-    describe.only('join another room (from sidebar)', () => {
+    describe('join another room (from sidebar)', () => {
         describe('join room modal', () => {
             const roomName = 'node.js';
 
@@ -1318,6 +1318,12 @@ describe('end-to-end tests for chat app', () => {
         });
 
         describe('error modal', () => {
+            let newPage;
+
+            afterAll(async () => {
+                await page2.close();
+            });
+
             test(
                 'if credentials are already in use, should show modal',
                 async () => {
@@ -1334,20 +1340,75 @@ describe('end-to-end tests for chat app', () => {
 
                     await page.click('#rooms-section div a'); // join room again
 
-                    const newPage = await newPagePromise; // declare new tab, now you can work with it
+                    newPage = await newPagePromise; // declare new tab, now you can work with it
 
                     await newPage.waitForSelector('#error-modal', { visible: true });
 
                     const error_modal = await newPage.$('#error-modal');
                     const error_modal_className = await getClassName(newPage, error_modal);
-                    console.log(error_modal_className);
 
                     expect(error_modal_className).toContain('show');
                 },
                 timeout
             );
 
-            // todo: should return to login page
+            test(
+                `if OK button is clicked, should return to login page`,
+                async () => {
+                    await newPage.waitForSelector('#error-modal-yes-button', { visible: true });
+                    await newPage.click('#error-modal-yes-button');
+
+                    await page.waitForTimeout(2000);
+
+                    expect(newPage.url()).toBe('http://localhost/?');
+
+                    await newPage.close();
+                },
+                timeout
+            );
         });
+    });
+
+    describe.only('on mobile', () => {
+        beforeAll(async () => {
+            await page.setViewport({
+                width: 480,
+                height: 853,
+            });
+        });
+
+        test(
+            'should show a collapsed sidebar and a harburger icon',
+            async () => {
+                await page.bringToFront();
+
+                await page.waitForTimeout(1000);
+
+                const sidebar_menu = await page.$('#sidebar-menu');
+                const sidebar_menu_className = await getClassName(page, sidebar_menu);
+
+                expect(sidebar_menu_className).not.toContain('active');
+
+                const is_hamburger_icon_shown = await getDisplayValue(page, '#sidebar-toggler-2');
+
+                expect(is_hamburger_icon_shown).toBe(true);
+            },
+            timeout
+        );
+
+        test(
+            'if hamburger icon is clicked, should show sidebar',
+            async () => {
+                await page.click('#sidebar-toggler-2');
+
+                await page.waitForTimeout(1000);
+
+                const sidebar_menu = await page.$('#sidebar-menu');
+                const sidebar_menu_className = await getClassName(page, sidebar_menu);
+
+                expect(sidebar_menu_className).toContain('active');
+            },
+            timeout
+        );
     });
 });
