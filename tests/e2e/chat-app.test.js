@@ -343,7 +343,7 @@ describe('end-to-end tests for chat app', () => {
             });
 
             // has only
-            describe.only('submit form', () => {
+            describe('submit form', () => {
                 test(
                     'if all fields are valid, should submit form when button is clicked',
                     async () => {
@@ -413,7 +413,7 @@ describe('end-to-end tests for chat app', () => {
     });
 
     // has only
-    describe.only('second user', () => {
+    describe('second user', () => {
         beforeAll(async () => {
             page2 = await browser.newPage();
             await page2.goto(URL, { waitUntil: 'domcontentloaded' });
@@ -485,7 +485,7 @@ describe('end-to-end tests for chat app', () => {
 
                         await page2.click('#active-rooms-menu > a');
 
-                        const button_text = await page2.getElementValue(page2, '#active-room-text');
+                        const button_text = await getElementValue(page2, '#active-room-text');
 
                         expect(button_text).toBe(option_text);
                     },
@@ -590,7 +590,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 // has only
-                test.only(
+                test(
                     `if open and 'Yes' is clicked, should auto-select room in active rooms dropdown`,
                     async () => {
                         await page2.waitForSelector('#duplicate-room-modal', { hidden: true });
@@ -709,7 +709,7 @@ describe('end-to-end tests for chat app', () => {
             });
 
             // has only
-            describe.only('submit form', () => {
+            describe('submit form', () => {
                 test(
                     'if all fields are valid, should submit form when enter is pressed',
                     async () => {
@@ -794,7 +794,7 @@ describe('end-to-end tests for chat app', () => {
         });
 
         // has only
-        describe.only('messaging', () => {
+        describe('messaging', () => {
             test(
                 'second user: if Enter key is pressed after typing, should send message',
                 async () => {
@@ -882,7 +882,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             // has skip
-            test.skip(
+            test(
                 'second user: if message is long and Enter key is pressed, should still send message',
                 async () => {
                     const testMessage =
@@ -903,7 +903,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             // has skip
-            test.skip(
+            test(
                 'first user: should be able to receive long message',
                 async () => {
                     const testMessage =
@@ -921,7 +921,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             // has skip
-            test.skip(
+            test(
                 'second user, if textbox is empty, should not send message',
                 async () => {
                     await page2.bringToFront();
@@ -941,7 +941,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             // has skip
-            test.skip(
+            test(
                 'second user: if message contains offensive words, should not send message',
                 async () => {
                     await page2.click('#message-textbox');
@@ -993,7 +993,7 @@ describe('end-to-end tests for chat app', () => {
 
                     const received_messages = await getReceivedMessages(page);
 
-                    expect(received_messages).toHaveLength(4);
+                    expect(received_messages).toHaveLength(5);
                 },
                 timeout
             );
@@ -1100,27 +1100,27 @@ describe('end-to-end tests for chat app', () => {
                     },
                     timeout
                 );
+            });
 
-                describe('second user', () => {
-                    test(
-                        'should receive message with emoji',
-                        async () => {
-                            await page2.bringToFront();
+            describe('second user', () => {
+                test(
+                    'should receive message with emoji',
+                    async () => {
+                        await page2.bringToFront();
 
-                            await page2.waitForTimeout(1000);
+                        await page2.waitForTimeout(1000);
 
-                            const received_messages = await getReceivedMessages(page2);
+                        const received_messages = await getReceivedMessages(page2);
 
-                            expect(received_messages[received_messages.length - 1]).toBe('Emoji🥰 test');
-                        },
-                        timeout
-                    );
-                });
+                        expect(received_messages[received_messages.length - 1]).toBe('Emoji🥰 test');
+                    },
+                    timeout
+                );
             });
         });
 
         // has only
-        describe.only('on user disconnect', () => {
+        describe('on user disconnect', () => {
             test(
                 'first user: if second user leaves the chatroom, should get admin notification',
                 async () => {
@@ -1178,7 +1178,7 @@ describe('end-to-end tests for chat app', () => {
         });
     });
 
-    describe.only('first and second user (different chatroom interaction tests)', () => {
+    describe('first and second user (different chatroom interaction tests)', () => {
         beforeAll(async () => {
             page2 = await browser.newPage();
             await page2.goto(URL, { waitUntil: 'domcontentloaded' });
@@ -1186,7 +1186,6 @@ describe('end-to-end tests for chat app', () => {
             await page2.waitForTimeout(1000);
         });
 
-        // todo: join othr room - need to test duplicate user
         describe('messaging', () => {
             test(
                 `first/second users: should not receive message sent from another room`,
@@ -1369,7 +1368,7 @@ describe('end-to-end tests for chat app', () => {
         });
     });
 
-    describe.only('on mobile', () => {
+    describe('on mobile', () => {
         beforeAll(async () => {
             await page.setViewport({
                 width: 480,
@@ -1378,7 +1377,7 @@ describe('end-to-end tests for chat app', () => {
         });
 
         test(
-            'should show a collapsed sidebar and a harburger icon',
+            'should show a collapsed sidebar and a hamburger icon',
             async () => {
                 await page.bringToFront();
 
@@ -1407,6 +1406,106 @@ describe('end-to-end tests for chat app', () => {
                 const sidebar_menu_className = await getClassName(page, sidebar_menu);
 
                 expect(sidebar_menu_className).toContain('active');
+            },
+            timeout
+        );
+
+        test(
+            'if sidebar is displayed, should show overlay on other half of screen',
+            async () => {
+                const overlay = await page.$('.overlay');
+
+                const overlay_classname = await getClassName(page, overlay);
+
+                expect(overlay_classname).toContain('active');
+            },
+            timeout
+        );
+
+        test(
+            'if hamburger icon is clicked again, should close sidebar',
+            async () => {
+                await page.click('#sidebar-toggler-1');
+
+                await page.waitForTimeout(1000);
+
+                const sidebar_menu = await page.$('#sidebar-menu');
+                const sidebar_menu_className = await getClassName(page, sidebar_menu);
+
+                expect(sidebar_menu_className).not.toContain('active');
+            },
+            timeout
+        );
+
+        test(
+            `if overlay is clicked, should close sidebar`,
+            async () => {
+                await page.click('#sidebar-toggler-2');
+
+                await page.waitForSelector('#sidebar-menu', { visible: true });
+
+                await page.evaluate(() => {
+                    document.querySelector('div.overlay').click();
+                });
+
+                // await page.waitForSelector('#sidebar-menu', { visible: false });
+                await page.waitForTimeout(1000);
+
+                const sidebar_menu = await page.$('#sidebar-menu');
+                const sidebar_menu_className = await getClassName(page, sidebar_menu);
+
+                expect(sidebar_menu_className).not.toContain('active');
+            },
+            timeout
+        );
+    });
+
+    // has only
+    describe('exit modal', () => {
+        test(
+            'if exit button is clicked, should show modal',
+            async () => {
+                await page.click('#exit-room-button');
+
+                await page.waitForTimeout(1000);
+
+                const exit_room_modal = await page.$('#exit-room-modal');
+                const exit_room_modal_className = await getClassName(page, exit_room_modal);
+
+                expect(exit_room_modal_className).toContain('show');
+            },
+            timeout
+        );
+
+        test(
+            `if 'No' is clicked, should close modal`,
+            async () => {
+                await page.waitForSelector('#exit-room-modal .modal-no-button', { visible: true });
+
+                await page.click('#exit-room-modal .modal-no-button');
+
+                const exit_room_modal = await page.$('#exit-room-modal .modal-no-button');
+                const exit_room_modal_className = await getClassName(page, exit_room_modal);
+
+                expect(exit_room_modal_className).not.toContain('show');
+            },
+            timeout
+        );
+
+        test(
+            `if 'Yes' is clicked, should return to login page`,
+            async () => {
+                await page.waitForSelector('#exit-room-modal', { visible: false });
+
+                await page.click('#exit-room-button');
+
+                await page.waitForSelector('#exit-room-modal', { visible: true });
+
+                await page.click('#exit-room-modal .modal-yes-button');
+
+                page.waitForNavigation();
+
+                expect(page.url()).toBe('http://localhost/?');
             },
             timeout
         );
