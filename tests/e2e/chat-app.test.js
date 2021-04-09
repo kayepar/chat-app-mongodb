@@ -1,5 +1,3 @@
-const { logger } = require('handlebars');
-
 /* eslint-disable no-undef */
 require('../../jest-puppeteer.config');
 
@@ -11,8 +9,6 @@ jest.setTimeout(20000);
 beforeAll(async () => {
     await page.goto(URL, { waitUntil: 'domcontentloaded' });
 });
-
-// await jestPuppeteer.debug();
 
 const clearField = async (activePage, id) => {
     const element = await activePage.$(id);
@@ -95,11 +91,6 @@ const joinNewRoom = async (activePage, email, username, room) => {
 
     await activePage.waitForTimeout(1000);
 };
-
-// todo: error redirects
-// todo: re-login to show saved messages
-// todo: very long message
-// todo: message color?
 
 describe('end-to-end tests for chat app', () => {
     describe('first user', () => {
@@ -342,7 +333,6 @@ describe('end-to-end tests for chat app', () => {
                 );
             });
 
-            // has only
             describe('submit form', () => {
                 test(
                     'if all fields are valid, should submit form when button is clicked',
@@ -412,7 +402,6 @@ describe('end-to-end tests for chat app', () => {
         });
     });
 
-    // has only
     describe('second user', () => {
         beforeAll(async () => {
             page2 = await browser.newPage();
@@ -589,7 +578,6 @@ describe('end-to-end tests for chat app', () => {
                     timeout
                 );
 
-                // has only
                 test(
                     `if open and 'Yes' is clicked, should auto-select room in active rooms dropdown`,
                     async () => {
@@ -708,7 +696,6 @@ describe('end-to-end tests for chat app', () => {
                 );
             });
 
-            // has only
             describe('submit form', () => {
                 test(
                     'if all fields are valid, should submit form when enter is pressed',
@@ -793,7 +780,6 @@ describe('end-to-end tests for chat app', () => {
             );
         });
 
-        // has only
         describe('messaging', () => {
             test(
                 'second user: if Enter key is pressed after typing, should send message',
@@ -881,7 +867,6 @@ describe('end-to-end tests for chat app', () => {
                 timeout
             );
 
-            // has skip
             test(
                 'second user: if message is long and Enter key is pressed, should still send message',
                 async () => {
@@ -902,7 +887,6 @@ describe('end-to-end tests for chat app', () => {
                 timeout
             );
 
-            // has skip
             test(
                 'first user: should be able to receive long message',
                 async () => {
@@ -920,7 +904,6 @@ describe('end-to-end tests for chat app', () => {
                 timeout
             );
 
-            // has skip
             test(
                 'second user, if textbox is empty, should not send message',
                 async () => {
@@ -940,7 +923,6 @@ describe('end-to-end tests for chat app', () => {
                 timeout
             );
 
-            // has skip
             test(
                 'second user: if message contains offensive words, should not send message',
                 async () => {
@@ -1119,7 +1101,6 @@ describe('end-to-end tests for chat app', () => {
             });
         });
 
-        // has only
         describe('on user disconnect', () => {
             test(
                 'first user: if second user leaves the chatroom, should get admin notification',
@@ -1448,7 +1429,6 @@ describe('end-to-end tests for chat app', () => {
                     document.querySelector('div.overlay').click();
                 });
 
-                // await page.waitForSelector('#sidebar-menu', { visible: false });
                 await page.waitForTimeout(1000);
 
                 const sidebar_menu = await page.$('#sidebar-menu');
@@ -1460,7 +1440,6 @@ describe('end-to-end tests for chat app', () => {
         );
     });
 
-    // has only
     describe('exit modal', () => {
         test(
             'if exit button is clicked, should show modal',
