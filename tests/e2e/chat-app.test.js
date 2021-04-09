@@ -1,3 +1,5 @@
+const { logger } = require('handlebars');
+
 /* eslint-disable no-undef */
 require('../../jest-puppeteer.config');
 
@@ -1136,7 +1138,7 @@ describe('end-to-end tests for chat app', () => {
             );
         });
 
-        describe.only('on user join - load chatroom messages', () => {
+        describe('on user join - load chatroom messages', () => {
             beforeEach(async () => {
                 page2 = await browser.newPage();
                 await page2.goto(URL, { waitUntil: 'domcontentloaded' });
@@ -1151,25 +1153,6 @@ describe('end-to-end tests for chat app', () => {
             });
 
             test('if user has sent messages, should get both sent and received messages', async () => {
-                // await page2.click('#email-text');
-                // await page2.type('#email-text', 'kaye.cenizal@gmail.com');
-
-                // await page2.click('#username-text');
-                // await page2.type('#username-text', 'kaye');
-
-                // await page2.click('#active-rooms');
-
-                // await page2.waitForSelector('#active-rooms-menu', { visible: true });
-
-                // await page2.click('#active-rooms-menu > a');
-
-                // await page2.waitForTimeout(1000);
-
-                // await page2.click('#start-button');
-
-                // await page2.waitForSelector('#messages-div', { visible: true });
-                // await page2.waitForTimeout(1000);
-
                 await joinExistingRooom(page2, 'kaye.cenizal@gmail.com', 'kaye');
 
                 const received_messages = await getReceivedMessages(page2);
@@ -1182,25 +1165,6 @@ describe('end-to-end tests for chat app', () => {
             });
 
             test('if user has no sent messages, should get received messages', async () => {
-                // await page2.click('#email-text');
-                // await page2.type('#email-text', 'john.par@gmail.com');
-
-                // await page2.click('#username-text');
-                // await page2.type('#username-text', 'john');
-
-                // await page2.click('#active-rooms');
-
-                // await page2.waitForSelector('#active-rooms-menu', { visible: true });
-
-                // await page2.click('#active-rooms-menu > a');
-
-                // await page2.waitForTimeout(1000);
-
-                // await page2.click('#start-button');
-
-                // await page2.waitForSelector('#messages-div', { visible: true });
-                // await page2.waitForTimeout(1000);
-
                 await joinExistingRooom(page2, 'john.par@gmail.com', 'john');
 
                 const received_messages = await getReceivedMessages(page2);
@@ -1227,21 +1191,6 @@ describe('end-to-end tests for chat app', () => {
             test(
                 `first/second users: should not receive message sent from another room`,
                 async () => {
-                    // await page2.click('#email-text');
-                    // await page2.type('#email-text', 'michael.cenizal@gmail.com');
-
-                    // await page2.click('#username-text');
-                    // await page2.type('#username-text', 'renz');
-
-                    // await page2.click('#room-text');
-                    // await page2.type('#room-text', 'cobol');
-
-                    // await page2.click('#start-button');
-
-                    // await page2.waitForSelector('#messages-div', { visible: true });
-
-                    // await page2.waitForTimeout(1000);
-
                     await joinNewRoom(page2, 'michael.cenizal@gmail.com', 'renz', 'cobol');
 
                     await page2.click('#message-textbox');
@@ -1304,37 +1253,101 @@ describe('end-to-end tests for chat app', () => {
         });
     });
 
-    describe('join another room (from sidebar)', () => {
-        beforeAll(async () => {
-            page2 = await browser.newPage();
-            await page2.goto(URL, { waitUntil: 'domcontentloaded' });
+    describe.only('join another room (from sidebar)', () => {
+        describe('join room modal', () => {
+            const roomName = 'node.js';
 
-            await page2.waitForTimeout(1000);
+            test(
+                `if room name is clicked, should show modal`,
+                async () => {
+                    page2 = await browser.newPage();
+                    await page2.goto(URL, { waitUntil: 'domcontentloaded' });
 
-            await joinNewRoom(page2, 'kaye.cenizal@gmail.com', 'kaye', 'node.js');
+                    await page2.waitForTimeout(1000);
+
+                    await joinNewRoom(page2, 'kaye.cenizal@gmail.com', 'kaye', roomName);
+
+                    await page.bringToFront();
+
+                    await page.evaluate(() => {
+                        localStorage.removeItem('join-room-modal-checked');
+                    });
+
+                    await page.waitForTimeout(1000);
+
+                    await page.click('#rooms-section div a');
+
+                    await page.waitForSelector('#join-room-modal', { visible: true });
+
+                    const join_room_modal = await page.$('#join-room-modal');
+                    const join_room_modal_className = await getClassName(page, join_room_modal);
+
+                    expect(join_room_modal_className).toContain('show');
+                },
+                timeout
+            );
+
+            test(
+                `if 'Do not show me again' is ticked, should not display modal again`,
+                async () => {
+                    await page.waitForTimeout(2000);
+
+                    await page.evaluate(() => {
+                        document.querySelector('#join-room-modal-checkbox-no-show').checked = true;
+                        localStorage.setItem('join-room-modal-checked', true);
+                    });
+
+                    await page.click('#chosen-room + button'); // No button
+
+                    await page.waitForSelector('#join-room-modal', { visible: false });
+
+                    const newPagePromise = new Promise((tab) => page.once('popup', tab));
+
+                    await page.click('#rooms-section div a'); // join room again
+
+                    const newPage = await newPagePromise; // declare new tab, now you can work with it
+
+                    expect(newPage.url()).toContain(`chat.html?room=${roomName}`);
+
+                    await newPage.close();
+
+                    await page2.close();
+                },
+                timeout
+            );
         });
 
-        test(
-            `should see 'join room' modal`,
-            async () => {
-                await page.bringToFront();
+        describe('error modal', () => {
+            test(
+                'if credentials are already in use, should show modal',
+                async () => {
+                    page2 = await browser.newPage();
+                    await page2.goto(URL, { waitUntil: 'domcontentloaded' });
 
-                await page.evaluate(() => {
-                    localStorage.removeItem('join-room-modal-checked');
-                });
+                    await page2.waitForTimeout(1000);
 
-                await page.waitForTimeout(1000);
+                    await joinNewRoom(page2, 'callie@gmail.com', 'callie', 'java');
 
-                await page.click('#rooms-section div a');
+                    await page.bringToFront();
 
-                await page.waitForSelector('#join-room-modal', { visible: true });
+                    const newPagePromise = new Promise((tab) => page.once('popup', tab));
 
-                const join_room_modal = await page.$('#join-room-modal');
-                const join_room_modal_className = await getClassName(page, join_room_modal);
+                    await page.click('#rooms-section div a'); // join room again
 
-                expect(join_room_modal_className).toContain('show');
-            },
-            timeout
-        );
+                    const newPage = await newPagePromise; // declare new tab, now you can work with it
+
+                    await newPage.waitForSelector('#error-modal', { visible: true });
+
+                    const error_modal = await newPage.$('#error-modal');
+                    const error_modal_className = await getClassName(newPage, error_modal);
+                    console.log(error_modal_className);
+
+                    expect(error_modal_className).toContain('show');
+                },
+                timeout
+            );
+
+            // todo: should return to login page
+        });
     });
 });
