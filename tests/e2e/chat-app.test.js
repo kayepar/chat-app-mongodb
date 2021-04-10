@@ -92,12 +92,12 @@ const joinNewRoom = async (activePage, email, username, room) => {
     await activePage.waitForTimeout(1000);
 };
 
-describe('end-to-end tests for chat app', () => {
-    describe('first user', () => {
-        describe('index page', () => {
-            describe('on load', () => {
+describe('End-to-end tests for chat app', () => {
+    describe('First user', () => {
+        describe('Index page', () => {
+            describe('On load', () => {
                 test(
-                    `page should have 'myChat' as title`,
+                    `Page should have 'myChat' as title`,
                     async () => {
                         const title = await page.title();
 
@@ -107,7 +107,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'page should have focus on the email input box',
+                    'Page should have focus on the email input box',
                     async () => {
                         const is_email_text_focused = await page.$eval(
                             '[data-testid="email-text"]',
@@ -120,9 +120,9 @@ describe('end-to-end tests for chat app', () => {
                 );
             });
 
-            describe('input validation', () => {
+            describe('Input validation', () => {
                 test(
-                    'if missing all three fields, should show validation errors',
+                    'If missing all three fields, should show validation errors',
                     async () => {
                         await page.click('#start-button');
 
@@ -145,7 +145,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'if email and username are missing, should show validation errors on both fields',
+                    'If email and username are missing, should show validation errors on both fields',
                     async () => {
                         await page.click('#room-text');
                         await page.type('#room-text', 'javascript');
@@ -171,7 +171,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'if email and room are missing, should show validation errors on both fields',
+                    'If email and room are missing, should show validation errors on both fields',
                     async () => {
                         await clearField(page, '#room-text');
 
@@ -199,7 +199,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'if username and room are missing, should show validation errors on both fields',
+                    'If username and room are missing, should show validation errors on both fields',
                     async () => {
                         await clearField(page, '#username-text');
 
@@ -227,7 +227,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'if only email is missing, should show validation error',
+                    'If only email is missing, should show validation error',
                     async () => {
                         await clearField(page, '#email-text');
 
@@ -258,7 +258,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'if only username is missing, should show validation error',
+                    'If only username is missing, should show validation error',
                     async () => {
                         await clearField(page, '#username-text');
 
@@ -286,7 +286,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'if only room is missing, should show validation error',
+                    'If only room is missing, should show validation error',
                     async () => {
                         await page.click('#username-text');
                         await page.type('#username-text', 'kaye');
@@ -314,7 +314,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'if email is invalid, should show validation error',
+                    'If email is invalid, should show validation error',
                     async () => {
                         await page.click('#room-text');
                         await page.type('#room-text', 'javascript');
@@ -333,9 +333,9 @@ describe('end-to-end tests for chat app', () => {
                 );
             });
 
-            describe('submit form', () => {
+            describe('Submit form', () => {
                 test(
-                    'if all fields are valid, should submit form when button is clicked',
+                    'If all fields are valid, should submit form when button is clicked',
                     async () => {
                         await clearField(page, '#email-text');
                         await page.click('#email-text');
@@ -360,9 +360,9 @@ describe('end-to-end tests for chat app', () => {
             });
         });
 
-        describe('chat page', () => {
+        describe('Chat page', () => {
             test(
-                'message section, should display welcome message from admin',
+                'Message section, should display welcome message from admin',
                 async () => {
                     await page.waitForSelector('.messages-box', { visible: true });
                     await page.waitForTimeout(2000);
@@ -375,7 +375,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             test(
-                `sidebar, should show room name in 'current chat room' section`,
+                `Sidebar, should show room name in 'Current Chat Room' section`,
                 async () => {
                     await page.waitForSelector('#current-room-section', { visible: true });
 
@@ -387,7 +387,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             test(
-                `sidebar, should show name in 'users' section`,
+                `Sidebar, should show name in 'Users' section`,
                 async () => {
                     await page.waitForSelector('#users-section', { visible: true });
 
@@ -402,7 +402,7 @@ describe('end-to-end tests for chat app', () => {
         });
     });
 
-    describe('second user', () => {
+    describe('Second user', () => {
         beforeAll(async () => {
             page2 = await browser.newPage();
             await page2.goto(URL, { waitUntil: 'domcontentloaded' });
@@ -410,10 +410,10 @@ describe('end-to-end tests for chat app', () => {
             await page.waitForTimeout(2000);
         });
 
-        describe('index page', () => {
-            describe('available rooms button', () => {
+        describe('Index page', () => {
+            describe('Available rooms button', () => {
                 test(
-                    'should show button (with options hidden)',
+                    'Should show button (with options hidden)',
                     async () => {
                         const is_available_rooms_shown = await getDisplayValue(page2, '#active-rooms');
 
@@ -428,7 +428,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'should show options when button is clicked',
+                    'Should show options when button is clicked',
                     async () => {
                         await page2.click('#active-rooms');
                         await page.waitForTimeout(2000);
@@ -442,7 +442,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'should have options available (the same number as current active rooms)',
+                    'Should have options available (the same number as current active rooms)',
                     async () => {
                         const options_count = await page2.$$eval('#active-rooms-menu a', (options) => options.length);
 
@@ -452,7 +452,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'on hover, option should correctly change color',
+                    'On hover, option should correctly change color',
                     async () => {
                         const first_option = await page2.$('#active-rooms-menu > a');
                         await first_option.hover();
@@ -468,7 +468,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'on click, option should be selected as active room',
+                    'On click, option should be selected as active room',
                     async () => {
                         const option_text = await getElementValue(page2, '#active-rooms-menu > a');
 
@@ -482,7 +482,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'on click, should clear room input value',
+                    'On click, should clear room input value',
                     async () => {
                         await page2.click('#room-text');
                         await page2.type('#room-text', 'test');
@@ -501,7 +501,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    `clear selection option, should reset button to default`,
+                    'Clear selection option, should reset button to default',
                     async () => {
                         await page2.click('#active-rooms');
                         await page2.waitForSelector('#active-rooms-menu', { visible: true });
@@ -516,7 +516,7 @@ describe('end-to-end tests for chat app', () => {
                 );
             });
 
-            describe('modal window (room existing)', () => {
+            describe('Modal window (room existing)', () => {
                 beforeAll(async () => {
                     await page2.click('#email-text');
                     await page2.type('#email-text', 'kaye.cenizal@gmail.com');
@@ -529,7 +529,7 @@ describe('end-to-end tests for chat app', () => {
                 });
 
                 test(
-                    'should be displayed if room already exists',
+                    'Should be displayed if room already exists',
                     async () => {
                         await page2.keyboard.press('Enter');
 
@@ -544,7 +544,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    `if open and 'No' is clicked, should close modal`,
+                    `If open and 'No' is clicked, should close modal`,
                     async () => {
                         await page2.waitForSelector('#duplicate-room-modal-no-button', { visible: true });
 
@@ -559,7 +559,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    `if open and 'X' is clicked, should close modal`,
+                    `If open and 'X' is clicked, should close modal`,
                     async () => {
                         await page2.waitForSelector('#duplicate-room-modal', { hidden: true });
 
@@ -579,7 +579,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    `if open and 'Yes' is clicked, should auto-select room in active rooms dropdown`,
+                    `If open and 'Yes' is clicked, should auto-select room in active rooms dropdown`,
                     async () => {
                         await page2.waitForSelector('#duplicate-room-modal', { hidden: true });
 
@@ -600,7 +600,7 @@ describe('end-to-end tests for chat app', () => {
                 );
             });
 
-            describe('input validation (duplicate credentials)', () => {
+            describe('Input validation (duplicate credentials)', () => {
                 beforeAll(async () => {
                     await clearField(page2, '#email-text');
                     await page2.click('#email-text');
@@ -612,7 +612,7 @@ describe('end-to-end tests for chat app', () => {
                 });
 
                 test(
-                    'if email and username are already in use, should display error message on both fields',
+                    'If email and username are already in use, should display error message on both fields',
                     async () => {
                         await page2.keyboard.press('Enter');
 
@@ -628,7 +628,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'if email is changed, should hide error message on email field',
+                    'If email is changed, should hide error message on email field',
                     async () => {
                         await clearField(page2, '#email-text');
                         await page2.click('#email-text');
@@ -646,7 +646,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'if username is changed, should hide error message on username field',
+                    'If username is changed, should hide error message on username field',
                     async () => {
                         await clearField(page2, '#username-text');
                         await page2.click('#username-text');
@@ -660,7 +660,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'if only email is in use, should display error message on email field',
+                    'If only email is in use, should display error message on email field',
                     async () => {
                         await clearField(page2, '#email-text');
                         await page2.click('#email-text');
@@ -676,7 +676,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'if only username is in use, should display error message on username field',
+                    'If only username is in use, should display error message on username field',
                     async () => {
                         await clearField(page2, '#email-text');
                         await page2.click('#email-text');
@@ -696,9 +696,9 @@ describe('end-to-end tests for chat app', () => {
                 );
             });
 
-            describe('submit form', () => {
+            describe('Submit form', () => {
                 test(
-                    'if all fields are valid, should submit form when enter is pressed',
+                    'If all fields are valid, should submit form when enter is pressed',
                     async () => {
                         await clearField(page2, '#email-text');
                         await page2.click('#email-text');
@@ -718,9 +718,9 @@ describe('end-to-end tests for chat app', () => {
                 );
             });
 
-            describe('chat page', () => {
+            describe('Chat page', () => {
                 test(
-                    'message section, focus should be on the message textbox',
+                    'Message section, focus should be on the message textbox',
                     async () => {
                         const is_message_text_focused = await page2.$eval(
                             '#message-textbox',
@@ -735,10 +735,10 @@ describe('end-to-end tests for chat app', () => {
         });
     });
 
-    describe('first and second user  (same chatroom interaction tests)', () => {
-        describe('sidebar', () => {
+    describe('First and second user  (same chatroom interaction tests)', () => {
+        describe('Sidebar', () => {
             test(
-                `first user: should show 2 names in the 'users' section`,
+                `First user: Should show 2 names in the 'Users' section`,
                 async () => {
                     await page2.waitForSelector('#users-section', { visible: true });
 
@@ -752,7 +752,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             test(
-                `second user: should show 2 names in the 'users' section`,
+                `Second user: Should show 2 names in the 'Users' section`,
                 async () => {
                     await page.waitForSelector('#users-section', { visible: true });
 
@@ -766,9 +766,9 @@ describe('end-to-end tests for chat app', () => {
             );
         });
 
-        describe('admin message', () => {
+        describe('Admin message', () => {
             test(
-                'first user: if another user joined in, should get notification message from admin',
+                'First user: If another user joined in, should get notification message from admin',
                 async () => {
                     await page.bringToFront();
 
@@ -780,9 +780,9 @@ describe('end-to-end tests for chat app', () => {
             );
         });
 
-        describe('messaging', () => {
+        describe('Messaging', () => {
             test(
-                'second user: if Enter key is pressed after typing, should send message',
+                'Second user: If Enter key is pressed after typing, should send message',
                 async () => {
                     await page2.bringToFront();
 
@@ -801,7 +801,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             test(
-                'first user: should be able to receive message',
+                'First user: Should be able to receive message',
                 async () => {
                     await page.bringToFront();
 
@@ -815,7 +815,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             test(
-                'first user: if Send button is clicked, should send message',
+                'First user: If Send button is clicked, should send message',
                 async () => {
                     await page.click('#message-textbox');
                     await page.type('#message-textbox', 'Test 1, 2, 3.');
@@ -832,7 +832,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             test(
-                'first user: if Enter key is pressed, should clear message text box',
+                'First user: If Enter key is pressed, should clear message text box',
                 async () => {
                     await page.click('#message-textbox');
                     await page.type('#message-textbox', 'Hello');
@@ -849,7 +849,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             test(
-                'second user: if Send button is clicked, should clear message text box',
+                'Second user: If Send button is clicked, should clear message text box',
                 async () => {
                     await page2.bringToFront();
 
@@ -868,7 +868,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             test(
-                'second user: if message is long and Enter key is pressed, should still send message',
+                'Second user: If message is long and Enter key is pressed, should still send message',
                 async () => {
                     const testMessage =
                         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non mi in nisi mattis laoreet in ut felis. Quisque libero leo, faucibus nec nibh vestibulum, finibus rutrum lorem. Etiam tincidunt lectus metus, a dignissim urna dictum eget. In hac habitasse platea dictumst. Aliquam enim turpis, facilisis eu libero nec, consectetur tincidunt felis. Suspendisse ut lectus et velit molestie volutpat. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.';
@@ -888,7 +888,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             test(
-                'first user: should be able to receive long message',
+                'First user: Should be able to receive long message',
                 async () => {
                     const testMessage =
                         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non mi in nisi mattis laoreet in ut felis. Quisque libero leo, faucibus nec nibh vestibulum, finibus rutrum lorem. Etiam tincidunt lectus metus, a dignissim urna dictum eget. In hac habitasse platea dictumst. Aliquam enim turpis, facilisis eu libero nec, consectetur tincidunt felis. Suspendisse ut lectus et velit molestie volutpat. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.';
@@ -905,7 +905,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             test(
-                'second user, if textbox is empty, should not send message',
+                'Second user: If textbox is empty, should not send message',
                 async () => {
                     await page2.bringToFront();
 
@@ -924,7 +924,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             test(
-                'second user: if message contains offensive words, should not send message',
+                'Second user: If message contains offensive words, should not send message',
                 async () => {
                     await page2.click('#message-textbox');
                     await page2.type('#message-textbox', 'Damn!');
@@ -940,9 +940,9 @@ describe('end-to-end tests for chat app', () => {
             );
         });
 
-        describe('typing indicator', () => {
+        describe('Typing indicator', () => {
             test(
-                `first/second users: if one user started typing, should display indicator on other user's screen`,
+                `First/second users: If one user started typing, should display indicator on other user's screen`,
                 async () => {
                     await page2.click('#message-textbox');
                     await page2.type('#message-textbox', 'Typing test...');
@@ -961,7 +961,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             test(
-                `first/second users: if textbox is cleared, should remove typing indicator from other user's screen`,
+                `First/second users: If textbox is cleared, should remove typing indicator from other user's screen`,
                 async () => {
                     await page2.bringToFront();
 
@@ -981,10 +981,10 @@ describe('end-to-end tests for chat app', () => {
             );
         });
 
-        describe('emoji picker', () => {
-            describe('first user', () => {
+        describe('Emoji picker', () => {
+            describe('First user', () => {
                 test(
-                    `if emoji button is clicked, should display emoji picker`,
+                    'If emoji button is clicked, should display emoji picker',
                     async () => {
                         await page.bringToFront();
 
@@ -998,7 +998,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    `if other element gets focus, should hide emoji picker`,
+                    'If other element gets focus, should hide emoji picker',
                     async () => {
                         await page.click('#messages-div');
 
@@ -1010,7 +1010,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    `if emoji is clicked, should add to message textbox`,
+                    'If emoji is clicked, should add to message textbox',
                     async () => {
                         await page.click('.emoji-button');
 
@@ -1028,7 +1028,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'if Enter key is pressed, should send message with emoji',
+                    'If Enter key is pressed, should send message with emoji',
                     async () => {
                         await page.keyboard.press('Enter');
 
@@ -1042,7 +1042,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    `if message textbox has text and an emoji is clicked, should insert emoji at cursor location`,
+                    'If message textbox has text and an emoji is clicked, should insert emoji at cursor location',
                     async () => {
                         await page.click('#message-textbox');
                         await page.type('#message-textbox', 'Emoji test');
@@ -1070,7 +1070,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    'if Send button is pressed, should send message with emoji',
+                    'If Send button is pressed, should send message with emoji',
                     async () => {
                         await page.click('button[type=submit]');
 
@@ -1084,9 +1084,9 @@ describe('end-to-end tests for chat app', () => {
                 );
             });
 
-            describe('second user', () => {
+            describe('Second user', () => {
                 test(
-                    'should receive message with emoji',
+                    'Should receive message with emoji',
                     async () => {
                         await page2.bringToFront();
 
@@ -1101,9 +1101,9 @@ describe('end-to-end tests for chat app', () => {
             });
         });
 
-        describe('on user disconnect', () => {
+        describe('On user disconnect', () => {
             test(
-                'first user: if second user leaves the chatroom, should get admin notification',
+                'First user: If second user leaves the chatroom, should get admin notification',
                 async () => {
                     await page2.close();
 
@@ -1119,7 +1119,7 @@ describe('end-to-end tests for chat app', () => {
             );
         });
 
-        describe('on user join - load chatroom messages', () => {
+        describe('On user join - load chatroom messages', () => {
             beforeEach(async () => {
                 page2 = await browser.newPage();
                 await page2.goto(URL, { waitUntil: 'domcontentloaded' });
@@ -1133,7 +1133,7 @@ describe('end-to-end tests for chat app', () => {
                 await page2.close();
             });
 
-            test('if user has sent messages, should get both sent and received messages', async () => {
+            test('If user has sent messages, should get both sent and received messages', async () => {
                 await joinExistingRooom(page2, 'kaye.cenizal@gmail.com', 'kaye');
 
                 const received_messages = await getReceivedMessages(page2);
@@ -1145,7 +1145,7 @@ describe('end-to-end tests for chat app', () => {
                 expect(sent_messages.length).toBeGreaterThan(0);
             });
 
-            test('if user has no sent messages, should get received messages', async () => {
+            test('If user has no sent messages, should get received messages', async () => {
                 await joinExistingRooom(page2, 'john.par@gmail.com', 'john');
 
                 const received_messages = await getReceivedMessages(page2);
@@ -1159,7 +1159,7 @@ describe('end-to-end tests for chat app', () => {
         });
     });
 
-    describe('first and second user (different chatroom interaction tests)', () => {
+    describe('First and second user (different chatroom interaction tests)', () => {
         beforeAll(async () => {
             page2 = await browser.newPage();
             await page2.goto(URL, { waitUntil: 'domcontentloaded' });
@@ -1167,9 +1167,9 @@ describe('end-to-end tests for chat app', () => {
             await page2.waitForTimeout(1000);
         });
 
-        describe('messaging', () => {
+        describe('Messaging', () => {
             test(
-                `first/second users: should not receive message sent from another room`,
+                'First/second users: should not receive message sent from another room',
                 async () => {
                     await joinNewRoom(page2, 'michael.cenizal@gmail.com', 'renz', 'cobol');
 
@@ -1188,16 +1188,16 @@ describe('end-to-end tests for chat app', () => {
             );
         });
 
-        describe('sidebar', () => {
-            describe('other chat rooms section', () => {
-                test(`first user: should display second user's room in the list`, async () => {
+        describe('Sidebar', () => {
+            describe('Other Chat Rooms section', () => {
+                test(`First user: Should display second user's room in the list`, async () => {
                     const page1_other_room = await getElementValue(page, '#rooms-section div a');
 
                     expect(page1_other_room).not.toBe('');
                 });
 
                 test(
-                    `second user: should display first user's room in the list`,
+                    `Second user: Should display first user's room in the list`,
                     async () => {
                         await page2.bringToFront();
 
@@ -1213,7 +1213,7 @@ describe('end-to-end tests for chat app', () => {
                 );
 
                 test(
-                    `first user: if other room becomes inactive, should remove name from list`,
+                    'First user: If other room becomes inactive, should remove name from list',
                     async () => {
                         await page2.close();
 
@@ -1233,12 +1233,12 @@ describe('end-to-end tests for chat app', () => {
         });
     });
 
-    describe('join another room (from sidebar)', () => {
-        describe('join room modal', () => {
+    describe('Join another room (from sidebar)', () => {
+        describe('Join room modal', () => {
             const roomName = 'node.js';
 
             test(
-                `if room name is clicked, should show modal`,
+                'If room name is clicked, should show modal',
                 async () => {
                     page2 = await browser.newPage();
                     await page2.goto(URL, { waitUntil: 'domcontentloaded' });
@@ -1268,7 +1268,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             test(
-                `if 'Do not show me again' is ticked, should not display modal again`,
+                `If 'Do not show me again' is ticked, should not display modal again`,
                 async () => {
                     await page.waitForTimeout(2000);
 
@@ -1297,7 +1297,7 @@ describe('end-to-end tests for chat app', () => {
             );
         });
 
-        describe('error modal', () => {
+        describe('Error modal', () => {
             let newPage;
 
             afterAll(async () => {
@@ -1305,7 +1305,7 @@ describe('end-to-end tests for chat app', () => {
             });
 
             test(
-                'if credentials are already in use, should show modal',
+                'If credentials are already in use, should show modal',
                 async () => {
                     page2 = await browser.newPage();
                     await page2.goto(URL, { waitUntil: 'domcontentloaded' });
@@ -1333,7 +1333,7 @@ describe('end-to-end tests for chat app', () => {
             );
 
             test(
-                `if OK button is clicked, should return to login page`,
+                'If OK button is clicked, should return to login page',
                 async () => {
                     await newPage.waitForSelector('#error-modal-yes-button', { visible: true });
                     await newPage.click('#error-modal-yes-button');
@@ -1349,7 +1349,7 @@ describe('end-to-end tests for chat app', () => {
         });
     });
 
-    describe('on mobile', () => {
+    describe('On mobile', () => {
         beforeAll(async () => {
             await page.setViewport({
                 width: 480,
@@ -1358,7 +1358,7 @@ describe('end-to-end tests for chat app', () => {
         });
 
         test(
-            'should show a collapsed sidebar and a hamburger icon',
+            'Should show a collapsed sidebar and a hamburger icon',
             async () => {
                 await page.bringToFront();
 
@@ -1377,7 +1377,7 @@ describe('end-to-end tests for chat app', () => {
         );
 
         test(
-            'if hamburger icon is clicked, should show sidebar',
+            'If hamburger icon is clicked, should show sidebar',
             async () => {
                 await page.click('#sidebar-toggler-2');
 
@@ -1392,7 +1392,7 @@ describe('end-to-end tests for chat app', () => {
         );
 
         test(
-            'if sidebar is displayed, should show overlay on other half of screen',
+            'If sidebar is displayed, should show overlay on other half of screen',
             async () => {
                 const overlay = await page.$('.overlay');
 
@@ -1404,7 +1404,7 @@ describe('end-to-end tests for chat app', () => {
         );
 
         test(
-            'if hamburger icon is clicked again, should close sidebar',
+            'If hamburger icon is clicked again, should close sidebar',
             async () => {
                 await page.click('#sidebar-toggler-1');
 
@@ -1419,7 +1419,7 @@ describe('end-to-end tests for chat app', () => {
         );
 
         test(
-            `if overlay is clicked, should close sidebar`,
+            'If overlay is clicked, should close sidebar',
             async () => {
                 await page.click('#sidebar-toggler-2');
 
@@ -1440,9 +1440,9 @@ describe('end-to-end tests for chat app', () => {
         );
     });
 
-    describe('exit modal', () => {
+    describe('Exit modal', () => {
         test(
-            'if exit button is clicked, should show modal',
+            'If exit button is clicked, should show modal',
             async () => {
                 await page.click('#exit-room-button');
 
@@ -1457,7 +1457,7 @@ describe('end-to-end tests for chat app', () => {
         );
 
         test(
-            `if 'No' is clicked, should close modal`,
+            `If 'No' is clicked, should close modal`,
             async () => {
                 await page.waitForSelector('#exit-room-modal .modal-no-button', { visible: true });
 
@@ -1472,7 +1472,7 @@ describe('end-to-end tests for chat app', () => {
         );
 
         test(
-            `if 'Yes' is clicked, should return to login page`,
+            `If 'Yes' is clicked, should return to login page`,
             async () => {
                 await page.waitForSelector('#exit-room-modal', { visible: false });
 
@@ -1482,7 +1482,7 @@ describe('end-to-end tests for chat app', () => {
 
                 await page.click('#exit-room-modal .modal-yes-button');
 
-                page.waitForNavigation();
+                await page.waitForTimeout(2000);
 
                 expect(page.url()).toBe('http://localhost/?');
             },

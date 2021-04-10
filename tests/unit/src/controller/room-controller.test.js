@@ -28,7 +28,7 @@ afterAll(() => {
     jest.resetAllMocks();
 });
 
-describe('unit tests for rooms-controller', () => {
+describe('Unit tests for rooms-controller', () => {
     describe('/validateUser route', () => {
         let getChatRoomMock;
         let processValidationResultsMock;
@@ -38,8 +38,8 @@ describe('unit tests for rooms-controller', () => {
             processValidationResultsMock = jest.spyOn(room_controller, 'processValidationResults');
         });
 
-        describe('invalid responses', () => {
-            test('if room parameter is missing, should call error middleware (with 400 status)', async () => {
+        describe('Invalid responses', () => {
+            test('If room parameter is missing, should call error middleware (with 400 status)', async () => {
                 processValidationResultsMock.mockImplementationOnce(() => {
                     throw new CustomError('Invalid request', 'Missing input', 400);
                 });
@@ -54,7 +54,7 @@ describe('unit tests for rooms-controller', () => {
                 expect(getChatRoomMock).not.toHaveBeenCalled();
             });
 
-            test('if email parameter is missing, should call error middleware (with 400 status)', async () => {
+            test('If email parameter is missing, should call error middleware (with 400 status)', async () => {
                 processValidationResultsMock.mockImplementationOnce(() => {
                     throw new CustomError('Invalid request', 'Missing input', 400);
                 });
@@ -69,7 +69,7 @@ describe('unit tests for rooms-controller', () => {
                 expect(getChatRoomMock).not.toHaveBeenCalled();
             });
 
-            test('if username parameter is missing, should call error middleware (with 400 status)', async () => {
+            test('If username parameter is missing, should call error middleware (with 400 status)', async () => {
                 processValidationResultsMock.mockImplementationOnce(() => {
                     throw new CustomError('Invalid request', 'Missing input', 400);
                 });
@@ -84,7 +84,7 @@ describe('unit tests for rooms-controller', () => {
                 expect(getChatRoomMock).not.toHaveBeenCalled();
             });
 
-            test('if email is invalid, should call error middleware (with 400 status)', async () => {
+            test('If email is invalid, should call error middleware (with 400 status)', async () => {
                 processValidationResultsMock.mockImplementationOnce(() => {
                     throw new CustomError('Invalid request', 'Invalid email', 400);
                 });
@@ -99,7 +99,7 @@ describe('unit tests for rooms-controller', () => {
                 expect(getChatRoomMock).not.toHaveBeenCalled();
             });
 
-            test('if any other issue is encountered, should call error middleware (with 500 status)', async () => {
+            test('If any other issue is encountered, should call error middleware (with 500 status)', async () => {
                 processValidationResultsMock.mockImplementationOnce(() => {
                     return;
                 });
@@ -122,7 +122,7 @@ describe('unit tests for rooms-controller', () => {
 
         let checkUserAccessMock;
 
-        describe('valid responses', () => {
+        describe('Valid responses', () => {
             beforeEach(() => {
                 checkUserAccessMock = jest.spyOn(room_controller, 'checkUserAccess');
                 processValidationResultsMock.mockImplementationOnce(() => {
@@ -130,8 +130,8 @@ describe('unit tests for rooms-controller', () => {
                 });
             });
 
-            describe('non existing room', () => {
-                test('if credentials are valid, user should be allowed to join in', async () => {
+            describe('Non-existing room', () => {
+                test('If credentials are valid, user should be allowed to join in', async () => {
                     getChatRoomMock.mockReturnValue(null);
 
                     const testResult = {
@@ -150,8 +150,8 @@ describe('unit tests for rooms-controller', () => {
                 });
             });
 
-            describe('existing room', () => {
-                test('if credentials are valid, user should be allowed to join in', async () => {
+            describe('Existing room', () => {
+                test('If credentials are valid, user should be allowed to join in', async () => {
                     getChatRoomMock.mockReturnValue({ _id: '6043163766eb61058c06d3f2', name: 'javascript', __v: 0 });
                     checkUserAccessMock.mockReturnValue({ isAllowed: true, duplicateFields: [] });
 
@@ -171,7 +171,7 @@ describe('unit tests for rooms-controller', () => {
                     expect(checkUserAccessMock).toHaveBeenCalled();
                 });
 
-                test(`if email already in use, user should NOT be allowed to join in`, async () => {
+                test('If email already in use, user should NOT be allowed to join in', async () => {
                     getChatRoomMock.mockReturnValue({ _id: '6043163766eb61058c06d3f2', name: 'javascript', __v: 0 });
                     checkUserAccessMock.mockReturnValue({ isAllowed: false, duplicateFields: ['email'] });
 
@@ -191,7 +191,7 @@ describe('unit tests for rooms-controller', () => {
                     expect(checkUserAccessMock).toHaveBeenCalled();
                 });
 
-                test(`if username already in use, user should NOT be allowed to join in`, async () => {
+                test('If username already in use, user should NOT be allowed to join in', async () => {
                     getChatRoomMock.mockReturnValue({ _id: '6043163766eb61058c06d3f2', name: 'javascript', __v: 0 });
                     checkUserAccessMock.mockReturnValue({ isAllowed: false, duplicateFields: ['username'] });
 
@@ -211,7 +211,7 @@ describe('unit tests for rooms-controller', () => {
                     expect(checkUserAccessMock).toHaveBeenCalled();
                 });
 
-                test(`if both email and username are in use, user should NOT be allowed to join in`, async () => {
+                test('If both email and username are in use, user should NOT be allowed to join in', async () => {
                     getChatRoomMock.mockReturnValue({ _id: '6043163766eb61058c06d3f2', name: 'javascript', __v: 0 });
                     checkUserAccessMock.mockReturnValue({ isAllowed: false, duplicateFields: ['email', 'username'] });
 
@@ -241,8 +241,8 @@ describe('unit tests for rooms-controller', () => {
             getActiveRoomsMock = jest.spyOn(RoomModel, 'getActiveRooms');
         });
 
-        describe('invalid responses', () => {
-            test('if error is encountered, should call error middleware', async () => {
+        describe('Invalid responses', () => {
+            test('If error is encountered, should call error middleware', async () => {
                 getActiveRoomsMock.mockImplementationOnce(() => {
                     throw new Error('Something went wrong');
                 });
@@ -258,8 +258,8 @@ describe('unit tests for rooms-controller', () => {
             });
         });
 
-        describe('valid responses', () => {
-            test(`if there are no active rooms, should return empty array`, async () => {
+        describe('Valid responses', () => {
+            test('If there are no active rooms, should return empty array', async () => {
                 getActiveRoomsMock.mockReturnValue([]);
 
                 const testRooms = { rooms: [] };
@@ -275,7 +275,7 @@ describe('unit tests for rooms-controller', () => {
                 expect(getActiveRoomsMock).toHaveBeenCalled();
             });
 
-            test(`if there are active rooms, should return array of room names`, async () => {
+            test('If there are active rooms, should return array of room names', async () => {
                 getActiveRoomsMock.mockReturnValue(['javascript', 'python']);
 
                 const testRooms = { rooms: ['javascript', 'python'] };

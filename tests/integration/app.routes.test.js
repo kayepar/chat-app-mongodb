@@ -12,54 +12,54 @@ afterAll(async () => {
     await mongoose.connection.close();
 });
 
-describe('integration tests for app routes', () => {
+describe('Integration tests for app routes', () => {
     describe('/validateUser route', () => {
-        describe('invalid responses', () => {
-            test('if room parameter is missing, should send HTTP 400 error', async () => {
-                const response = await request(app).get(`/validateUser?email=kaye.cenizal@gmail.com&username=kaye`);
+        describe('Invalid responses', () => {
+            test('If room parameter is missing, should send HTTP 400 error', async () => {
+                const response = await request(app).get('/validateUser?email=kaye.cenizal@gmail.com&username=kaye');
 
                 expect(response.status).toEqual(400);
             });
 
-            test('if email parameter is missing, should send HTTP 400 error', async () => {
-                const response = await request(app).get(`/validateUser?username=kaye&room=javascript`);
+            test('If email parameter is missing, should send HTTP 400 error', async () => {
+                const response = await request(app).get('/validateUser?username=kaye&room=javascript');
 
                 expect(response.status).toEqual(400);
             });
 
-            test('if username parameter is missing, should send HTTP 400 error', async () => {
-                const response = await request(app).get(`/validateUser?username=kaye&room=javascript`);
+            test('If username parameter is missing, should send HTTP 400 error', async () => {
+                const response = await request(app).get('/validateUser?username=kaye&room=javascript');
 
                 expect(response.status).toEqual(400);
             });
 
-            test('if email address is invalid, should send HTTP 400 error', async () => {
+            test('If email address is invalid, should send HTTP 400 error', async () => {
                 const response = await request(app).get(
-                    `/validateUser?email=kaye.cenizal!gmail.com&username=kaye&room=javascript`
+                    '/validateUser?email=kaye.cenizal!gmail.com&username=kaye&room=javascript'
                 );
 
                 expect(response.status).toEqual(400);
             });
 
-            test('if any other issue is encountered, should send HTTP 500 error', async () => {
+            test('If any other issue is encountered, should send HTTP 500 error', async () => {
                 const findOneMock = jest.spyOn(RoomModel, 'findOne');
                 findOneMock.mockImplementationOnce(() => {
                     throw new Error('Integration test: Something went wrong');
                 });
 
                 const response = await request(app).get(
-                    `/validateUser?email=kaye.cenizal@gmail.com&username=kaye&room=javascript`
+                    '/validateUser?email=kaye.cenizal@gmail.com&username=kaye&room=javascript'
                 );
 
                 expect(response.status).toEqual(500);
             });
         });
 
-        describe('valid responses', () => {
-            describe('non existing room', () => {
-                test('if credentials are valid, user should be allowed to join in', async () => {
+        describe('Valid responses', () => {
+            describe('non-existing room', () => {
+                test('If credentials are valid, user should be allowed to join in', async () => {
                     const response = await request(app).get(
-                        `/validateUser?email=chatuser1@example.com&username=chatuser1&room=testroom`
+                        '/validateUser?email=chatuser1@example.com&username=chatuser1&room=testroom'
                     );
 
                     const expectedResults = { result: { isAllowed: true, duplicateFields: [] } };
@@ -69,10 +69,10 @@ describe('integration tests for app routes', () => {
                 });
             });
 
-            describe('existing room', () => {
-                test('if credentials are valid, user should be allowed to join in', async () => {
+            describe('Existing room', () => {
+                test('If credentials are valid, user should be allowed to join in', async () => {
                     const response = await request(app).get(
-                        `/validateUser?email=chatuser1@example.com&username=chatuser1&room=html`
+                        '/validateUser?email=chatuser1@example.com&username=chatuser1&room=html'
                     );
 
                     const expectedResults = { result: { isAllowed: true, duplicateFields: [] } };
@@ -81,9 +81,9 @@ describe('integration tests for app routes', () => {
                     expect(response.body).toEqual(expectedResults);
                 });
 
-                test(`if email already in use, user should NOT be allowed to join in`, async () => {
+                test('If email already in use, user should NOT be allowed to join in', async () => {
                     const response = await request(app).get(
-                        `/validateUser?email=kaye.cenizal@gmail.com&username=kcenizal&room=javascript`
+                        '/validateUser?email=kaye.cenizal@gmail.com&username=kcenizal&room=javascript'
                     );
 
                     const expectedResults = { result: { isAllowed: false, duplicateFields: ['email'] } };
@@ -92,9 +92,9 @@ describe('integration tests for app routes', () => {
                     expect(response.body).toEqual(expectedResults);
                 });
 
-                test(`if username already in use, user should NOT be allowed to join in`, async () => {
+                test('If username already in use, user should NOT be allowed to join in', async () => {
                     const response = await request(app).get(
-                        `/validateUser?email=callie.madison.par@gmail.com&username=callie&room=javascript`
+                        '/validateUser?email=callie.madison.par@gmail.com&username=callie&room=javascript'
                     );
 
                     const expectedResults = { result: { isAllowed: false, duplicateFields: ['username'] } };
@@ -103,9 +103,9 @@ describe('integration tests for app routes', () => {
                     expect(response.body).toEqual(expectedResults);
                 });
 
-                test(`if both email and username are in use, user should NOT be allowed to join in`, async () => {
+                test('If both email and username are in use, user should NOT be allowed to join in', async () => {
                     const response = await request(app).get(
-                        `/validateUser?email=john.par@gmail.com&username=john&room=css`
+                        '/validateUser?email=john.par@gmail.com&username=john&room=css'
                     );
 
                     const expectedResults = { result: { isAllowed: false, duplicateFields: ['email', 'username'] } };
@@ -118,32 +118,32 @@ describe('integration tests for app routes', () => {
     });
 
     describe('/getActiveRooms route', () => {
-        describe('invalid responses', () => {
-            test('if error is encountered, should return HTTP 500', async () => {
+        describe('Invalid responses', () => {
+            test('If error is encountered, should return HTTP 500', async () => {
                 const getActiveRoomsMock = jest.spyOn(RoomModel, 'getActiveRooms');
                 getActiveRoomsMock.mockImplementationOnce(() => {
                     throw new Error('Integration test: Something went wrong');
                 });
 
-                const response = await request(app).get(`/getActiveRooms`);
+                const response = await request(app).get('/getActiveRooms');
 
                 expect(response.status).toEqual(500);
             });
         });
 
-        describe('valid responses', () => {
-            test(`if there are no active rooms, should return empty array`, async () => {
+        describe('Valid responses', () => {
+            test('If there are no active rooms, should return empty array', async () => {
                 await RoomModel.deleteMany();
 
-                const response = await request(app).get(`/getActiveRooms`);
+                const response = await request(app).get('/getActiveRooms');
 
                 expect(response.status).toEqual(200);
                 expect(response.body.rooms).toEqual([]);
             });
 
-            test(`if there are active rooms, should return array of room names`, async () => {
+            test('If there are active rooms, should return array of room names', async () => {
                 const expectedResults = ['javascript', 'css', 'html'];
-                const response = await request(app).get(`/getActiveRooms`);
+                const response = await request(app).get('/getActiveRooms');
 
                 expect(response.status).toEqual(200);
                 expect(response.body.rooms).toEqual(expectedResults);

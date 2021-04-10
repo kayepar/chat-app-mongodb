@@ -47,9 +47,6 @@ jest.setTimeout(20000);
 
 beforeAll((done) => {
     server.listen(80, () => {
-        console.log('up');
-        // done();
-
         setTimeout(() => {
             done();
         }, 1000);
@@ -77,15 +74,15 @@ afterEach(async (done) => {
     await disconnectSocket(socketB);
     await disconnectSocket(socketC);
 
-    // 1 sec delay to let disconnection to finish
+    // 1 sec delay to let disconnection finish
     setTimeout(() => {
         done();
     }, 1000);
 });
 
-describe('integration tests for app - sockets', () => {
-    describe('server connection', () => {
-        test('socket should be able to connect to io server', (done) => {
+describe('Integration tests for app - sockets', () => {
+    describe('Server connection', () => {
+        test('Socket should be able to connect to io server', (done) => {
             expect(socketA.connected).toBe(true);
             expect(socketB.connected).toBe(true);
             expect(socketC.connected).toBe(true);
@@ -94,9 +91,9 @@ describe('integration tests for app - sockets', () => {
         });
     });
 
-    describe('join room', () => {
-        describe('success', () => {
-            test('if email and username are unique, user should be able to join in', (done) => {
+    describe('Join room', () => {
+        describe('Success', () => {
+            test('If email and username are unique, user should be able to join in', (done) => {
                 const testUser = { email: 'catherine.par@gmail.com', username: 'catherine', room: 'javascript' };
 
                 socketA.emit('join', testUser, async (callback) => {
@@ -106,7 +103,7 @@ describe('integration tests for app - sockets', () => {
                 });
             });
 
-            test('if multiple unique users, all should be able to join in', (done) => {
+            test('If multiple unique users, all should be able to join in', (done) => {
                 const testUser1 = { email: 'user1@gmail.com', username: 'user1', room: 'html' };
                 const testUser2 = { email: 'user2@gmail.com', username: 'user2', room: 'html' };
 
@@ -121,7 +118,7 @@ describe('integration tests for app - sockets', () => {
                 });
             });
 
-            test('if previous session disconnects and then same credentials are used again, user should be able to join in', async (done) => {
+            test('If previous session disconnects and then same credentials are used again, user should be able to join in', async (done) => {
                 const testUser = { email: 'user2@gmail.com', username: 'user2', room: 'css' };
 
                 socketA.emit('join', testUser, async (callback) => {
@@ -142,8 +139,8 @@ describe('integration tests for app - sockets', () => {
             });
         });
 
-        describe('failure', () => {
-            test('if email is already in use, user should NOT be able to join in', (done) => {
+        describe('Failure', () => {
+            test('If email is already in use, user should NOT be able to join in', (done) => {
                 const testUser = { email: 'kaye.cenizal@gmail.com', username: 'catherine', room: 'javascript' };
 
                 socketA.emit('join', testUser, (callback) => {
@@ -153,7 +150,7 @@ describe('integration tests for app - sockets', () => {
                 });
             });
 
-            test('if username is already in use, user should NOT be able to join in', (done) => {
+            test('If username is already in use, user should NOT be able to join in', (done) => {
                 const testUser = { email: 'kaye.cenizal@live.com', username: 'kaye', room: 'javascript' };
 
                 socketA.emit('join', testUser, (callback) => {
@@ -163,7 +160,7 @@ describe('integration tests for app - sockets', () => {
                 });
             });
 
-            test('if both email and username are already in use, user should NOT be able to join in', async (done) => {
+            test('If both email and username are already in use, user should NOT be able to join in', async (done) => {
                 const testUser = { email: 'user1@gmail.com', username: 'user1', room: 'html' };
 
                 socketA.emit('join', testUser, (callback) => {
@@ -179,7 +176,7 @@ describe('integration tests for app - sockets', () => {
                 }, 100);
             });
 
-            test('if email is invalid, user should NOT be able to join in', (done) => {
+            test('If email is invalid, user should NOT be able to join in', (done) => {
                 const testUser = { email: 'kaye.cenizal!live.com', username: 'kaye.cenizal', room: 'javascript' };
 
                 socketA.emit('join', testUser, (callback) => {
@@ -189,7 +186,7 @@ describe('integration tests for app - sockets', () => {
                 });
             });
 
-            test('if email is missing, user should NOT be able to join in', (done) => {
+            test('If email is missing, user should NOT be able to join in', (done) => {
                 const testUser = { username: 'kaye.cenizal', room: 'javascript' };
 
                 socketA.emit('join', testUser, (callback) => {
@@ -199,7 +196,7 @@ describe('integration tests for app - sockets', () => {
                 });
             });
 
-            test('if username is missing, user should NOT be able to join in', (done) => {
+            test('If username is missing, user should NOT be able to join in', (done) => {
                 const testUser = { email: 'kaye.cenizal!live.com', username: '', room: 'javascript' };
 
                 socketA.emit('join', testUser, (callback) => {
@@ -211,9 +208,9 @@ describe('integration tests for app - sockets', () => {
         });
     });
 
-    describe('send/receive messages', () => {
-        describe('admin messages', () => {
-            test('if new user, should get welcome message from admin upon joining', (done) => {
+    describe('Send/receive messages', () => {
+        describe('Admin messages', () => {
+            test('If new user, should get welcome message from admin upon joining', (done) => {
                 const testUser = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
 
                 socketA.emit('join', testUser, () => {});
@@ -233,7 +230,7 @@ describe('integration tests for app - sockets', () => {
                 });
             });
 
-            test('if existing user, should get notification from admin when someone joins the same room', (done) => {
+            test('If existing user, should get notification from admin when someone joins the same room', (done) => {
                 const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
                 const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'css' };
 
@@ -264,7 +261,7 @@ describe('integration tests for app - sockets', () => {
                 }, 100);
             });
 
-            test('if existing user, should get admin notification when someone leaves the same room', (done) => {
+            test('If existing user, should get admin notification when someone leaves the same room', (done) => {
                 const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
                 const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'css' };
 
@@ -299,7 +296,7 @@ describe('integration tests for app - sockets', () => {
                 }, 100);
             });
 
-            test('user should not get notification from admin if someone from a different room leaves', (done) => {
+            test('User should not get notification from admin if someone from a different room leaves', (done) => {
                 const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
                 const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'html' };
 
@@ -328,8 +325,8 @@ describe('integration tests for app - sockets', () => {
             });
         });
 
-        describe('chatroom messages', () => {
-            test('user should be able to send messages to the chatroom', async (done) => {
+        describe('Chatroom messages', () => {
+            test('User should be able to send messages to the chatroom', async (done) => {
                 const testUser = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
 
                 socketA.emit('join', testUser, () => {});
@@ -347,7 +344,7 @@ describe('integration tests for app - sockets', () => {
                 }, 200);
             });
 
-            test('user should be able to receive messages sent over to the chatroom', async (done) => {
+            test('User should be able to receive messages sent over to the chatroom', async (done) => {
                 const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
                 const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'css' };
 
@@ -381,7 +378,7 @@ describe('integration tests for app - sockets', () => {
                 }, 200);
             });
 
-            test('user should not be able to receive messages sent over to a different chatroom', (done) => {
+            test('User should not be able to receive messages sent over to a different chatroom', (done) => {
                 const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
                 const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'html' };
 
@@ -421,7 +418,7 @@ describe('integration tests for app - sockets', () => {
                 }, 500);
             });
 
-            test('user should be able to receive own message', (done) => {
+            test('User should be able to receive own message', (done) => {
                 const testUser = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
 
                 const testMessage = {
@@ -429,7 +426,7 @@ describe('integration tests for app - sockets', () => {
                         username: testUser.username,
                         email: testUser.email,
                     },
-                    text: `Hello!`,
+                    text: 'Hello!',
                 };
 
                 socketA.emit('join', testUser, () => {});
@@ -451,7 +448,7 @@ describe('integration tests for app - sockets', () => {
                 }, 100);
             });
 
-            test('if message has profanity, should generate error message', (done) => {
+            test('If message has profanity, should generate error message', (done) => {
                 const testUser = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
 
                 socketA.emit('join', testUser, () => {});
@@ -463,7 +460,7 @@ describe('integration tests for app - sockets', () => {
                 });
             });
 
-            test('if message has no text, should return a null message', (done) => {
+            test('If message has no text, should return a null message', (done) => {
                 const testUser = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
 
                 socketA.emit('join', testUser, () => {});
@@ -487,7 +484,7 @@ describe('integration tests for app - sockets', () => {
     });
 
     describe('activeRoomsUpdate event', () => {
-        test(`if user joins a room, existing user (regardless of room) should get 'activeRoomsUpdate' event`, (done) => {
+        test(`If user joins a room, existing user (regardless of room) should get 'activeRoomsUpdate' event`, (done) => {
             const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
             const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'html' };
 
@@ -503,7 +500,7 @@ describe('integration tests for app - sockets', () => {
             });
         });
 
-        test(`if user leaves, existing user (regardless of room) should get 'activeRoomsUpdate' event`, (done) => {
+        test(`If user leaves, existing user (regardless of room) should get 'activeRoomsUpdate' event`, (done) => {
             const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
             const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'html' };
 
@@ -536,7 +533,7 @@ describe('integration tests for app - sockets', () => {
     });
 
     describe('usersInRoomUpdate event', () => {
-        test(`if user joins in, existing user in the same room should get 'usersInRoomUpdate' event`, async (done) => {
+        test(`If user joins in, existing user in the same room should get 'usersInRoomUpdate' event`, async (done) => {
             const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'bootstrap' };
             const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'bootstrap' };
             const testUser3 = { email: 'john.par@gmail.com', username: 'john', room: 'bootstrap' };
@@ -563,7 +560,7 @@ describe('integration tests for app - sockets', () => {
             }, 200);
         });
 
-        test(`if user leaves, existing user in the same room should get 'usersInRoomUpdate' event`, (done) => {
+        test(`If user leaves, existing user in the same room should get 'usersInRoomUpdate' event`, (done) => {
             const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'bootstrap' };
             const testUser2 = { email: 'john.par@gmail.com', username: 'john', room: 'bootstrap' };
             const testUser3 = { email: 'callie.par@gmail.com', username: 'callie', room: 'bootstrap' };
@@ -597,8 +594,8 @@ describe('integration tests for app - sockets', () => {
         });
     });
 
-    describe('typing indicator', () => {
-        test('if another user starts typing, existing user in the same room should get typing indicator', (done) => {
+    describe('Typing indicator', () => {
+        test('If another user starts typing, existing user in the same room should get typing indicator', (done) => {
             const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
             const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'css' };
 
@@ -623,8 +620,8 @@ describe('integration tests for app - sockets', () => {
         });
     });
 
-    describe('disconnect from room', () => {
-        test('user should be disconnected', (done) => {
+    describe('Disconnect from room', () => {
+        test('User should be disconnected', (done) => {
             const testUser = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
 
             socketA.emit('join', testUser, () => {});
