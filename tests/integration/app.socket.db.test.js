@@ -54,7 +54,6 @@ beforeAll((done) => {
         setTimeout(() => {
             done();
         }, 1000);
-        // done();
     });
 });
 
@@ -85,9 +84,9 @@ afterEach(async (done) => {
     }, 1000);
 });
 
-describe('integration tests for app - sockets and db', () => {
-    describe('server connection', () => {
-        test('socket should be able to connect to io server', (done) => {
+describe('Integration tests for app - sockets and db', () => {
+    describe('Server connection', () => {
+        test('Socket should be able to connect to IO server', (done) => {
             expect(socketA.connected).toBe(true);
             expect(socketB.connected).toBe(true);
             expect(socketC.connected).toBe(true);
@@ -96,8 +95,8 @@ describe('integration tests for app - sockets and db', () => {
         });
     });
 
-    describe('create room', () => {
-        test('if room is not yet existing, it should be created and saved to db', async (done) => {
+    describe('Create room', () => {
+        test('If room is not yet existing, it should be created and saved to db', async (done) => {
             // note: room will be automatically created once a user joins in
             const testUser = { email: 'catherine.par@gmail.com', username: 'catherine', room: 'node.js' };
 
@@ -118,7 +117,7 @@ describe('integration tests for app - sockets and db', () => {
             });
         });
 
-        test('if room is existing, it should be reused instead of creating a duplicate', async (done) => {
+        test('If room is existing, it should be reused instead of creating a duplicate', async (done) => {
             // note: room will be automatically created once a user joins in
             const testUser = { email: 'catherine.par@gmail.com', username: 'catherine', room: 'javascript' };
 
@@ -139,9 +138,9 @@ describe('integration tests for app - sockets and db', () => {
         });
     });
 
-    describe('join room', () => {
-        describe('success', () => {
-            test('if email and username are unique (in specific room), user should be saved to db', (done) => {
+    describe('Join room', () => {
+        describe('Success', () => {
+            test('If email and username are unique (in specific room), user should be saved to db', (done) => {
                 const testUser = { email: 'catherine.par@gmail.com', username: 'catherine', room: 'javascript' };
 
                 socketA.emit('join', testUser, async (callback) => {
@@ -156,7 +155,7 @@ describe('integration tests for app - sockets and db', () => {
                 });
             });
 
-            test('if multiple unique users (in specific room), all should be saved to db', (done) => {
+            test('If multiple unique users (in specific room), all should be saved to db', (done) => {
                 const testUser1 = { email: 'user1@gmail.com', username: 'user1', room: 'test' };
                 const testUser2 = { email: 'user2@gmail.com', username: 'user2', room: 'test' };
 
@@ -173,7 +172,7 @@ describe('integration tests for app - sockets and db', () => {
                 });
             });
 
-            test('if previous session disconnects and then same credentials are used again, user should be saved to db', async (done) => {
+            test('If previous session disconnects and then same credentials are used again, user should be saved to db', async (done) => {
                 const testUser = { email: 'user2@gmail.com', username: 'user2', room: 'css' };
 
                 socketA.emit('join', testUser, async (callback) => {
@@ -200,8 +199,8 @@ describe('integration tests for app - sockets and db', () => {
         });
     });
 
-    describe('failure', () => {
-        test('if email is already in use, user should NOT be saved to db', (done) => {
+    describe('Failure', () => {
+        test('If email is already in use, user should NOT be saved to db', (done) => {
             const testUser = { email: 'kaye.cenizal@gmail.com', username: 'catherine', room: 'javascript' };
 
             socketA.emit('join', testUser, async () => {
@@ -214,7 +213,7 @@ describe('integration tests for app - sockets and db', () => {
             });
         });
 
-        test('if username is already in use, user should NOT be saved to db', (done) => {
+        test('If username is already in use, user should NOT be saved to db', (done) => {
             const testUser = { email: 'kaye.cenizal@live.com', username: 'kaye', room: 'javascript' };
 
             socketA.emit('join', testUser, async () => {
@@ -227,7 +226,7 @@ describe('integration tests for app - sockets and db', () => {
             });
         });
 
-        test('if both email and username are already in use, user should NOT be saved to db', async (done) => {
+        test('If both email and username are already in use, user should NOT be saved to db', async (done) => {
             const testUser = { email: 'user1@gmail.com', username: 'user1', room: 'html' };
 
             socketA.emit('join', testUser, (callback) => {
@@ -246,7 +245,7 @@ describe('integration tests for app - sockets and db', () => {
             }, 100);
         });
 
-        test('if email is invalid, user should NOT be saved to db', (done) => {
+        test('If email is invalid, user should NOT be saved to db', (done) => {
             const testUser = { email: 'kaye.cenizal!live.com', username: 'kaye.cenizal', room: 'javascript' };
 
             socketA.emit('join', testUser, async () => {
@@ -261,8 +260,8 @@ describe('integration tests for app - sockets and db', () => {
         });
     });
 
-    describe('chatroom messages', () => {
-        test('sent message should be saved to db', async (done) => {
+    describe('Chatroom messages', () => {
+        test('Sent message should be saved to db', async (done) => {
             const testUser = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
 
             socketA.emit('join', testUser, (callback) => {
@@ -270,7 +269,7 @@ describe('integration tests for app - sockets and db', () => {
             });
 
             setTimeout(() => {
-                socketA.emit('sendMessage', `Hello!`, async () => {
+                socketA.emit('sendMessage', 'Hello!', async () => {
                     const room = await RoomModel.findOne({ name: testUser.room });
                     const allMessages = await room.getMessages();
 
@@ -290,7 +289,7 @@ describe('integration tests for app - sockets and db', () => {
             }, 300);
         });
 
-        test('if message has profanity, it should NOT be saved to db', (done) => {
+        test('If message has profanity, it should NOT be saved to db', (done) => {
             const testUser = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
 
             socketA.emit('join', testUser, (callback) => {
@@ -309,8 +308,8 @@ describe('integration tests for app - sockets and db', () => {
     });
 
     describe('activeRooms event', () => {
-        describe('on join', () => {
-            test(`room should be added to active rooms list`, async (done) => {
+        describe('On join', () => {
+            test('Room should be added to active rooms list', async (done) => {
                 const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
                 const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'python' };
 
@@ -336,8 +335,8 @@ describe('integration tests for app - sockets and db', () => {
             });
         });
 
-        describe('on disconnect', () => {
-            test(`if room still has other active users, it should remain on activeRooms list`, async (done) => {
+        describe('On disconnect', () => {
+            test('If room still has other active users, it should remain on activeRooms list', async (done) => {
                 const testUser = { email: 'catherine.par@gmail.com', username: 'catherine', room: 'javascript' };
 
                 socketA.emit('join', testUser, async (callback) => {
@@ -355,7 +354,7 @@ describe('integration tests for app - sockets and db', () => {
                 }, 200);
             });
 
-            test(`if room has no active users left, it should be removed from activeRooms list`, async (done) => {
+            test('If room has no active users left, it should be removed from activeRooms list', async (done) => {
                 const testUser = { email: 'catherine.par@gmail.com', username: 'catherine', room: 'java' };
 
                 socketA.emit('join', testUser, async (callback) => {
@@ -370,14 +369,14 @@ describe('integration tests for app - sockets and db', () => {
                     expect(activeRooms).toEqual(expect.not.arrayContaining([testUser.room]));
 
                     done();
-                }, 200);
+                }, 500);
             });
         });
     });
 
     describe('usersInRoom event', () => {
-        describe('on join', () => {
-            test(`user should be included in activeUsers list`, async (done) => {
+        describe('On join', () => {
+            test('User should be included in activeUsers list', async (done) => {
                 const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'bootstrap' };
                 const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'bootstrap' };
                 const testUser3 = { email: 'john.par@gmail.com', username: 'john', room: 'bootstrap' };
@@ -386,22 +385,19 @@ describe('integration tests for app - sockets and db', () => {
                 socketB.emit('join', testUser2, () => {});
                 socketC.emit('join', testUser3, () => {});
 
-                const testUsers = [{ username: 'kaye' }, { username: 'callie' }, { username: 'john' }];
-
                 setTimeout(async () => {
                     const room = await RoomModel.findOne({ name: testUser1.room });
                     const users = await room.getActiveUsers();
 
                     expect(users).toHaveLength(3);
-                    expect(users).toMatchObject(testUsers);
 
                     done();
                 }, 1000);
             });
         });
 
-        describe('on disconnect', () => {
-            test(`disconnected user should be removed from activeUsers list`, (done) => {
+        describe('On disconnect', () => {
+            test('Disconnected user should be removed from activeUsers list', (done) => {
                 const testUser1 = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'bootstrap' };
                 const testUser2 = { email: 'john.par@gmail.com', username: 'john', room: 'bootstrap' };
                 const testUser3 = { email: 'callie.par@gmail.com', username: 'callie', room: 'bootstrap' };
@@ -434,9 +430,9 @@ describe('integration tests for app - sockets and db', () => {
         });
     });
 
-    describe('disconnect from room', () => {
-        describe('user cleanup', () => {
-            test('user be deleted from db', (done) => {
+    describe('Disconnect from room', () => {
+        describe('User cleanup', () => {
+            test('User be deleted from db', (done) => {
                 const testUser = { email: 'kaye.cenizal@gmail.com', username: 'kaye', room: 'css' };
 
                 socketA.emit('join', testUser, async () => {
@@ -451,8 +447,8 @@ describe('integration tests for app - sockets and db', () => {
             });
         });
 
-        describe('room cleanup', () => {
-            test(`if room has users, it should NOT be deleted from db`, async (done) => {
+        describe('Room cleanup', () => {
+            test('If room has users, it should NOT be deleted from db', async (done) => {
                 const testUser1 = { email: 'catherine.par@gmail.com', username: 'catherine', room: 'java' };
                 const testUser2 = { email: 'callie.par@gmail.com', username: 'callie', room: 'java' };
 
@@ -477,7 +473,7 @@ describe('integration tests for app - sockets and db', () => {
                 }, 400);
             });
 
-            test(`if room has no users, it should be deleted from db`, async (done) => {
+            test('If room has no users, it should be deleted from db', async (done) => {
                 const testUser = { email: 'catherine.par@gmail.com', username: 'catherine', room: 'java' };
 
                 socketA.emit('join', testUser, (callback) => {
@@ -495,7 +491,7 @@ describe('integration tests for app - sockets and db', () => {
                 }, 300);
             });
 
-            test(`if room has no users but has saved messages, it should NOT be deleted from db`, async (done) => {
+            test('If room has no users but has saved messages, it should NOT be deleted from db', async (done) => {
                 const testUser = { email: 'catherine.par@gmail.com', username: 'catherine', room: 'java' };
 
                 socketA.emit('join', testUser, (callback) => {
@@ -517,6 +513,4 @@ describe('integration tests for app - sockets and db', () => {
             });
         });
     });
-
-    // todo: create room should be added to socket test
 });
