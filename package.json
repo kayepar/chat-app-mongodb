@@ -23,7 +23,6 @@
     ],
     "dependencies": {
         "@joeattardi/emoji-button": "^4.6.0",
-        "D": "^1.0.0",
         "bad-words": "^3.0.4",
         "express": "^4.17.1",
         "express-hbs": "^2.3.4",
