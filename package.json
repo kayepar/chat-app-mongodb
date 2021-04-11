@@ -34,7 +34,7 @@
         "morgan": "^1.10.0",
         "nodemailer": "^6.4.18",
         "parcel-bundler": "^1.12.4",
-        "parcel-plugin-custom-dist-structure": "^1.1.16",
+        "parcel-plugin-custom-dist-structure": "^1.1.17",
         "parcel-plugin-handlebars": "^0.4.4",
         "qs": "^6.9.6",
         "socket.io": "^3.1.0",
