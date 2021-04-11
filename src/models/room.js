@@ -59,8 +59,6 @@ roomSchema.methods.checkDuplicateCredentials = function (user) {
 roomSchema.methods.deleteIfInactive = async function (event) {
     const isActive = await this.isRoomStillActive(event);
 
-    // console.log(`${this.name} is active: ${isActive}`);
-
     if (!isActive) return await this.deleteOne();
 };
 

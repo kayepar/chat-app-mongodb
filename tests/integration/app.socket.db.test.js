@@ -49,8 +49,6 @@ jest.setTimeout(20000);
 
 beforeAll((done) => {
     server.listen(80, () => {
-        console.log('up');
-
         setTimeout(() => {
             done();
         }, 1000);
