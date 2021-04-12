@@ -59,7 +59,7 @@ $(document).ready(function () {
     });
 
     socket.on('message', (message) => {
-        removeTypingIndicatorMsg(message.sender.username);
+        // removeTypingIndicatorMsg(message.sender.username);
         displayMessage(message);
     });
 
@@ -123,6 +123,8 @@ $(document).ready(function () {
                 return error;
             }
         });
+
+        removeTypingIndicatorMsg(message.username);
     });
 
     initialize();
