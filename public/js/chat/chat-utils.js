@@ -78,7 +78,7 @@ const constructFinalMessage = (message) => {
 const constructTypingIndicatorMessage = (message) => {
     message['type'] = 'received';
     message['createdAt'] = moment(message.createdAt).format('MM-D h:mm a');
-    message['id'] = `${message.username}-temp-msg-div`;
+    message['id'] = `${message.sender.username}-temp-msg-div`;
 
     return message;
 };

@@ -59,7 +59,7 @@ $(document).ready(function () {
     });
 
     socket.on('message', (message) => {
-        // removeTypingIndicatorMsg(message.sender.username);
+        removeTypingIndicatorMsg(message.sender.username);
         displayMessage(message);
     });
 
@@ -78,10 +78,10 @@ $(document).ready(function () {
     });
 
     socket.on('typing', (message) => {
-        if (message.text === 'idle') return removeTypingIndicatorMsg(message.username);
+        if (message.text === 'idle') return removeTypingIndicatorMsg(message.sender.username);
 
         // prevent duplicate notifs
-        if (!document.querySelector(`#${message.username}-temp-msg-div`)) {
+        if (!document.querySelector(`#${message.sender.username}-temp-msg-div`)) {
             displayMessage(message, 'indicator');
         }
 
@@ -123,8 +123,6 @@ $(document).ready(function () {
                 return error;
             }
         });
-
-        removeTypingIndicatorMsg(message.username);
     });
 
     initialize();
