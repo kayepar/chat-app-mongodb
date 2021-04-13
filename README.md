@@ -64,14 +64,13 @@ Follow below steps to setup the project on your local machine.
     [nodemon] to restart at any time, enter `rs`
     [nodemon] watching path(s): *.*
     [nodemon] watching extensions: js
-    [nodemon] starting `node src/index.js hbs`
+    [nodemon] starting `node src/server.js hbs`
     Server running on port 80
     ...
-    [nodemon] starting `node src/index.js hbs`
+    [nodemon] starting `node src/server.js hbs`
     [nodemon] restarting due to changes...
-    √  Built in 9.22s.
-    Server running on port 80
-    [nodemon] starting `node src/index.js hbs`
+    √  Built in 29.89s.
+    ...
     Server running on port 80
     ```
 
