@@ -12,18 +12,21 @@
 
 # Chat App (myChat)
 
-A simple web based chat application using [Socket.io](http://socket.io), vanilla Javascript and [mongoDB](https://www.mongodb.com/).
+A simple web-based chat application built with [Socket.io](http://socket.io), vanilla Javascript and [mongoDB](https://www.mongodb.com/).
 
 **URL:** https://par-chat-app.herokuapp.com/
 
 <div style="padding-bottom:10px">
-    <img src="public/img/app-screenshot-1.png" width="850px" style=";border: 1px solid #2b2b28;"></img> 
+    <img src="public/img/chat-app-screenshot-desktop-1.jpg" width="850px" style=";border: 1px solid #2b2b28;"></img> 
 </div>
 <div style="padding-bottom:10px">
-    <img src="public/img/app-screenshot-2.png" width="850px" style=";border: 1px solid #2b2b28;"></img> 
+    <img src="public/img/chat-app-screenshot-desktop-2.jpg" width="850px" style=";border: 1px solid #2b2b28;"></img> 
+</div>
+<div style="padding-bottom:10px">
+    <img src="public/img/chat-app-screenshot-desktop-3.jpg" width="850px" style=";border: 1px solid #2b2b28;"></img> 
 </div>
 <div>
-  <img src="public/img/app-screenshot-mobile.png" width="850px" style=";border: 1px solid #2b2b28;"></img> 
+  <img src="public/img/chat-app-screenshot-mobile.jpg" width="850px" style=";border: 1px solid #2b2b28;"></img> 
 </div>
 
 Note: Best viewed on Chrome (on both mobile and desktop)
