@@ -12,7 +12,7 @@
 
 # Chat App (myChat)
 
-A simple web-based chat application built with [Socket.io](http://socket.io), vanilla Javascript and [mongoDB](https://www.mongodb.com/).
+A simple web-based chat application built with [Socket.io](http://socket.io), [mongoDB](https://www.mongodb.com/), vanilla Javascript and [Bootstrap 4](https://getbootstrap.com/docs/4.6/getting-started/introduction/).
 
 **URL:** https://par-chat-app.herokuapp.com/
 
