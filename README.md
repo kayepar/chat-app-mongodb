@@ -201,6 +201,7 @@ This version of the app does not come with a private chat functionality.
 -   [Freepik](https://www.freepik.com/)
 -   [Font Awesome](https://fontawesome.com/)
 -   [Heroku](https://www.heroku.com/)
+-   [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
 -   [Emoji-button](https://github.com/joeattardi/emoji-button)
 -   [jest-puppeteer](https://github.com/smooth-code/jest-puppeteer)
 -   [Nodemon](https://nodemon.io/)
